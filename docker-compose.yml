@@ -1,0 +1,26 @@
+# Single source of truth for env is ./.env — the backend reads it directly,
+# and the frontend only needs NEXT_PUBLIC_API_URL which is passed in below.
+
+services:
+  backend:
+    build: ./backend
+    env_file: .env
+    ports:
+      - "${ARA_PORT:-8000}:8000"
+    volumes:
+      - ./backend/src:/app/src
+    command: uv run uvicorn ara.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    image: node:22-alpine
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - backend
