@@ -112,6 +112,7 @@ class LLMClient:
         model: str,
         messages: list[MessageDict],
         tools: list[ToolSpec] | None = None,
+        tool_choice: dict[str, Any] | None = None,
         system: str | None = None,
         max_tokens: int = 4096,
     ) -> Message:
@@ -122,6 +123,8 @@ class LLMClient:
         }
         if tools is not None:
             kwargs["tools"] = tools
+        if tool_choice is not None:
+            kwargs["tool_choice"] = tool_choice
         if system is not None:
             kwargs["system"] = system
 
