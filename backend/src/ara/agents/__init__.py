@@ -1,8 +1,13 @@
 """Research pipeline agents: planner, researcher, synthesizer."""
 
+from collections.abc import Awaitable, Callable
 from typing import Any, cast
 
 from anthropic.types import Message
+
+from ara.models.events import ResearchEvent
+
+EventEmitter = Callable[[ResearchEvent], Awaitable[None]]
 
 
 class AgentError(RuntimeError):
@@ -31,6 +36,7 @@ def extract_tool_use(response: Message, tool_name: str) -> dict[str, Any] | None
 
 __all__ = [
     "AgentError",
+    "EventEmitter",
     "PlannerError",
     "ResearcherError",
     "SynthesizerError",
