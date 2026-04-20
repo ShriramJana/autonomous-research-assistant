@@ -85,10 +85,11 @@ async def test_on_api_call_hook_fires() -> None:
     fake = make_fake_anthropic(create_return=response)
 
     calls: list[tuple[str, int, int]] = []
-    client = LLMClient(
-        anthropic_client=fake,
-        on_api_call=lambda m, i, o: calls.append((m, i, o)),
-    )
+
+    async def on_api_call(model: str, inp: int, out: int) -> None:
+        calls.append((model, inp, out))
+
+    client = LLMClient(anthropic_client=fake, on_api_call=on_api_call)
     await client.complete_with_tools(model="m", messages=[{"role": "user", "content": "hi"}])
     assert calls == [("m", 42, 7)]
 
@@ -113,10 +114,11 @@ async def test_stream_completion_records_usage_after_stream() -> None:
     fake = make_fake_anthropic(stream_return=stream)
 
     calls: list[tuple[str, int, int]] = []
-    client = LLMClient(
-        anthropic_client=fake,
-        on_api_call=lambda m, i, o: calls.append((m, i, o)),
-    )
+
+    async def on_api_call(m: str, i: int, o: int) -> None:
+        calls.append((m, i, o))
+
+    client = LLMClient(anthropic_client=fake, on_api_call=on_api_call)
     async for _ in client.stream_completion(model="m", messages=[]):
         pass
     assert calls == [("m", 99, 3)]

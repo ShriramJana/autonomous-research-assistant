@@ -63,6 +63,16 @@ class ErrorEvent(BaseModel):
     sub_query_id: UUID | None = None
 
 
+class CostUpdate(BaseModel):
+    """Running API cost snapshot; emitted after every Anthropic response."""
+
+    type: Literal["cost_update"] = "cost_update"
+    model: str
+    input_tokens: int
+    output_tokens: int
+    cumulative_usd: float
+
+
 ResearchEvent = Annotated[
     (
         PlanReady
@@ -72,6 +82,7 @@ ResearchEvent = Annotated[
         | SynthesisToken
         | ReportComplete
         | ErrorEvent
+        | CostUpdate
     ),
     Field(discriminator="type"),
 ]

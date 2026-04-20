@@ -14,7 +14,7 @@ plain `stream_completion` path.
 
 from __future__ import annotations
 
-from collections.abc import AsyncIterator, Callable
+from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
 from typing import Any, cast
 
@@ -51,7 +51,7 @@ class MessageStop:
 
 StreamEvent = TextDelta | ToolUseBlock | MessageStop
 
-OnApiCall = Callable[[str, int, int], None]
+OnApiCall = Callable[[str, int, int], Awaitable[None]]
 
 
 def _extract_text_delta(event: object) -> str | None:
@@ -129,7 +129,7 @@ class LLMClient:
             kwargs["system"] = system
 
         response: Message = await self._client.messages.create(**kwargs)
-        self._record(model, response.usage.input_tokens, response.usage.output_tokens)
+        await self._record(model, response.usage.input_tokens, response.usage.output_tokens)
         return response
 
     async def stream_completion(
@@ -153,7 +153,7 @@ class LLMClient:
             async for text in stream.text_stream:
                 yield text
             final = await stream.get_final_message()
-        self._record(model, final.usage.input_tokens, final.usage.output_tokens)
+        await self._record(model, final.usage.input_tokens, final.usage.output_tokens)
 
     async def stream_completion_with_tools(
         self,
@@ -200,8 +200,8 @@ class LLMClient:
             input_tokens=final.usage.input_tokens,
             output_tokens=final.usage.output_tokens,
         )
-        self._record(model, final.usage.input_tokens, final.usage.output_tokens)
+        await self._record(model, final.usage.input_tokens, final.usage.output_tokens)
 
-    def _record(self, model: str, input_tokens: int, output_tokens: int) -> None:
+    async def _record(self, model: str, input_tokens: int, output_tokens: int) -> None:
         if self._on_api_call is not None:
-            self._on_api_call(model, input_tokens, output_tokens)
+            await self._on_api_call(model, input_tokens, output_tokens)

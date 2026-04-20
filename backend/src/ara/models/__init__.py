@@ -1,6 +1,7 @@
 """Pydantic v2 models: research domain + SSE event envelopes."""
 
 from ara.models.events import (
+    CostUpdate,
     ErrorEvent,
     PlanReady,
     ReportComplete,
@@ -23,6 +24,7 @@ from ara.models.research import (
 )
 
 __all__ = [
+    "CostUpdate",
     "ErrorEvent",
     "FinalReport",
     "KeyFact",
