@@ -62,10 +62,10 @@ async def stream_research(report_id: UUID, request: Request) -> EventSourceRespo
     store: ReportStore = request.app.state.store
 
     async def event_source() -> AsyncIterator[dict[str, Any]]:
+        # Emit only `data:` (no `event:` field) so the frontend can use a
+        # single EventSource.onmessage handler and discriminate on the
+        # parsed `type` field. Keeps the consumer ~15 lines smaller.
         async for event in store.subscribe(report_id):
-            yield {
-                "event": event.type,
-                "data": event.model_dump_json(),
-            }
+            yield {"data": event.model_dump_json()}
 
     return EventSourceResponse(event_source())
