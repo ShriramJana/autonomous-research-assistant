@@ -26,3 +26,6 @@ next-env.d.ts
 .DS_Store
 .vscode/
 .idea/
+
+# Claude Code — personal settings only (team/project .claude/settings.json is commitable)
+.claude/settings.local.json
