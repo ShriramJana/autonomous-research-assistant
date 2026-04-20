@@ -1,0 +1,139 @@
+"""Tests for the FastAPI surface.
+
+Uses `httpx.AsyncClient` with `ASGITransport` rather than `TestClient`:
+TestClient runs the app via a thread-based anyio portal, which interacts
+badly with LangGraph 1.x's internal scheduling (the pipeline hangs after
+the first node). AsyncClient runs the app in the test's own event loop,
+which matches how it behaves under real uvicorn.
+
+Agents are monkey-patched at their DAG import sites so the pipeline
+completes without hitting Anthropic.
+"""
+
+from __future__ import annotations
+
+import json
+from typing import Any
+from unittest.mock import patch
+from uuid import UUID
+
+import httpx
+
+from ara.main import create_app
+from ara.models.research import (
+    FinalReport,
+    KeyFact,
+    Priority,
+    ReportSection,
+    ResearchPlan,
+    Source,
+    SubQuery,
+    SubQueryFinding,
+)
+
+
+def _plan(n: int = 3) -> ResearchPlan:
+    return ResearchPlan(
+        original_question="q",
+        sub_queries=[
+            SubQuery(question=f"q{i}", rationale="r", priority=Priority.MEDIUM) for i in range(n)
+        ],
+    )
+
+
+def _source(url: str = "https://example.com", title: str = "Ex") -> Source:
+    return Source.model_validate({"url": url, "title": title})
+
+
+def _fakes() -> tuple[Any, Any, Any]:
+    async def fake_plan(**k: Any) -> ResearchPlan:
+        return _plan()
+
+    async def fake_research(*, sub_query: SubQuery, emit: Any, **k: Any) -> SubQueryFinding:
+        src = _source(f"https://{sub_query.question}.com", sub_query.question)
+        return SubQueryFinding(
+            sub_query_id=sub_query.id,
+            summary="s",
+            key_facts=[KeyFact(statement="f", citation_ids=[src.id])],
+            sources=[src],
+        )
+
+    async def fake_synth(**k: Any) -> FinalReport:
+        src = _source()
+        return FinalReport(
+            report_id=k["report_id"],
+            original_question=k["original_question"],
+            executive_summary="Exec.",
+            sections=[ReportSection(heading="H", content="C [1].", citation_ids=[src.id])],
+            citations=[src],
+        )
+
+    return fake_plan, fake_research, fake_synth
+
+
+async def _async_client() -> httpx.AsyncClient:
+    transport = httpx.ASGITransport(app=create_app())
+    return httpx.AsyncClient(transport=transport, base_url="http://test")
+
+
+async def test_post_research_rejects_empty_question() -> None:
+    async with await _async_client() as client:
+        resp = await client.post("/api/research", json={"question": ""})
+    assert resp.status_code == 422
+
+
+async def test_post_research_returns_report_id() -> None:
+    fake_plan, fake_research, fake_synth = _fakes()
+    with (
+        patch("ara.graph.dag.plan_research", fake_plan),
+        patch("ara.graph.dag.research_sub_query", fake_research),
+        patch("ara.graph.dag.synthesize_report", fake_synth),
+    ):
+        async with await _async_client() as client:
+            resp = await client.post("/api/research", json={"question": "what is rag?"})
+
+    assert resp.status_code == 200
+    body = resp.json()
+    assert "report_id" in body
+    UUID(body["report_id"])  # must round-trip as a UUID
+
+
+def _parse_sse_lines(text: str) -> list[dict[str, Any]]:
+    """Parse raw SSE text into a list of {type, event, ...data} dicts."""
+    events: list[dict[str, Any]] = []
+    current_event: str | None = None
+    for line in text.splitlines():
+        if not line:
+            current_event = None
+            continue
+        if line.startswith("event:"):
+            current_event = line[len("event:") :].strip()
+        elif line.startswith("data:"):
+            data = json.loads(line[len("data:") :].strip())
+            events.append({"event": current_event, **data})
+    return events
+
+
+async def test_stream_delivers_plan_ready_and_report_complete() -> None:
+    fake_plan, fake_research, fake_synth = _fakes()
+
+    with (
+        patch("ara.graph.dag.plan_research", fake_plan),
+        patch("ara.graph.dag.research_sub_query", fake_research),
+        patch("ara.graph.dag.synthesize_report", fake_synth),
+    ):
+        async with await _async_client() as client:
+            resp = await client.post("/api/research", json={"question": "q"})
+            report_id = resp.json()["report_id"]
+
+            async with client.stream(
+                "GET", f"/api/research/{report_id}/stream"
+            ) as stream:
+                chunks = [chunk async for chunk in stream.aiter_text()]
+
+    raw = "".join(chunks)
+    events = _parse_sse_lines(raw)
+    event_types = {e.get("type") for e in events}
+    assert "plan_ready" in event_types
+    assert "researcher_complete" in event_types
+    assert "report_complete" in event_types

@@ -36,6 +36,13 @@ class InMemoryReportStore:
         self._reports: dict[UUID, _ReportState] = {}
 
     async def create(self, report_id: UUID, question: str) -> None:
+        """Idempotent: creating the same report twice is a no-op, not an overwrite.
+
+        This lets the API layer pre-create the report before spawning the
+        orchestrator task without racing the orchestrator's own create call.
+        """
+        if report_id in self._reports:
+            return
         self._reports[report_id] = _ReportState(
             question=question,
             buffer=deque(maxlen=self._buffer_size),
