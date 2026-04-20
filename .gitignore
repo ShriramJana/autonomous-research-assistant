@@ -26,3 +26,6 @@ next-env.d.ts
 .DS_Store
 .vscode/
 .idea/
+
+# Editor-local settings
+*.local.json
