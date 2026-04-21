@@ -16,12 +16,14 @@ from ara.models.research import ResearchPlan, SubQuery
 
 PLANNER_TOOL_NAME = "submit_research_plan"
 
-PLANNER_SYSTEM_PROMPT = """\
+
+def _planner_system_prompt(target_count: int) -> str:
+    return f"""\
 You are the Planner stage of an autonomous research assistant.
 
-Given a research question from the user, decompose it into 3 to 7 sub-queries \
-that, when answered individually, will collectively produce a thorough, \
-well-sourced answer to the original question.
+Given a research question from the user, decompose it into exactly \
+{target_count} sub-queries that, when answered individually, will collectively \
+produce a thorough, well-sourced answer to the original question.
 
 Design principles for a good decomposition:
 - Cover the question from complementary angles: definitions / background, \
@@ -37,46 +39,52 @@ You MUST call the `submit_research_plan` tool with your decomposition. \
 Do not respond with plain text.
 """
 
-PLANNER_TOOL: ToolSpec = {
-    "name": PLANNER_TOOL_NAME,
-    "description": (
-        "Submit the decomposition of the research question into 3 to 7 "
-        "actionable sub-queries. Each sub-query must include a rationale "
-        "and a priority (1=low, 2=medium, 3=high)."
-    ),
-    "input_schema": {
-        "type": "object",
-        "properties": {
-            "sub_queries": {
-                "type": "array",
-                "minItems": 3,
-                "maxItems": 7,
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "question": {
-                            "type": "string",
-                            "description": "The sub-question to research.",
+
+def _planner_tool(target_count: int) -> ToolSpec:
+    return {
+        "name": PLANNER_TOOL_NAME,
+        "description": (
+            f"Submit the decomposition of the research question into exactly "
+            f"{target_count} actionable sub-queries. Each sub-query must include "
+            f"a rationale and a priority (1=low, 2=medium, 3=high)."
+        ),
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "sub_queries": {
+                    "type": "array",
+                    "minItems": target_count,
+                    "maxItems": target_count,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "question": {
+                                "type": "string",
+                                "description": "The sub-question to research.",
+                            },
+                            "rationale": {
+                                "type": "string",
+                                "description": (
+                                    "Why this sub-query matters to the overall question."
+                                ),
+                            },
+                            "priority": {
+                                "type": "integer",
+                                "enum": [1, 2, 3],
+                                "description": "1=low, 2=medium, 3=high.",
+                            },
                         },
-                        "rationale": {
-                            "type": "string",
-                            "description": (
-                                "Why this sub-query matters to the overall question."
-                            ),
-                        },
-                        "priority": {
-                            "type": "integer",
-                            "enum": [1, 2, 3],
-                            "description": "1=low, 2=medium, 3=high.",
-                        },
+                        "required": ["question", "rationale", "priority"],
                     },
-                    "required": ["question", "rationale", "priority"],
-                },
-            }
+                }
+            },
+            "required": ["sub_queries"],
         },
-        "required": ["sub_queries"],
-    },
-}
+    }
+
+
+# Default tool spec preserved for tests / external callers that import it.
+PLANNER_TOOL: ToolSpec = _planner_tool(5)
 
 
 async def plan_research(
@@ -84,18 +92,23 @@ async def plan_research(
     question: str,
     llm: LLMClient,
     model: str,
+    max_sub_queries: int = 5,
     max_tokens: int = 2048,
 ) -> ResearchPlan:
     """Run the planner and return a validated `ResearchPlan`.
+
+    `max_sub_queries` becomes both the min and max of the planner tool
+    schema, forcing an exact decomposition count. The default (5) matches
+    the historical behaviour for callers that don't pass the option.
 
     Raises `PlannerError` if the model returns no tool call or malformed data.
     """
     response = await llm.complete_with_tools(
         model=model,
         messages=[{"role": "user", "content": question}],
-        tools=[PLANNER_TOOL],
+        tools=[_planner_tool(max_sub_queries)],
         tool_choice={"type": "tool", "name": PLANNER_TOOL_NAME},
-        system=PLANNER_SYSTEM_PROMPT,
+        system=_planner_system_prompt(max_sub_queries),
         max_tokens=max_tokens,
     )
 

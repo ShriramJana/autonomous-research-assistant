@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from ara.config import get_settings
+from ara.options import Depth, options_for_depth
 from ara.runtime.orchestrator import run_report
 from ara.storage.base import ReportStore
 
@@ -20,6 +21,7 @@ router = APIRouter(prefix="/api")
 
 class CreateResearchRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
+    depth: Depth = "standard"
 
 
 class CreateResearchResponse(BaseModel):
@@ -37,6 +39,7 @@ async def create_research(req: CreateResearchRequest, request: Request) -> Creat
     store: ReportStore = request.app.state.store
     tasks: set[asyncio.Task[None]] = request.app.state.tasks
     settings = get_settings()
+    options = options_for_depth(req.depth)
 
     report_id = uuid4()
     await store.create(report_id, req.question)
@@ -47,6 +50,7 @@ async def create_research(req: CreateResearchRequest, request: Request) -> Creat
             question=req.question,
             store=store,
             settings=settings,
+            options=options,
         )
     )
     # Hold a reference so the task isn't GC'd before completion, then
