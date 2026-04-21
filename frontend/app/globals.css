@@ -148,30 +148,30 @@
    prefers-reduced-motion disables the animation entirely. */
 .ara-blob {
   position: absolute;
-  width: 42rem;
-  height: 42rem;
+  width: 46rem;
+  height: 46rem;
   border-radius: 9999px;
-  filter: blur(90px);
-  opacity: 0.55;
+  filter: blur(110px);
+  opacity: 0.75;
   will-change: transform;
 }
 .ara-blob-1 {
-  top: -14rem;
-  left: -12rem;
-  background: radial-gradient(circle, #fde68a 0%, transparent 70%); /* warm amber */
+  top: -10rem;
+  left: -8rem;
+  background: radial-gradient(circle, #fcd34d 0%, transparent 65%); /* amber-300 */
   animation: ara-drift-1 24s ease-in-out infinite alternate;
 }
 .ara-blob-2 {
-  bottom: -14rem;
-  right: -12rem;
-  background: radial-gradient(circle, #bfdbfe 0%, transparent 70%); /* soft sky */
+  bottom: -10rem;
+  right: -8rem;
+  background: radial-gradient(circle, #93c5fd 0%, transparent 65%); /* blue-300 */
   animation: ara-drift-2 30s ease-in-out infinite alternate;
 }
 .ara-blob-3 {
-  top: 35%;
+  top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, #ddd6fe 0%, transparent 70%); /* lilac */
+  background: radial-gradient(circle, #c4b5fd 0%, transparent 65%); /* violet-300 */
   animation: ara-drift-3 36s ease-in-out infinite alternate;
 }
 .dark .ara-blob {
