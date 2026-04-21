@@ -1,7 +1,8 @@
-# Autonomous Research Assistant
+# ARA
 
-A three-stage agent pipeline (Planner → Researchers → Synthesizer) that turns a
-research question into a cited report, streamed live over SSE.
+**Autonomous Research Assistant.** A three-stage agent pipeline
+(Planner → Researchers → Synthesizer) that turns a research question into a
+cited report, streamed live over SSE.
 
 Flagship portfolio project for [LLMTechno](https://llmtechno.com).
 

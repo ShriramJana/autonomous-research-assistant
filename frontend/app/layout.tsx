@@ -13,8 +13,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Autonomous Research Assistant",
-  description: "Planner → Researchers → Synthesizer pipeline with live cited reports.",
+  title: "ARA | Research Terminal",
+  description:
+    "ARA — Autonomous Research Assistant. A planner → researchers → synthesizer pipeline that streams cited reports live.",
 };
 
 export default function RootLayout({

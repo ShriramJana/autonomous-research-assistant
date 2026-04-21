@@ -8,8 +8,8 @@ export default function Home() {
       <BackgroundShapes />
       <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col gap-10 py-12">
         <section className="flex flex-col gap-2">
-          <p className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
-            Autonomous Research Assistant
+          <p className="text-primary font-mono text-[0.6875rem] uppercase tracking-[0.2em]">
+            ARA
           </p>
           <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
             Ask a research question.
