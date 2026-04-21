@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Globe, Paperclip, Zap } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { createResearch } from "@/lib/api";
 import { addHistoryItem } from "@/lib/history";
 
@@ -20,9 +19,8 @@ export function ResearchForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!question.trim()) return;
+  const submit = async () => {
+    if (!question.trim() || submitting) return;
     setError(null);
     setSubmitting(true);
     try {
@@ -41,28 +39,73 @@ export function ResearchForm({
     }
   };
 
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    void submit();
+  };
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+      e.preventDefault();
+      void submit();
+    }
+  };
+
+  const minHeight = compact ? "min-h-[96px]" : "min-h-[160px]";
+
   return (
-    <form onSubmit={onSubmit} className="flex w-full flex-col gap-3">
-      <Textarea
-        placeholder="e.g. How should we evaluate RAG vs fine-tuning for enterprise LLM apps in 2026?"
-        value={question}
-        onChange={(e) => setQuestion(e.target.value)}
-        rows={compact ? 3 : 5}
-        disabled={submitting}
-        className="resize-none"
-      />
-      <div className="flex items-center justify-between gap-3">
-        {error ? (
-          <p className="text-destructive text-sm">{error}</p>
-        ) : (
-          <span className="text-muted-foreground text-xs">
-            ⌘/Ctrl + Enter to submit
-          </span>
-        )}
-        <Button type="submit" disabled={!question.trim() || submitting}>
-          {submitting ? "Starting…" : "Research"}
-        </Button>
+    <form onSubmit={onSubmit} className="w-full">
+      <div className="bg-secondary focus-within:ring-border group relative rounded-xl p-1 transition-all duration-300 focus-within:ring-1">
+        <textarea
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+          onKeyDown={onKeyDown}
+          disabled={submitting}
+          placeholder="Deep dive into the competitive landscape of renewable energy storage systems in 2024…"
+          className={`text-foreground placeholder:text-muted-foreground/50 font-sans w-full resize-none border-none bg-transparent p-6 text-lg outline-none focus:ring-0 ${minHeight}`}
+        />
+        <div className="flex items-center justify-between border-t border-white/[0.04] px-6 py-4">
+          <div className="flex gap-4">
+            <button
+              type="button"
+              title="Reference — coming soon"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
+            >
+              <Paperclip className="h-3.5 w-3.5" strokeWidth={1.75} />
+              <span className="font-mono text-[10px] uppercase tracking-wider">
+                Reference
+              </span>
+            </button>
+            <button
+              type="button"
+              title="Browse web — coming soon"
+              className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
+            >
+              <Globe className="h-3.5 w-3.5" strokeWidth={1.75} />
+              <span className="font-mono text-[10px] uppercase tracking-wider">
+                Browse Web
+              </span>
+            </button>
+          </div>
+          <button
+            type="submit"
+            disabled={!question.trim() || submitting}
+            className="from-primary to-primary-container text-primary-foreground shadow-primary/10 inline-flex items-center gap-2 rounded-md bg-gradient-to-r px-8 py-2 text-sm font-bold shadow-lg transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <span className="font-mono text-xs tracking-tight">
+              {submitting ? "STARTING…" : "EXECUTE"}
+            </span>
+            {!submitting ? (
+              <Zap className="h-3.5 w-3.5" strokeWidth={2.5} />
+            ) : null}
+          </button>
+        </div>
       </div>
+      {error ? (
+        <p className="text-destructive mt-3 px-2 font-mono text-xs">
+          {error}
+        </p>
+      ) : null}
     </form>
   );
 }
