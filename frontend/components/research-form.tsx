@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Globe, Paperclip, Zap } from "lucide-react";
 
@@ -15,9 +15,21 @@ export function ResearchForm({
   compact?: boolean;
 }) {
   const router = useRouter();
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [question, setQuestion] = useState(initialQuestion);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const focusOnHash = () => {
+      if (window.location.hash === "#question") {
+        textareaRef.current?.focus({ preventScroll: false });
+      }
+    };
+    focusOnHash();
+    window.addEventListener("hashchange", focusOnHash);
+    return () => window.removeEventListener("hashchange", focusOnHash);
+  }, []);
 
   const submit = async () => {
     if (!question.trim() || submitting) return;
@@ -57,6 +69,8 @@ export function ResearchForm({
     <form onSubmit={onSubmit} className="w-full">
       <div className="bg-secondary focus-within:ring-border group relative rounded-xl p-1 transition-all duration-300 focus-within:ring-1">
         <textarea
+          ref={textareaRef}
+          id="question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           onKeyDown={onKeyDown}
