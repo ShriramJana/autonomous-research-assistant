@@ -56,9 +56,9 @@ export function ResearchLive({ reportId }: { reportId: string }) {
         <div className="flex items-center gap-3">
           <Link
             href="/"
-            className="font-semibold tracking-tight hover:underline"
+            className="text-primary font-mono text-xl font-bold tracking-tighter hover:opacity-80"
           >
-            Autonomous Research Assistant
+            ARA
           </Link>
           <StatusPill status={state.status} />
         </div>
