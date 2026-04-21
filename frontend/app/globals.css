@@ -129,3 +129,15 @@
     @apply font-sans;
   }
 }
+/* Print layout — used by the "Download PDF" button. Hides the
+   header/sidebar/cost-meter and flattens the report card so the
+   browser's native Save-as-PDF dialog renders a clean document. */
+@media print {
+  html, body { background: white !important; color: black !important; }
+  /* Let content flow naturally on a printed page */
+  .overflow-hidden, .overflow-y-auto { overflow: visible !important; }
+  /* Keep links visible but without accent color */
+  a { color: black !important; text-decoration: underline; }
+  /* Avoid orphaned headings */
+  h1, h2, h3 { break-after: avoid-page; }
+}

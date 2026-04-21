@@ -1,10 +1,11 @@
+import { HistoryList } from "@/components/history-list";
 import { ResearchForm } from "@/components/research-form";
 
 export default function Home() {
   return (
-    <div className="bg-background flex min-h-[100dvh] items-center justify-center p-6">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
-        <div className="flex flex-col gap-2">
+    <div className="bg-background flex min-h-[100dvh] justify-center p-6">
+      <div className="mx-auto flex w-full max-w-2xl flex-col gap-10 py-12">
+        <section className="flex flex-col gap-2">
           <p className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
             Autonomous Research Assistant
           </p>
@@ -16,8 +17,9 @@ export default function Home() {
             in parallel with live web search, and a synthesizer streams a cited report
             back in real time.
           </p>
-        </div>
+        </section>
         <ResearchForm />
+        <HistoryList />
       </div>
     </div>
   );
