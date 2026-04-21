@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { PlanTree } from "@/components/plan-tree";
@@ -51,15 +50,9 @@ export function ResearchLive({ reportId }: { reportId: string }) {
   const isComplete = state.status === "complete" && state.report !== null;
 
   return (
-    <div className="bg-background flex h-[100dvh] flex-col print:block print:h-auto">
+    <div className="bg-background flex flex-1 flex-col print:block print:h-auto">
       <header className="flex items-center justify-between gap-4 border-b px-6 py-3 print:hidden">
         <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="text-primary font-mono text-xl font-bold tracking-tighter hover:opacity-80"
-          >
-            ARA
-          </Link>
           <StatusPill status={state.status} />
         </div>
         <div className="flex items-center gap-2">
