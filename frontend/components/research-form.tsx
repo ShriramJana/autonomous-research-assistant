@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { createResearch } from "@/lib/api";
+import { addHistoryItem } from "@/lib/history";
 
 export function ResearchForm({
   initialQuestion = "",
@@ -25,7 +26,14 @@ export function ResearchForm({
     setError(null);
     setSubmitting(true);
     try {
-      const { report_id } = await createResearch(question.trim());
+      const trimmed = question.trim();
+      const { report_id } = await createResearch(trimmed);
+      addHistoryItem({
+        reportId: report_id,
+        question: trimmed,
+        createdAt: Date.now(),
+        status: "running",
+      });
       router.push(`/r/${report_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
