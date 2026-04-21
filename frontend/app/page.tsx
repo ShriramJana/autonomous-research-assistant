@@ -1,10 +1,12 @@
+import { BackgroundShapes } from "@/components/background-shapes";
 import { HistoryList } from "@/components/history-list";
 import { ResearchForm } from "@/components/research-form";
 
 export default function Home() {
   return (
-    <div className="bg-background flex min-h-[100dvh] justify-center p-6">
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-10 py-12">
+    <div className="bg-background relative flex min-h-[100dvh] items-center justify-center overflow-hidden p-6">
+      <BackgroundShapes />
+      <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col gap-10 py-12">
         <section className="flex flex-col gap-2">
           <p className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
             Autonomous Research Assistant
