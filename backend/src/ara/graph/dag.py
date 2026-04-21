@@ -28,6 +28,7 @@ from ara.models.events import (
     ResearcherComplete,
 )
 from ara.models.research import SubQuery, SubQueryFinding
+from ara.options import ResearchOptions, options_for_depth
 
 
 def build_graph(
@@ -35,11 +36,16 @@ def build_graph(
     llm: LLMClient,
     emit: EventEmitter,
     settings: Settings,
+    options: ResearchOptions | None = None,
 ) -> Any:
-    """Return a compiled LangGraph bound to `llm`, `emit`, and `settings`.
+    """Return a compiled LangGraph bound to `llm`, `emit`, `settings`, and
+    per-run `options`.
 
     A fresh graph per report run. LangGraph compilation is cheap.
+    `options` defaults to the standard depth preset so existing callers
+    that omit it keep their previous behaviour.
     """
+    opts = options if options is not None else options_for_depth("standard")
 
     async def plan_node(state: GraphState) -> dict[str, Any]:
         try:
@@ -47,6 +53,7 @@ def build_graph(
                 question=state["question"],
                 llm=llm,
                 model=settings.claude_planner_model,
+                max_sub_queries=opts.max_sub_queries,
             )
         except PlannerError as exc:
             await emit(ErrorEvent(stage="plan", message=str(exc)))
@@ -65,7 +72,7 @@ def build_graph(
                     llm=llm,
                     model=settings.claude_researcher_model,
                     emit=emit,
-                    max_iterations=settings.ara_researcher_max_iterations,
+                    max_iterations=opts.max_iterations,
                     input_token_budget=settings.ara_researcher_input_token_budget,
                 )
             except ResearcherError as exc:
