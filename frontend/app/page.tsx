@@ -4,25 +4,22 @@ import { ResearchForm } from "@/components/research-form";
 
 export default function Home() {
   return (
-    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden p-6">
+    <div className="relative flex flex-1 flex-col overflow-hidden">
       <BackgroundShapes />
-      <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col gap-10 py-12">
-        <section className="flex flex-col gap-2">
-          <p className="text-primary font-mono text-[0.6875rem] uppercase tracking-[0.2em]">
-            ARA
-          </p>
-          <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-            Ask a research question.
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            A planner decomposes your question into sub-queries, researchers run them
-            in parallel with live web search, and a synthesizer streams a cited report
-            back in real time.
-          </p>
+      <main className="relative z-10 mx-auto flex w-full max-w-4xl flex-grow flex-col px-6 py-12 md:py-24">
+        <section className="mb-20 w-full space-y-12">
+          <div className="space-y-2 text-left">
+            <p className="text-primary font-mono text-[0.6875rem] uppercase tracking-[0.2em]">
+              ARA
+            </p>
+            <h1 className="text-foreground text-4xl font-extrabold tracking-tight md:text-5xl">
+              Ask a research question.
+            </h1>
+          </div>
+          <ResearchForm />
         </section>
-        <ResearchForm />
         <HistoryList />
-      </div>
+      </main>
     </div>
   );
 }
