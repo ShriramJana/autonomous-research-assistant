@@ -141,3 +141,59 @@
   /* Avoid orphaned headings */
   h1, h2, h3 { break-after: avoid-page; }
 }
+
+/* ───── Landing-page ambient backdrop ───── */
+/* Soft drifting gradient blobs behind the research form.
+   Drifts are long (24–36s) and eased so they feel ambient, not busy.
+   prefers-reduced-motion disables the animation entirely. */
+.ara-blob {
+  position: absolute;
+  width: 42rem;
+  height: 42rem;
+  border-radius: 9999px;
+  filter: blur(90px);
+  opacity: 0.55;
+  will-change: transform;
+}
+.ara-blob-1 {
+  top: -14rem;
+  left: -12rem;
+  background: radial-gradient(circle, #fde68a 0%, transparent 70%); /* warm amber */
+  animation: ara-drift-1 24s ease-in-out infinite alternate;
+}
+.ara-blob-2 {
+  bottom: -14rem;
+  right: -12rem;
+  background: radial-gradient(circle, #bfdbfe 0%, transparent 70%); /* soft sky */
+  animation: ara-drift-2 30s ease-in-out infinite alternate;
+}
+.ara-blob-3 {
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #ddd6fe 0%, transparent 70%); /* lilac */
+  animation: ara-drift-3 36s ease-in-out infinite alternate;
+}
+.dark .ara-blob {
+  opacity: 0.22;
+}
+
+@keyframes ara-drift-1 {
+  0%   { transform: translate(0, 0)       scale(1);    }
+  50%  { transform: translate(3rem, 2rem) scale(1.05); }
+  100% { transform: translate(8rem, 4rem) scale(1.1);  }
+}
+@keyframes ara-drift-2 {
+  0%   { transform: translate(0, 0)         scale(1);    }
+  50%  { transform: translate(-3rem, -1rem) scale(0.98); }
+  100% { transform: translate(-7rem, -3rem) scale(0.94); }
+}
+@keyframes ara-drift-3 {
+  0%   { transform: translate(-50%, -50%) scale(1);    }
+  50%  { transform: translate(-42%, -60%) scale(1.05); }
+  100% { transform: translate(-30%, -70%) scale(1.1);  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ara-blob { animation: none !important; }
+}
