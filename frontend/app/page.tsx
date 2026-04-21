@@ -4,7 +4,7 @@ import { ResearchForm } from "@/components/research-form";
 
 export default function Home() {
   return (
-    <div className="bg-background relative flex min-h-[100dvh] items-center justify-center overflow-hidden p-6">
+    <div className="relative flex min-h-[100dvh] items-center justify-center overflow-hidden p-6">
       <BackgroundShapes />
       <div className="relative z-10 mx-auto flex w-full max-w-2xl flex-col gap-10 py-12">
         <section className="flex flex-col gap-2">
