@@ -40,6 +40,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
+  --color-surface-lowest: var(--surface-lowest);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary-container: var(--on-primary-container);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -49,73 +52,60 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
+/* Cognitive Terminal — dark-only.
+   :root and .dark hold identical values so the palette applies whether
+   a parent has the .dark class or not. v1 ships dark-only; a future light
+   theme can specialize :root without touching .dark. */
+:root,
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Tonal stack — "Ink & Obsidian" */
+  --surface-lowest: #0e0e0e;
+  --background: #131313;          /* surface */
+  --card: #1c1b1b;                /* surface-container-low */
+  --card-foreground: #e5e2e1;
+  --popover: #1c1b1b;
+  --popover-foreground: #e5e2e1;
+  --muted: #201f1f;               /* surface-container */
+  --muted-foreground: #c3c5d7;    /* on-surface-variant */
+  --secondary: #2a2a2a;           /* surface-container-high */
+  --secondary-foreground: #e5e2e1;
+  --accent: #353534;              /* surface-container-highest */
+  --accent-foreground: #e5e2e1;
+  --foreground: #e5e2e1;          /* on-surface */
+
+  /* Brand */
+  --primary: #b5c4ff;
+  --primary-foreground: #00297a;  /* on-primary */
+  --primary-container: #638aff;   /* gradient CTA endpoint */
+  --on-primary-container: #00236b;
+
+  /* Status */
+  --destructive: #ffb4ab;         /* error */
+
+  /* Lines & focus — "Ghost Border" rule: outline-variant at low opacity */
+  --border: rgba(67, 70, 84, 0.25);
+  --input: rgba(67, 70, 84, 0.35);
+  --ring: #b5c4ff;
+
+  /* Charts (kept neutral; tune when chart components land) */
+  --chart-1: #b5c4ff;
+  --chart-2: #638aff;
+  --chart-3: #c3c5d7;
+  --chart-4: #8d90a0;
+  --chart-5: #434654;
+
+  /* Density — Stitch uses rounded-md (0.375rem) globally */
+  --radius: 0.375rem;
+
+  /* Sidebar (used by shadcn sidebar primitives if introduced) */
+  --sidebar: #1c1b1b;
+  --sidebar-foreground: #e5e2e1;
+  --sidebar-primary: #b5c4ff;
+  --sidebar-primary-foreground: #00297a;
+  --sidebar-accent: #2a2a2a;
+  --sidebar-accent-foreground: #e5e2e1;
+  --sidebar-border: rgba(67, 70, 84, 0.25);
+  --sidebar-ring: #b5c4ff;
 }
 
 @layer base {
@@ -129,71 +119,53 @@
     @apply font-sans;
   }
 }
+
 /* Print layout — used by the "Download PDF" button. Hides the
    header/sidebar/cost-meter and flattens the report card so the
    browser's native Save-as-PDF dialog renders a clean document. */
 @media print {
   html, body { background: white !important; color: black !important; }
-  /* Let content flow naturally on a printed page */
   .overflow-hidden, .overflow-y-auto { overflow: visible !important; }
-  /* Keep links visible but without accent color */
   a { color: black !important; text-decoration: underline; }
-  /* Avoid orphaned headings */
   h1, h2, h3 { break-after: avoid-page; }
 }
 
-/* ───── Landing-page ambient backdrop ───── */
-/* Soft drifting gradient blobs behind the research form.
-   Drifts are long (24–36s) and eased so they feel ambient, not busy.
-   prefers-reduced-motion disables the animation entirely. */
-.ara-blob {
+/* ───── Cognitive Terminal ambient backdrop ─────
+   Two large, very low-opacity blue radial glows. Drift slowly and asymmetrically
+   to avoid a flat dead surface without competing with content. */
+.ara-glow {
   position: absolute;
-  width: 46rem;
-  height: 46rem;
   border-radius: 9999px;
-  filter: blur(110px);
-  opacity: 0.75;
+  filter: blur(120px);
   will-change: transform;
+  pointer-events: none;
 }
-.ara-blob-1 {
-  top: -10rem;
-  left: -8rem;
-  background: radial-gradient(circle, #fcd34d 0%, transparent 65%); /* amber-300 */
-  animation: ara-drift-1 24s ease-in-out infinite alternate;
+.ara-glow-1 {
+  top: -18%;
+  right: -12%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(181, 196, 255, 0.07) 0%, transparent 65%);
+  animation: ara-glow-drift-1 32s ease-in-out infinite alternate;
 }
-.ara-blob-2 {
-  bottom: -10rem;
-  right: -8rem;
-  background: radial-gradient(circle, #93c5fd 0%, transparent 65%); /* blue-300 */
-  animation: ara-drift-2 30s ease-in-out infinite alternate;
-}
-.ara-blob-3 {
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, #c4b5fd 0%, transparent 65%); /* violet-300 */
-  animation: ara-drift-3 36s ease-in-out infinite alternate;
-}
-.dark .ara-blob {
-  opacity: 0.22;
+.ara-glow-2 {
+  top: 28%;
+  left: -8%;
+  width: 36%;
+  height: 36%;
+  background: radial-gradient(circle, rgba(99, 138, 255, 0.06) 0%, transparent 65%);
+  animation: ara-glow-drift-2 40s ease-in-out infinite alternate;
 }
 
-@keyframes ara-drift-1 {
+@keyframes ara-glow-drift-1 {
+  0%   { transform: translate(0, 0)        scale(1);    }
+  100% { transform: translate(-3rem, 4rem) scale(1.08); }
+}
+@keyframes ara-glow-drift-2 {
   0%   { transform: translate(0, 0)       scale(1);    }
-  50%  { transform: translate(3rem, 2rem) scale(1.05); }
-  100% { transform: translate(8rem, 4rem) scale(1.1);  }
-}
-@keyframes ara-drift-2 {
-  0%   { transform: translate(0, 0)         scale(1);    }
-  50%  { transform: translate(-3rem, -1rem) scale(0.98); }
-  100% { transform: translate(-7rem, -3rem) scale(0.94); }
-}
-@keyframes ara-drift-3 {
-  0%   { transform: translate(-50%, -50%) scale(1);    }
-  50%  { transform: translate(-42%, -60%) scale(1.05); }
-  100% { transform: translate(-30%, -70%) scale(1.1);  }
+  100% { transform: translate(2rem, -2rem) scale(0.94); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ara-blob { animation: none !important; }
+  .ara-glow { animation: none !important; }
 }
