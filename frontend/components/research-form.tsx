@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import { createResearch } from "@/lib/api";
 import { addHistoryItem } from "@/lib/history";
+import { useBrowseWeb } from "@/hooks/use-browse-web";
 import { type Depth, useDepth } from "@/hooks/use-depth";
 
 const DEPTH_OPTIONS: Array<{
@@ -40,6 +41,7 @@ export function ResearchForm({
   const [error, setError] = useState<string | null>(null);
   const [depthOpen, setDepthOpen] = useState(false);
   const { depth, setDepth } = useDepth();
+  const { browseWeb, toggleBrowseWeb } = useBrowseWeb();
 
   useEffect(() => {
     const focusOnHash = () => {
@@ -58,7 +60,7 @@ export function ResearchForm({
     setSubmitting(true);
     try {
       const trimmed = question.trim();
-      const { report_id } = await createResearch(trimmed, { depth });
+      const { report_id } = await createResearch(trimmed, { depth, browseWeb });
       addHistoryItem({
         reportId: report_id,
         question: trimmed,
@@ -150,12 +152,22 @@ export function ResearchForm({
             </Popover>
             <button
               type="button"
-              title="Browse web — coming soon"
-              className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
+              onClick={toggleBrowseWeb}
+              aria-pressed={browseWeb}
+              title={
+                browseWeb
+                  ? "Web search enabled — click to disable"
+                  : "Web search disabled — click to enable"
+              }
+              className={
+                browseWeb
+                  ? "text-primary hover:text-primary/80 flex items-center gap-2 transition-colors"
+                  : "text-muted-foreground/50 hover:text-foreground flex items-center gap-2 transition-colors"
+              }
             >
               <Globe className="h-3.5 w-3.5" strokeWidth={1.75} />
               <span className="font-mono text-[10px] uppercase tracking-wider">
-                Browse Web
+                Browse Web · {browseWeb ? "On" : "Off"}
               </span>
             </button>
           </div>

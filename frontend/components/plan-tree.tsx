@@ -1,5 +1,7 @@
 "use client";
 
+import { GlobeLock } from "lucide-react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgentStatus } from "@/components/agent-status";
@@ -11,11 +13,14 @@ export function PlanTree({
   originalQuestion,
   agents,
   isPlanning,
+  webSearchEnabled,
 }: {
   originalQuestion: string | null;
   agents: AgentState[];
   isPlanning: boolean;
+  webSearchEnabled?: boolean;
 }) {
+  const offline = webSearchEnabled === false;
   return (
     <Card className="flex h-full flex-col overflow-hidden">
       <CardHeader className="pb-3">
@@ -26,6 +31,17 @@ export function PlanTree({
           <p className="text-muted-foreground line-clamp-3 text-xs">
             {originalQuestion}
           </p>
+        ) : null}
+        {offline ? (
+          <div
+            className="border-border/60 bg-secondary/50 text-muted-foreground mt-2 inline-flex items-center gap-1.5 self-start rounded px-2 py-1"
+            title="Researchers answered from training knowledge — sources may be sparse or canonical-only."
+          >
+            <GlobeLock className="h-3 w-3" strokeWidth={1.75} />
+            <span className="font-mono text-[10px] uppercase tracking-wider">
+              Web search disabled
+            </span>
+          </div>
         ) : null}
       </CardHeader>
       <CardContent className="flex flex-1 flex-col gap-3 overflow-y-auto pb-4">
