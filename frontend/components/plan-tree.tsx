@@ -2,7 +2,6 @@
 
 import { GlobeLock } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgentStatus } from "@/components/agent-status";
 import type { AgentState } from "@/hooks/use-research-stream";
@@ -22,19 +21,19 @@ export function PlanTree({
 }) {
   const offline = webSearchEnabled === false;
   return (
-    <Card className="flex h-full flex-col overflow-hidden">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-medium tracking-tight">
+    <div className="bg-card flex h-full flex-col overflow-hidden rounded-lg">
+      <div className="border-border/40 flex flex-col gap-2 border-b px-5 py-4">
+        <p className="text-muted-foreground/60 font-mono text-[10px] uppercase tracking-widest">
           Research plan
-        </CardTitle>
+        </p>
         {originalQuestion ? (
-          <p className="text-muted-foreground line-clamp-3 text-xs">
+          <p className="text-foreground line-clamp-3 text-sm leading-snug">
             {originalQuestion}
           </p>
         ) : null}
         {offline ? (
           <div
-            className="border-border/60 bg-secondary/50 text-muted-foreground mt-2 inline-flex items-center gap-1.5 self-start rounded px-2 py-1"
+            className="border-border/60 bg-secondary/50 text-muted-foreground mt-1 inline-flex items-center gap-1.5 self-start rounded px-2 py-1"
             title="Researchers answered from training knowledge — sources may be sparse or canonical-only."
           >
             <GlobeLock className="h-3 w-3" strokeWidth={1.75} />
@@ -43,45 +42,49 @@ export function PlanTree({
             </span>
           </div>
         ) : null}
-      </CardHeader>
-      <CardContent className="flex flex-1 flex-col gap-3 overflow-y-auto pb-4">
+      </div>
+      <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
         {isPlanning && agents.length === 0 ? (
           <>
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
+            <Skeleton className="h-16 w-full" />
           </>
         ) : null}
         {agents.map((agent, i) => (
           <AgentRow key={agent.subQueryId} index={i + 1} agent={agent} />
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 
 function AgentRow({ index, agent }: { index: number; agent: AgentState }) {
   return (
-    <div className="group border-border/60 bg-card hover:border-border flex flex-col gap-2 rounded-md border p-3 transition-colors">
+    <div className="hover:bg-secondary/40 flex flex-col gap-2 rounded-md p-3 transition-colors">
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-start gap-2">
-          <span className="text-muted-foreground mt-0.5 font-mono text-[11px]">
+        <div className="flex min-w-0 items-start gap-2">
+          <span className="text-muted-foreground/60 mt-0.5 font-mono text-[10px]">
             {String(index).padStart(2, "0")}
           </span>
-          <p className="text-foreground text-sm leading-snug">{agent.question}</p>
+          <p className="text-foreground min-w-0 text-sm leading-snug">
+            {agent.question}
+          </p>
         </div>
         <AgentStatus phase={agent.phase} />
       </div>
       {agent.lastToolCall ? (
-        <p className="text-muted-foreground truncate font-mono text-[11px]">
+        <p className="text-muted-foreground/70 truncate pl-6 font-mono text-[10px]">
           → {agent.lastToolCall}
         </p>
       ) : null}
       {agent.errorMessage ? (
-        <p className="text-destructive text-xs">{agent.errorMessage}</p>
+        <p className="text-destructive pl-6 font-mono text-[10px]">
+          {agent.errorMessage}
+        </p>
       ) : null}
       {agent.finding && agent.phase === "done" ? (
-        <p className="text-muted-foreground line-clamp-2 text-xs">
+        <p className="text-muted-foreground/80 line-clamp-2 pl-6 text-xs leading-snug">
           {agent.finding.summary}
         </p>
       ) : null}
@@ -89,6 +92,4 @@ function AgentRow({ index, agent }: { index: number; agent: AgentState }) {
   );
 }
 
-// Exporting PRIORITY_LABEL to silence unused-var warnings if other callers
-// want to render priority later; PlanTree itself doesn't render it yet.
 export { PRIORITY_LABEL };

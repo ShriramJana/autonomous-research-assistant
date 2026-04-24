@@ -1,8 +1,6 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import type { AgentPhase } from "@/hooks/use-research-stream";
-import { cn } from "@/lib/utils";
 
 const LABEL: Record<AgentPhase, string> = {
   pending: "Queued",
@@ -11,20 +9,31 @@ const LABEL: Record<AgentPhase, string> = {
   error: "Failed",
 };
 
-const VARIANT: Record<AgentPhase, "secondary" | "default" | "destructive" | "outline"> = {
-  pending: "outline",
-  running: "default",
-  done: "secondary",
-  error: "destructive",
-};
-
 export function AgentStatus({ phase }: { phase: AgentPhase }) {
+  const tone =
+    phase === "error"
+      ? "text-destructive"
+      : phase === "pending"
+        ? "text-muted-foreground/60"
+        : phase === "done"
+          ? "text-muted-foreground"
+          : "text-primary";
+  const dot =
+    phase === "error"
+      ? "bg-destructive"
+      : phase === "pending"
+        ? "bg-muted-foreground/40"
+        : phase === "done"
+          ? "bg-muted-foreground/60"
+          : "bg-primary animate-pulse";
   return (
-    <Badge variant={VARIANT[phase]} className={cn("gap-1.5")}>
-      {phase === "running" ? (
-        <span className="bg-primary-foreground inline-block size-1.5 animate-pulse rounded-full" />
-      ) : null}
-      {LABEL[phase]}
-    </Badge>
+    <div className="inline-flex shrink-0 items-center gap-1.5">
+      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} />
+      <span
+        className={`font-mono text-[10px] uppercase tracking-widest ${tone}`}
+      >
+        {LABEL[phase]}
+      </span>
+    </div>
   );
 }

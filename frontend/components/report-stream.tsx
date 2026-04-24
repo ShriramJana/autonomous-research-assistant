@@ -4,7 +4,6 @@ import { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Citation } from "@/components/citation";
 import type { FinalReport, Source } from "@/lib/types";
@@ -16,22 +15,20 @@ export function ReportStream({
   report,
   isSynthesizing,
   isPending,
-  footer,
   questionForPrint,
 }: {
   streamedMarkdown: string;
   report: FinalReport | null;
   isSynthesizing: boolean;
   isPending: boolean;
-  footer?: React.ReactNode;
   questionForPrint?: string | null;
 }) {
   const citations: Source[] = useMemo(() => report?.citations ?? [], [report]);
   const markdown = report ? composeFinalMarkdown(report) : streamedMarkdown;
 
   return (
-    <Card className="flex h-full flex-col overflow-hidden print:block print:h-auto print:overflow-visible print:border-0 print:shadow-none">
-      <CardContent className="flex-1 overflow-y-auto py-6 print:overflow-visible print:py-0">
+    <div className="bg-card flex h-full flex-col overflow-hidden rounded-lg print:block print:h-auto print:overflow-visible print:border-0 print:bg-transparent print:shadow-none">
+      <div className="flex-1 overflow-y-auto px-8 py-8 print:overflow-visible print:p-0">
         {questionForPrint ? (
           <div className="hidden print:mb-6 print:block">
             <p className="text-muted-foreground font-mono text-xs uppercase tracking-wider">
@@ -49,30 +46,27 @@ export function ReportStream({
             <Skeleton className="h-4 w-10/12" />
           </div>
         ) : (
-          <>
-            <article className="prose prose-sm dark:prose-invert max-w-none">
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: ({ children }) => (
-                    <p>{renderWithCitations(children, citations)}</p>
-                  ),
-                  li: ({ children }) => (
-                    <li>{renderWithCitations(children, citations)}</li>
-                  ),
-                }}
-              >
-                {markdown}
-              </ReactMarkdown>
-              {isSynthesizing && !report ? (
-                <span className="bg-foreground inline-block h-4 w-1 translate-y-0.5 animate-pulse rounded-sm align-middle" />
-              ) : null}
-            </article>
-            {footer}
-          </>
+          <article className="prose prose-sm dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-p:leading-relaxed max-w-2xl">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({ children }) => (
+                  <p>{renderWithCitations(children, citations)}</p>
+                ),
+                li: ({ children }) => (
+                  <li>{renderWithCitations(children, citations)}</li>
+                ),
+              }}
+            >
+              {markdown}
+            </ReactMarkdown>
+            {isSynthesizing && !report ? (
+              <span className="bg-primary inline-block h-4 w-1 translate-y-0.5 animate-pulse rounded-sm align-middle" />
+            ) : null}
+          </article>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
 

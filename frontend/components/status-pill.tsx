@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import type { StreamStatus } from "@/hooks/use-research-stream";
 
 const LABEL: Record<StreamStatus, string> = {
@@ -8,27 +7,35 @@ const LABEL: Record<StreamStatus, string> = {
   planning: "Planning",
   researching: "Researching",
   synthesizing: "Synthesizing",
-  complete: "Complete",
+  complete: "Synthesized",
   error: "Error",
 };
 
-const VARIANT: Record<StreamStatus, "default" | "secondary" | "destructive" | "outline"> = {
-  idle: "outline",
-  planning: "default",
-  researching: "default",
-  synthesizing: "default",
-  complete: "secondary",
-  error: "destructive",
-};
-
 export function StatusPill({ status }: { status: StreamStatus }) {
-  const animated = status === "planning" || status === "researching" || status === "synthesizing";
+  const animated =
+    status === "planning" || status === "researching" || status === "synthesizing";
+  const tone =
+    status === "error"
+      ? "text-destructive"
+      : status === "idle"
+        ? "text-muted-foreground"
+        : "text-primary";
+  const dot =
+    status === "error"
+      ? "bg-destructive"
+      : status === "idle"
+        ? "bg-muted-foreground/60"
+        : "bg-primary";
   return (
-    <Badge variant={VARIANT[status]} className="gap-1.5 py-1">
-      {animated ? (
-        <span className="bg-primary-foreground inline-block size-1.5 animate-pulse rounded-full" />
-      ) : null}
-      {LABEL[status]}
-    </Badge>
+    <div className="inline-flex items-center gap-2">
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${dot} ${animated ? "animate-pulse" : ""}`}
+      />
+      <span
+        className={`font-mono text-[10px] uppercase tracking-widest ${tone}`}
+      >
+        {LABEL[status]}
+      </span>
+    </div>
   );
 }
