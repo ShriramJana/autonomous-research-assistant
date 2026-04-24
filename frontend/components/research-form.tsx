@@ -2,10 +2,29 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Globe, Paperclip, Zap } from "lucide-react";
+import { Check, Globe, Layers, Zap } from "lucide-react";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { createResearch } from "@/lib/api";
 import { addHistoryItem } from "@/lib/history";
+import { type Depth, useDepth } from "@/hooks/use-depth";
+
+const DEPTH_OPTIONS: Array<{
+  value: Depth;
+  label: string;
+  detail: string;
+}> = [
+  { value: "quick", label: "Quick", detail: "3 sub-queries · 2 iterations" },
+  { value: "standard", label: "Standard", detail: "5 sub-queries · 3 iterations" },
+  { value: "deep", label: "Deep", detail: "7 sub-queries · 5 iterations" },
+];
+
+const depthLabel = (d: Depth) =>
+  DEPTH_OPTIONS.find((o) => o.value === d)?.label ?? "Standard";
 
 export function ResearchForm({
   initialQuestion = "",
@@ -19,6 +38,8 @@ export function ResearchForm({
   const [question, setQuestion] = useState(initialQuestion);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [depthOpen, setDepthOpen] = useState(false);
+  const { depth, setDepth } = useDepth();
 
   useEffect(() => {
     const focusOnHash = () => {
@@ -37,7 +58,7 @@ export function ResearchForm({
     setSubmitting(true);
     try {
       const trimmed = question.trim();
-      const { report_id } = await createResearch(trimmed);
+      const { report_id } = await createResearch(trimmed, { depth });
       addHistoryItem({
         reportId: report_id,
         question: trimmed,
@@ -80,16 +101,53 @@ export function ResearchForm({
         />
         <div className="flex items-center justify-between border-t border-white/[0.04] px-6 py-4">
           <div className="flex gap-4">
-            <button
-              type="button"
-              title="Reference — coming soon"
-              className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
-            >
-              <Paperclip className="h-3.5 w-3.5" strokeWidth={1.75} />
-              <span className="font-mono text-[10px] uppercase tracking-wider">
-                Reference
-              </span>
-            </button>
+            <Popover open={depthOpen} onOpenChange={setDepthOpen}>
+              <PopoverTrigger
+                className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
+                aria-label={`Depth: ${depthLabel(depth)}`}
+              >
+                <Layers className="h-3.5 w-3.5" strokeWidth={1.75} />
+                <span className="font-mono text-[10px] uppercase tracking-wider">
+                  Depth · {depthLabel(depth)}
+                </span>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-64 p-1.5">
+                <p className="text-muted-foreground/60 px-2 py-1 font-mono text-[10px] uppercase tracking-wider">
+                  Research depth
+                </p>
+                {DEPTH_OPTIONS.map((opt) => {
+                  const active = opt.value === depth;
+                  return (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => {
+                        setDepth(opt.value);
+                        setDepthOpen(false);
+                      }}
+                      className={
+                        active
+                          ? "bg-accent text-foreground flex w-full items-center justify-between rounded px-2 py-1.5 text-left"
+                          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground flex w-full items-center justify-between rounded px-2 py-1.5 text-left transition-colors"
+                      }
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">{opt.label}</span>
+                        <span className="text-muted-foreground/70 font-mono text-[10px] tracking-tight">
+                          {opt.detail}
+                        </span>
+                      </div>
+                      {active ? (
+                        <Check
+                          className="text-primary h-3.5 w-3.5"
+                          strokeWidth={2.5}
+                        />
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </PopoverContent>
+            </Popover>
             <button
               type="button"
               title="Browse web — coming soon"
