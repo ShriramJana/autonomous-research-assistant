@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Download } from "lucide-react";
+import { Check, Copy, Download, Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { PlanTree } from "@/components/plan-tree";
@@ -11,6 +11,7 @@ import { StatusPill } from "@/components/status-pill";
 import { SourcesList } from "@/components/sources-list";
 import { useResearchStream } from "@/hooks/use-research-stream";
 import { updateHistoryItem } from "@/lib/history";
+import { composeReportMarkdown } from "@/lib/report";
 import type { Source } from "@/lib/types";
 
 type Tab = "plan" | "report" | "sources";
@@ -21,9 +22,12 @@ const TABS: Array<{ value: Tab; label: string }> = [
   { value: "sources", label: "Sources" },
 ];
 
+type Flash = "copy" | "share" | null;
+
 export function ResearchLive({ reportId }: { reportId: string }) {
   const state = useResearchStream(reportId);
   const [mobileTab, setMobileTab] = useState<Tab>("report");
+  const [flash, setFlash] = useState<Flash>(null);
 
   const originalQuestion =
     state.plan?.original_question ?? state.report?.original_question ?? null;
@@ -59,6 +63,41 @@ export function ResearchLive({ reportId }: { reportId: string }) {
 
   const isComplete = state.status === "complete" && state.report !== null;
 
+  const flashFor = (kind: Exclude<Flash, null>) => {
+    setFlash(kind);
+    window.setTimeout(() => setFlash((prev) => (prev === kind ? null : prev)), 1800);
+  };
+
+  const onCopy = async () => {
+    if (!state.report) return;
+    try {
+      await navigator.clipboard.writeText(composeReportMarkdown(state.report));
+      flashFor("copy");
+    } catch {
+      /* clipboard API blocked — swallow silently */
+    }
+  };
+
+  const onShare = async () => {
+    const url =
+      typeof window !== "undefined" ? window.location.href : `/r/${reportId}`;
+    const title = originalQuestion ?? "ARA report";
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await navigator.share({ title, url });
+        return;
+      } catch {
+        /* user cancelled or share failed — fall through to clipboard */
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      flashFor("share");
+    } catch {
+      /* clipboard API blocked — swallow silently */
+    }
+  };
+
   const planPanel = (
     <PlanTree
       originalQuestion={originalQuestion}
@@ -77,6 +116,16 @@ export function ResearchLive({ reportId }: { reportId: string }) {
         (state.status === "researching" && state.streamedMarkdown.length === 0)
       }
       questionForPrint={originalQuestion}
+      title={originalQuestion}
+      stats={
+        isComplete && state.report
+          ? {
+              subQueries: state.plan?.sub_queries.length ?? state.agents.length,
+              sources: state.report.citations.length,
+              cumulativeUsd: state.cumulativeCostUsd,
+            }
+          : undefined
+      }
     />
   );
   const sourcesPanel = (
@@ -104,16 +153,52 @@ export function ResearchLive({ reportId }: { reportId: string }) {
         </div>
         <div className="flex items-center gap-2">
           {isComplete ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => window.print()}
-              aria-label="Save report as PDF via your browser's print dialog"
-              className="font-mono text-xs uppercase tracking-wider"
-            >
-              <Download className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.75} />
-              Download PDF
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void onCopy()}
+                aria-label="Copy the report markdown to the clipboard"
+                className="text-muted-foreground hover:text-foreground font-mono text-xs uppercase tracking-wider"
+              >
+                {flash === "copy" ? (
+                  <Check
+                    className="mr-1.5 h-3.5 w-3.5 text-primary"
+                    strokeWidth={2}
+                  />
+                ) : (
+                  <Copy className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.75} />
+                )}
+                {flash === "copy" ? "Copied" : "Copy"}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void onShare()}
+                aria-label="Share the report link"
+                className="text-muted-foreground hover:text-foreground font-mono text-xs uppercase tracking-wider"
+              >
+                {flash === "share" ? (
+                  <Check
+                    className="mr-1.5 h-3.5 w-3.5 text-primary"
+                    strokeWidth={2}
+                  />
+                ) : (
+                  <Share2 className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.75} />
+                )}
+                {flash === "share" ? "Link copied" : "Share"}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.print()}
+                aria-label="Save report as PDF via your browser's print dialog"
+                className="font-mono text-xs uppercase tracking-wider"
+              >
+                <Download className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.75} />
+                PDF
+              </Button>
+            </>
           ) : null}
         </div>
       </header>

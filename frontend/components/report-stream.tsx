@@ -6,9 +6,16 @@ import remarkGfm from "remark-gfm";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Citation } from "@/components/citation";
+import { composeReportMarkdown } from "@/lib/report";
 import type { FinalReport, Source } from "@/lib/types";
 
 const CITE_RE = /\[(\d+)\]/g;
+
+export interface ReportStats {
+  subQueries: number;
+  sources: number;
+  cumulativeUsd: number;
+}
 
 export function ReportStream({
   streamedMarkdown,
@@ -16,15 +23,20 @@ export function ReportStream({
   isSynthesizing,
   isPending,
   questionForPrint,
+  title,
+  stats,
 }: {
   streamedMarkdown: string;
   report: FinalReport | null;
   isSynthesizing: boolean;
   isPending: boolean;
   questionForPrint?: string | null;
+  title?: string | null;
+  stats?: ReportStats;
 }) {
   const citations: Source[] = useMemo(() => report?.citations ?? [], [report]);
-  const markdown = report ? composeFinalMarkdown(report) : streamedMarkdown;
+  const markdown = report ? composeReportMarkdown(report) : streamedMarkdown;
+  const showCompletedHeader = report !== null && title;
 
   return (
     <div className="bg-card flex h-full flex-col overflow-hidden rounded-lg print:block print:h-auto print:overflow-visible print:border-0 print:bg-transparent print:shadow-none">
@@ -35,6 +47,39 @@ export function ReportStream({
               Research question
             </p>
             <h1 className="text-xl font-semibold">{questionForPrint}</h1>
+          </div>
+        ) : null}
+
+        {showCompletedHeader ? (
+          <div className="mb-8 flex max-w-2xl flex-col gap-3 print:hidden">
+            <p className="text-primary font-mono text-[10px] uppercase tracking-[0.2em]">
+              Report output · stable
+            </p>
+            <h1 className="text-foreground text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+              {title}
+            </h1>
+            {stats ? (
+              <div className="text-muted-foreground/70 flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-widest">
+                <span>
+                  <span className="text-foreground">
+                    {String(stats.subQueries).padStart(2, "0")}
+                  </span>{" "}
+                  sub-queries
+                </span>
+                <span>
+                  <span className="text-foreground">
+                    {String(stats.sources).padStart(2, "0")}
+                  </span>{" "}
+                  sources
+                </span>
+                <span>
+                  <span className="text-foreground">
+                    ${stats.cumulativeUsd.toFixed(4)}
+                  </span>{" "}
+                  cost
+                </span>
+              </div>
+            ) : null}
           </div>
         ) : null}
 
@@ -68,15 +113,6 @@ export function ReportStream({
       </div>
     </div>
   );
-}
-
-function composeFinalMarkdown(report: FinalReport): string {
-  const parts: string[] = [];
-  parts.push(`# Executive Summary\n\n${report.executive_summary}\n`);
-  for (const sec of report.sections) {
-    parts.push(`# ${sec.heading}\n\n${sec.content}\n`);
-  }
-  return parts.join("\n");
 }
 
 function renderWithCitations(
