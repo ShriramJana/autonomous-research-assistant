@@ -58,6 +58,9 @@ def build_graph(
         except PlannerError as exc:
             await emit(ErrorEvent(stage="plan", message=str(exc)))
             raise
+        plan = plan.model_copy(
+            update={"web_search_enabled": opts.web_search_enabled}
+        )
         await emit(PlanReady(plan=plan))
         return {"plan": plan}
 
@@ -74,6 +77,7 @@ def build_graph(
                     emit=emit,
                     max_iterations=opts.max_iterations,
                     input_token_budget=settings.ara_researcher_input_token_budget,
+                    web_search_enabled=opts.web_search_enabled,
                 )
             except ResearcherError as exc:
                 await emit(
@@ -104,6 +108,9 @@ def build_graph(
         except SynthesizerError as exc:
             await emit(ErrorEvent(stage="synthesis", message=str(exc)))
             raise
+        report = report.model_copy(
+            update={"web_search_enabled": opts.web_search_enabled}
+        )
         await emit(ReportComplete(report=report))
         return {"report": report}
 

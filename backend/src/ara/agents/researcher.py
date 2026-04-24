@@ -45,6 +45,29 @@ Critical constraints:
 - You MUST end by calling submit_finding. Plain-text-only replies are a failure.
 """
 
+RESEARCHER_OFFLINE_SYSTEM_PROMPT = """\
+You are the Researcher stage of an autonomous research assistant.
+
+Web search is DISABLED for this run. Answer the sub-query using only your \
+training knowledge and submit a structured finding via the submit_finding tool.
+
+Workflow:
+1. Consider the sub-query carefully using your existing knowledge.
+2. Synthesize 3-8 key facts that directly answer the sub-query.
+3. Cite canonical sources you are confident exist (e.g. the homepage of a \
+   well-known site, a canonical paper or spec). Do NOT invent specific URLs, \
+   blog posts, or papers that might not exist.
+4. Call submit_finding with your summary, key_facts, and sources.
+
+Critical constraints:
+- Acknowledge uncertainty in the summary when your knowledge may be stale.
+- Every key_fact must cite at least one URL from your sources list.
+- If you cannot think of a confident canonical source, use the root homepage \
+  of an authoritative publisher (arxiv.org, ietf.org, who.int, etc.) rather \
+  than guessing a deep link.
+- You MUST end by calling submit_finding. Plain-text-only replies are a failure.
+"""
+
 SUBMIT_FINDING_TOOL: ToolSpec = {
     "name": SUBMIT_FINDING_TOOL_NAME,
     "description": "Submit the structured finding for this sub-query.",
@@ -101,6 +124,7 @@ async def research_sub_query(
     max_iterations: int = 5,
     input_token_budget: int = 100_000,
     max_tokens: int = 8192,
+    web_search_enabled: bool = True,
 ) -> SubQueryFinding:
     """Research one sub-query end-to-end.
 
@@ -108,17 +132,31 @@ async def research_sub_query(
     `ResearcherProgress` per server-side web_search. Returns a
     `SubQueryFinding` on success; raises `ResearcherError` on failure so
     the orchestrator can build a degraded finding + `ErrorEvent`.
+
+    When `web_search_enabled=False`, the web_search tool is omitted and
+    the researcher answers from training-knowledge only. Findings from
+    offline runs should be read with that caveat — the UI surfaces a
+    "web search disabled" chip so users know.
     """
     await emit(ResearcherStarted(sub_query_id=sub_query.id, question=sub_query.question))
+
+    tools: list[ToolSpec]
+    system: str
+    if web_search_enabled:
+        tools = [
+            LLMClient.web_search_tool_spec(max_uses=max_iterations),
+            SUBMIT_FINDING_TOOL,
+        ]
+        system = RESEARCHER_SYSTEM_PROMPT
+    else:
+        tools = [SUBMIT_FINDING_TOOL]
+        system = RESEARCHER_OFFLINE_SYSTEM_PROMPT
 
     response = await llm.complete_with_tools(
         model=model,
         messages=[{"role": "user", "content": sub_query.question}],
-        tools=[
-            LLMClient.web_search_tool_spec(max_uses=max_iterations),
-            SUBMIT_FINDING_TOOL,
-        ],
-        system=RESEARCHER_SYSTEM_PROMPT,
+        tools=tools,
+        system=system,
         max_tokens=max_tokens,
     )
 

@@ -13,7 +13,12 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from ara.agents import ResearcherError
-from ara.agents.researcher import SUBMIT_FINDING_TOOL_NAME, research_sub_query
+from ara.agents.researcher import (
+    RESEARCHER_OFFLINE_SYSTEM_PROMPT,
+    SUBMIT_FINDING_TOOL_NAME,
+    research_sub_query,
+)
+from ara.llm.client import WEB_SEARCH_TOOL_TYPE
 from ara.models.events import ResearcherProgress, ResearcherStarted, ResearchEvent
 from ara.models.research import Priority, SubQuery, SubQueryFinding
 from tests.conftest import make_usage
@@ -216,6 +221,66 @@ async def test_researcher_maps_multi_source_citations_to_uuids() -> None:
     by_url = {str(s.url).rstrip("/"): s.id for s in finding.sources}
     expected = [by_url["https://a.com"], by_url["https://b.com"]]
     assert finding.key_facts[0].citation_ids == expected
+
+
+async def test_researcher_includes_web_search_tool_by_default() -> None:
+    """When web_search is enabled (default), the tools list carries web_search."""
+    sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
+    response = _make_response(
+        [
+            _tool_use(
+                SUBMIT_FINDING_TOOL_NAME,
+                {
+                    "summary": "s",
+                    "key_facts": [{"statement": "x", "source_urls": ["https://a.com"]}],
+                    "sources": [{"url": "https://a.com", "title": "A"}],
+                },
+            ),
+        ]
+    )
+    llm = MagicMock()
+    llm.complete_with_tools = AsyncMock(return_value=response)
+    emit, _ = _make_emit()
+
+    await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit)
+
+    kwargs = llm.complete_with_tools.await_args.kwargs
+    tool_types = {t.get("type") for t in kwargs["tools"] if isinstance(t, dict)}
+    tool_names = {t.get("name") for t in kwargs["tools"] if isinstance(t, dict)}
+    assert WEB_SEARCH_TOOL_TYPE in tool_types
+    assert SUBMIT_FINDING_TOOL_NAME in tool_names
+
+
+async def test_researcher_omits_web_search_when_disabled() -> None:
+    """With web_search disabled, the tool list is submit_finding only and the
+    offline system prompt is used."""
+    sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
+    response = _make_response(
+        [
+            _tool_use(
+                SUBMIT_FINDING_TOOL_NAME,
+                {
+                    "summary": "offline answer.",
+                    "key_facts": [
+                        {"statement": "claim.", "source_urls": ["https://arxiv.org"]}
+                    ],
+                    "sources": [{"url": "https://arxiv.org", "title": "arxiv"}],
+                },
+            ),
+        ]
+    )
+    llm = MagicMock()
+    llm.complete_with_tools = AsyncMock(return_value=response)
+    emit, _ = _make_emit()
+
+    await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, web_search_enabled=False
+    )
+
+    kwargs = llm.complete_with_tools.await_args.kwargs
+    tool_types = {t.get("type") for t in kwargs["tools"] if isinstance(t, dict)}
+    assert WEB_SEARCH_TOOL_TYPE not in tool_types
+    assert kwargs["system"] == RESEARCHER_OFFLINE_SYSTEM_PROMPT
 
 
 async def test_researcher_skips_unknown_cited_urls() -> None:
