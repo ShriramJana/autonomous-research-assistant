@@ -13,6 +13,7 @@ export interface SubQuery {
 export interface ResearchPlan {
   original_question: string;
   sub_queries: SubQuery[];
+  web_search_enabled?: boolean;
 }
 
 export interface Source {
@@ -45,4 +46,5 @@ export interface FinalReport {
   executive_summary: string;
   sections: ReportSection[];
   citations: Source[];
+  web_search_enabled?: boolean;
 }

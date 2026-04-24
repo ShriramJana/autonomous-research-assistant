@@ -79,6 +79,10 @@ export function ResearchLive({ reportId }: { reportId: string }) {
             originalQuestion={originalQuestion}
             agents={state.agents}
             isPlanning={state.status === "planning"}
+            webSearchEnabled={
+              state.plan?.web_search_enabled ??
+              state.report?.web_search_enabled
+            }
           />
         </aside>
         <section className="flex flex-col overflow-hidden print:overflow-visible">
