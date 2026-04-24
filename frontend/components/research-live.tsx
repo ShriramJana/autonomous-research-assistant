@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Download } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { PlanTree } from "@/components/plan-tree";
@@ -12,14 +13,21 @@ import { useResearchStream } from "@/hooks/use-research-stream";
 import { updateHistoryItem } from "@/lib/history";
 import type { Source } from "@/lib/types";
 
+type Tab = "plan" | "report" | "sources";
+
+const TABS: Array<{ value: Tab; label: string }> = [
+  { value: "plan", label: "Plan" },
+  { value: "report", label: "Report" },
+  { value: "sources", label: "Sources" },
+];
+
 export function ResearchLive({ reportId }: { reportId: string }) {
   const state = useResearchStream(reportId);
+  const [mobileTab, setMobileTab] = useState<Tab>("report");
+
   const originalQuestion =
     state.plan?.original_question ?? state.report?.original_question ?? null;
 
-  // Sources visible under the report: prefer the deduped master list
-  // from the final report; while still researching, show a running
-  // URL-deduped union of whatever findings have arrived.
   const citations: Source[] = useMemo(() => {
     if (state.report) return state.report.citations;
     const seen = new Set<string>();
@@ -35,7 +43,9 @@ export function ResearchLive({ reportId }: { reportId: string }) {
     return out;
   }, [state.report, state.agents]);
 
-  // Mirror the stream state into the localStorage history entry.
+  const webSearchEnabled =
+    state.plan?.web_search_enabled ?? state.report?.web_search_enabled;
+
   useEffect(() => {
     if (state.status === "complete" && state.report) {
       updateHistoryItem(reportId, {
@@ -49,11 +59,48 @@ export function ResearchLive({ reportId }: { reportId: string }) {
 
   const isComplete = state.status === "complete" && state.report !== null;
 
+  const planPanel = (
+    <PlanTree
+      originalQuestion={originalQuestion}
+      agents={state.agents}
+      isPlanning={state.status === "planning"}
+      webSearchEnabled={webSearchEnabled}
+    />
+  );
+  const reportPanel = (
+    <ReportStream
+      streamedMarkdown={state.streamedMarkdown}
+      report={state.report}
+      isSynthesizing={state.status === "synthesizing"}
+      isPending={
+        state.status === "planning" ||
+        (state.status === "researching" && state.streamedMarkdown.length === 0)
+      }
+      questionForPrint={originalQuestion}
+    />
+  );
+  const sourcesPanel = (
+    <div className="flex h-full flex-col gap-4 overflow-hidden">
+      <div className="bg-card flex-1 overflow-y-auto rounded-lg p-5">
+        <SourcesList citations={citations} />
+      </div>
+      <CostMeter
+        cumulativeUsd={state.cumulativeCostUsd}
+        costByModel={state.costByModel}
+      />
+    </div>
+  );
+
   return (
-    <div className="bg-background flex flex-1 flex-col print:block print:h-auto">
-      <header className="flex items-center justify-between gap-4 border-b px-6 py-3 print:hidden">
-        <div className="flex items-center gap-3">
+    <div className="bg-background flex flex-1 flex-col overflow-hidden print:block print:h-auto print:overflow-visible">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.06] px-6 py-3 print:hidden">
+        <div className="flex min-w-0 items-center gap-3">
           <StatusPill status={state.status} />
+          {originalQuestion ? (
+            <p className="text-muted-foreground line-clamp-1 min-w-0 truncate text-sm">
+              {originalQuestion}
+            </p>
+          ) : null}
         </div>
         <div className="flex items-center gap-2">
           {isComplete ? (
@@ -62,43 +109,48 @@ export function ResearchLive({ reportId }: { reportId: string }) {
               size="sm"
               onClick={() => window.print()}
               aria-label="Save report as PDF via your browser's print dialog"
+              className="font-mono text-xs uppercase tracking-wider"
             >
+              <Download className="mr-1.5 h-3.5 w-3.5" strokeWidth={1.75} />
               Download PDF
             </Button>
           ) : null}
-          <CostMeter
-            cumulativeUsd={state.cumulativeCostUsd}
-            costByModel={state.costByModel}
-          />
         </div>
       </header>
 
-      <main className="grid flex-1 grid-cols-1 gap-4 overflow-hidden p-4 md:grid-cols-[minmax(320px,420px)_1fr] print:grid-cols-1 print:gap-0 print:overflow-visible print:p-0">
-        <aside className="overflow-hidden print:hidden">
-          <PlanTree
-            originalQuestion={originalQuestion}
-            agents={state.agents}
-            isPlanning={state.status === "planning"}
-            webSearchEnabled={
-              state.plan?.web_search_enabled ??
-              state.report?.web_search_enabled
-            }
-          />
-        </aside>
-        <section className="flex flex-col overflow-hidden print:overflow-visible">
-          <ReportStream
-            streamedMarkdown={state.streamedMarkdown}
-            report={state.report}
-            isSynthesizing={state.status === "synthesizing"}
-            isPending={
-              state.status === "planning" ||
-              (state.status === "researching" && state.streamedMarkdown.length === 0)
-            }
-            footer={<SourcesList citations={citations} />}
-            questionForPrint={originalQuestion}
-          />
-        </section>
+      <div className="flex items-center gap-1 border-b border-white/[0.06] px-4 py-2 lg:hidden print:hidden">
+        {TABS.map((tab) => {
+          const active = mobileTab === tab.value;
+          return (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => setMobileTab(tab.value)}
+              className={
+                active
+                  ? "text-primary border-primary border-b-2 px-3 py-1.5 font-mono text-xs uppercase tracking-wider"
+                  : "text-muted-foreground hover:text-foreground border-b-2 border-transparent px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors"
+              }
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <main className="hidden flex-1 gap-4 overflow-hidden p-4 lg:grid lg:grid-cols-[minmax(280px,320px)_1fr_minmax(300px,360px)] print:hidden">
+        <aside className="overflow-hidden">{planPanel}</aside>
+        <section className="flex flex-col overflow-hidden">{reportPanel}</section>
+        <aside className="overflow-hidden">{sourcesPanel}</aside>
       </main>
+
+      <main className="flex flex-1 flex-col overflow-hidden p-4 lg:hidden print:hidden">
+        {mobileTab === "plan" ? planPanel : null}
+        {mobileTab === "report" ? reportPanel : null}
+        {mobileTab === "sources" ? sourcesPanel : null}
+      </main>
+
+      <section className="hidden print:block">{reportPanel}</section>
 
       {state.status === "error" && state.errorMessage ? (
         <footer className="border-destructive/40 bg-destructive/5 text-destructive border-t px-6 py-3 text-sm print:hidden">
