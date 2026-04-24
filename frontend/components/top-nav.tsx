@@ -11,9 +11,17 @@ import {
 } from "@/components/ui/popover";
 
 const NAV_LINKS = [
-  { href: "/", label: "Dashboard" },
-  { href: "/#history", label: "History" },
-  { href: "/#settings", label: "Settings" },
+  { href: "/", label: "Dashboard", match: (p: string) => p === "/" },
+  {
+    href: "/#history",
+    label: "History",
+    match: () => false,
+  },
+  {
+    href: "/settings",
+    label: "Settings",
+    match: (p: string) => p === "/settings",
+  },
 ] as const;
 
 export function TopNav() {
@@ -43,7 +51,7 @@ export function TopNav() {
         </Link>
         <nav className="hidden gap-6 md:flex">
           {NAV_LINKS.map((link) => {
-            const active = link.href === "/" ? isDashboard : false;
+            const active = link.match(pathname);
             return (
               <Link
                 key={link.href}

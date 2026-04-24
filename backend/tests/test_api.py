@@ -82,6 +82,30 @@ async def test_post_research_rejects_empty_question() -> None:
     assert resp.status_code == 422
 
 
+async def test_get_config_returns_sanitized_settings() -> None:
+    async with await _async_client() as client:
+        resp = await client.get("/api/config")
+    assert resp.status_code == 200
+    body = resp.json()
+
+    # Models — must mirror Settings defaults.
+    assert set(body["models"].keys()) == {"planner", "researcher", "synthesizer"}
+    assert isinstance(body["models"]["planner"], str)
+    assert body["models"]["planner"]  # non-empty
+
+    # Depth presets — must match the three locked levels.
+    presets = body["depth_presets"]
+    assert set(presets.keys()) == {"quick", "standard", "deep"}
+    assert presets["quick"] == {"max_sub_queries": 3, "max_iterations": 2}
+    assert presets["standard"] == {"max_sub_queries": 5, "max_iterations": 3}
+    assert presets["deep"] == {"max_sub_queries": 7, "max_iterations": 5}
+
+    # Sensitive and infra fields must NOT leak through.
+    forbidden = {"anthropic_api_key", "ara_host", "ara_port", "ara_cors_origins"}
+    flat_body = set(body.keys()) | set(body["models"].keys())
+    assert flat_body.isdisjoint(forbidden)
+
+
 async def test_post_research_returns_report_id() -> None:
     fake_plan, fake_research, fake_synth = _fakes()
     with (
