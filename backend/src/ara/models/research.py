@@ -31,6 +31,7 @@ class SubQuery(BaseModel):
 class ResearchPlan(BaseModel):
     original_question: str = Field(min_length=1)
     sub_queries: list[SubQuery] = Field(min_length=3, max_length=7)
+    web_search_enabled: bool = True
 
 
 class Source(BaseModel):
@@ -73,3 +74,4 @@ class FinalReport(BaseModel):
     executive_summary: str = Field(min_length=1)
     sections: list[ReportSection] = Field(min_length=1)
     citations: list[Source] = Field(default_factory=list)
+    web_search_enabled: bool = True
