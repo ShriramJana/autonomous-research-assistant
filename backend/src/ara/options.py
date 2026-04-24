@@ -33,3 +33,19 @@ _DEPTH_PRESETS: dict[Depth, ResearchOptions] = {
 
 def options_for_depth(depth: Depth, *, web_search_enabled: bool = True) -> ResearchOptions:
     return replace(_DEPTH_PRESETS[depth], web_search_enabled=web_search_enabled)
+
+
+def depth_presets() -> dict[Depth, dict[str, int]]:
+    """Serializable snapshot of the depth presets.
+
+    Exposed so GET /api/config can echo the same (max_sub_queries,
+    max_iterations) values the frontend form already hard-codes, without
+    leaking the internal dataclass shape.
+    """
+    return {
+        d: {
+            "max_sub_queries": opts.max_sub_queries,
+            "max_iterations": opts.max_iterations,
+        }
+        for d, opts in _DEPTH_PRESETS.items()
+    }
