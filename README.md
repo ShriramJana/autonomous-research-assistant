@@ -16,6 +16,13 @@ Flagship portfolio project for [LLMTechno](https://llmtechno.com).
 See [ARCHITECTURE.md](./ARCHITECTURE.md) for the DAG, streaming protocol, and
 v2 extension points.
 
+## First-time DB setup
+
+1. Create a Supabase project (see [docs/superpowers/specs/2026-05-01-auth-and-history-design.md](docs/superpowers/specs/2026-05-01-auth-and-history-design.md) "Pre-flight" section)
+2. Paste `backend/migrations/001_initial.sql` into the Supabase SQL editor and Run
+3. Copy the values from your Supabase dashboard into `.env` (see `.env.example`)
+4. Sign in once via the running frontend, then copy your `auth.users.id` (from Supabase Dashboard → Authentication → Users) into `ADMIN_USER_ID` in `.env`
+
 ## Quickstart
 
 ```bash
