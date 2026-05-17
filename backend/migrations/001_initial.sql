@@ -1,5 +1,6 @@
 -- ARA auth + history schema. Apply via Supabase SQL editor or psql.
--- This file is idempotent for tables/indexes (IF NOT EXISTS); RLS policies are not.
+-- Fully idempotent: tables/indexes use IF NOT EXISTS; RLS policies use
+-- DROP POLICY IF EXISTS before re-creation.
 
 -- ============================================================================
 -- 1. user_profiles  — app-level user data, 1:1 with auth.users
@@ -12,7 +13,10 @@ create table if not exists user_profiles (
 
 -- ============================================================================
 -- 2. reports  — the main entity. owner_id + is_sample + share_token define
---    the three access paths enforced in Python.
+--    the three access paths, ALL enforced in Python (the backend uses the
+--    service-role key, which bypasses RLS). The RLS policies below cover
+--    only owner + is_sample as defense-in-depth for any future anon-key
+--    access — share_token reads are intentionally not gated by RLS.
 -- ============================================================================
 create table if not exists reports (
   id              uuid primary key default gen_random_uuid(),
