@@ -30,7 +30,7 @@ def verify_jwt(token: str, settings: Settings) -> User:
     if not settings.supabase_jwt_secret:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Server misconfigured: SUPABASE_JWT_SECRET not set",
+            detail="Authentication service unavailable",
         )
     try:
         payload = pyjwt.decode(
@@ -38,19 +38,15 @@ def verify_jwt(token: str, settings: Settings) -> User:
             settings.supabase_jwt_secret,
             algorithms=["HS256"],
             audience="authenticated",
+            options={"require": ["exp", "sub", "email"]},
         )
     except pyjwt.PyJWTError as exc:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail=f"Invalid token: {exc}"
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token"
         ) from exc
 
-    sub = payload.get("sub")
-    email = payload.get("email")
-    if not sub or not email:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token missing required claims (sub, email)",
-        )
+    sub = payload["sub"]
+    email = payload["email"]
     try:
         user_id = UUID(sub)
     except (ValueError, TypeError) as exc:

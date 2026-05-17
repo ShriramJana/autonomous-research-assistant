@@ -47,8 +47,10 @@ def get_optional_user(
         return None
     try:
         return verify_jwt(token, settings)
-    except HTTPException:
-        return None
+    except HTTPException as exc:
+        if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+            return None
+        raise
 
 
 def require_admin(
