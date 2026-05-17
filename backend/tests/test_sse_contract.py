@@ -33,7 +33,9 @@ from ara.models.research import (
     SubQuery,
     SubQueryFinding,
 )
+from ara.options import options_for_depth
 from ara.runtime.orchestrator import run_report
+from ara.runtime.overrides import RuntimeOverrides
 from ara.storage.memory import InMemoryReportStore
 
 
@@ -81,6 +83,14 @@ async def _run_canned_pipeline() -> list[Any]:
             citations=[src],
         )
 
+    settings = _settings()
+    overrides = RuntimeOverrides(
+        api_key=settings.anthropic_api_key,
+        planner_model=settings.claude_planner_model,
+        researcher_model=settings.claude_researcher_model,
+        synthesizer_model=settings.claude_synthesizer_model,
+        options=options_for_depth("standard"),
+    )
     with (
         patch("ara.graph.dag.plan_research", fake_plan),
         patch("ara.graph.dag.research_sub_query", fake_research),
@@ -90,7 +100,9 @@ async def _run_canned_pipeline() -> list[Any]:
             report_id=report_id,
             question="top",
             store=store,
-            settings=_settings(),
+            settings=settings,
+            overrides=overrides,
+            owner_id=uuid4(),
         )
 
     return [e async for e in store.subscribe(report_id)]
