@@ -10,6 +10,7 @@ documented in ARCHITECTURE.md.
 from __future__ import annotations
 
 import asyncio
+from dataclasses import dataclass
 from typing import Any
 
 from langgraph.graph import END, START, StateGraph
@@ -31,19 +32,24 @@ from ara.models.research import SubQuery, SubQueryFinding
 from ara.options import ResearchOptions, options_for_depth
 
 
+@dataclass(frozen=True)
+class GraphModels:
+    planner: str
+    researcher: str
+    synthesizer: str
+
+
 def build_graph(
     *,
     llm: LLMClient,
     emit: EventEmitter,
     settings: Settings,
+    models: GraphModels,
     options: ResearchOptions | None = None,
 ) -> Any:
-    """Return a compiled LangGraph bound to `llm`, `emit`, `settings`, and
-    per-run `options`.
-
-    A fresh graph per report run. LangGraph compilation is cheap.
-    `options` defaults to the standard depth preset so existing callers
-    that omit it keep their previous behaviour.
+    """Return a compiled LangGraph bound to `llm`, `emit`, the per-run
+    `models`, and per-run `options`. Settings is still consulted for
+    engineering internals (researcher token budget).
     """
     opts = options if options is not None else options_for_depth("standard")
 
@@ -52,15 +58,13 @@ def build_graph(
             plan = await plan_research(
                 question=state["question"],
                 llm=llm,
-                model=settings.claude_planner_model,
+                model=models.planner,
                 max_sub_queries=opts.max_sub_queries,
             )
         except PlannerError as exc:
             await emit(ErrorEvent(stage="plan", message=str(exc)))
             raise
-        plan = plan.model_copy(
-            update={"web_search_enabled": opts.web_search_enabled}
-        )
+        plan = plan.model_copy(update={"web_search_enabled": opts.web_search_enabled})
         await emit(PlanReady(plan=plan))
         return {"plan": plan}
 
@@ -73,7 +77,7 @@ def build_graph(
                 finding = await research_sub_query(
                     sub_query=sq,
                     llm=llm,
-                    model=settings.claude_researcher_model,
+                    model=models.researcher,
                     emit=emit,
                     max_iterations=opts.max_iterations,
                     input_token_budget=settings.ara_researcher_input_token_budget,
@@ -102,15 +106,13 @@ def build_graph(
                 original_question=state["question"],
                 findings=state["findings"],
                 llm=llm,
-                model=settings.claude_synthesizer_model,
+                model=models.synthesizer,
                 emit=emit,
             )
         except SynthesizerError as exc:
             await emit(ErrorEvent(stage="synthesis", message=str(exc)))
             raise
-        report = report.model_copy(
-            update={"web_search_enabled": opts.web_search_enabled}
-        )
+        report = report.model_copy(update={"web_search_enabled": opts.web_search_enabled})
         await emit(ReportComplete(report=report))
         return {"report": report}
 

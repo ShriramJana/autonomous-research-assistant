@@ -14,6 +14,7 @@ from sse_starlette.sse import EventSourceResponse
 from ara.config import get_settings
 from ara.options import Depth, depth_presets, options_for_depth
 from ara.runtime.orchestrator import run_report
+from ara.runtime.overrides import RuntimeOverrides
 from ara.storage.base import ReportStore
 
 router = APIRouter(prefix="/api")
@@ -70,25 +71,22 @@ async def get_config() -> ConfigResponse:
 async def create_research(req: CreateResearchRequest, request: Request) -> CreateResearchResponse:
     """Start a new research run and return its id.
 
-    The report is registered synchronously before we return so any client
-    that immediately opens the SSE stream sees either events or the
-    buffered tail rather than a 'report not found' empty stream.
+    Owner_id is a placeholder until Task 8 wires real auth.
     """
     store: ReportStore = request.app.state.store
     tasks: set[asyncio.Task[None]] = request.app.state.tasks
     settings = get_settings()
     options = options_for_depth(req.depth, web_search_enabled=req.browse_web)
 
-    report_id = uuid4()
-    # Minimal compile-fix only; Task 5 threads the real owner through.
-    await store.create(
-        report_id,
-        req.question,
-        owner_id=uuid4(),
-        depth=req.depth,
-        browse_web=req.browse_web,
-        used_byok=False,
+    overrides = RuntimeOverrides(
+        api_key=settings.anthropic_api_key,
+        planner_model=settings.claude_planner_model,
+        researcher_model=settings.claude_researcher_model,
+        synthesizer_model=settings.claude_synthesizer_model,
+        options=options,
     )
+
+    report_id = uuid4()
 
     task = asyncio.create_task(
         run_report(
@@ -96,11 +94,10 @@ async def create_research(req: CreateResearchRequest, request: Request) -> Creat
             question=req.question,
             store=store,
             settings=settings,
-            options=options,
+            overrides=overrides,
+            owner_id=uuid4(),  # placeholder until Task 8 wires real auth
         )
     )
-    # Hold a reference so the task isn't GC'd before completion, then
-    # clean up once it finishes (success or failure).
     tasks.add(task)
     task.add_done_callback(tasks.discard)
 

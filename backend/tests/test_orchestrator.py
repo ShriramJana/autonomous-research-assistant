@@ -34,7 +34,9 @@ from ara.models.research import (
     SubQuery,
     SubQueryFinding,
 )
+from ara.options import options_for_depth
 from ara.runtime.orchestrator import run_report
+from ara.runtime.overrides import RuntimeOverrides
 from ara.storage.memory import InMemoryReportStore
 
 
@@ -65,10 +67,21 @@ def _settings() -> Settings:
     return Settings(anthropic_api_key="test-key")  # type: ignore[call-arg]
 
 
+def _overrides(settings: Settings, depth: str = "standard") -> RuntimeOverrides:
+    return RuntimeOverrides(
+        api_key=settings.anthropic_api_key,
+        planner_model=settings.claude_planner_model,
+        researcher_model=settings.claude_researcher_model,
+        synthesizer_model=settings.claude_synthesizer_model,
+        options=options_for_depth(depth),  # type: ignore[arg-type]
+    )
+
+
 async def test_pipeline_happy_path_emits_events_in_order() -> None:
     store = InMemoryReportStore()
     report_id = uuid4()
     plan = _plan_with_n(3)
+    settings = _settings()
 
     async def fake_plan(**kwargs: Any) -> ResearchPlan:
         return plan
@@ -98,7 +111,9 @@ async def test_pipeline_happy_path_emits_events_in_order() -> None:
             report_id=report_id,
             question="top",
             store=store,
-            settings=_settings(),
+            settings=settings,
+            overrides=_overrides(settings),
+            owner_id=uuid4(),
         )
 
     events = [e async for e in store.subscribe(report_id)]
@@ -130,6 +145,7 @@ async def test_pipeline_partial_researcher_failure_degrades_gracefully() -> None
     store = InMemoryReportStore()
     report_id = uuid4()
     plan = _plan_with_n(3)
+    settings = _settings()
 
     async def fake_plan(**kwargs: Any) -> ResearchPlan:
         return plan
@@ -165,7 +181,9 @@ async def test_pipeline_partial_researcher_failure_degrades_gracefully() -> None
             report_id=report_id,
             question="top",
             store=store,
-            settings=_settings(),
+            settings=settings,
+            overrides=_overrides(settings),
+            owner_id=uuid4(),
         )
 
     events = [e async for e in store.subscribe(report_id)]
@@ -191,6 +209,7 @@ async def test_pipeline_partial_researcher_failure_degrades_gracefully() -> None
 async def test_pipeline_terminal_planner_failure_emits_error_and_stops() -> None:
     store = InMemoryReportStore()
     report_id = uuid4()
+    settings = _settings()
 
     async def fake_plan(**kwargs: Any) -> ResearchPlan:
         raise PlannerError("fatal planner failure")
@@ -210,7 +229,9 @@ async def test_pipeline_terminal_planner_failure_emits_error_and_stops() -> None
             report_id=report_id,
             question="top",
             store=store,
-            settings=_settings(),
+            settings=settings,
+            overrides=_overrides(settings),
+            owner_id=uuid4(),
         )
 
     events = [e async for e in store.subscribe(report_id)]
@@ -219,3 +240,154 @@ async def test_pipeline_terminal_planner_failure_emits_error_and_stops() -> None
     assert errors[0].stage == "plan"
     assert "fatal planner failure" in errors[0].message
     assert not any(isinstance(e, ReportComplete) for e in events)
+
+
+class _RecordingLLM:
+    """Captures every model string the orchestrator dispatches to.
+
+    Raises on first call so we don't need a real Anthropic round-trip;
+    we just need to confirm the model the orchestrator picked.
+    """
+
+    def __init__(self) -> None:
+        self.models_seen: list[str] = []
+
+    async def complete_with_tools(self, *, model: str, **_: object) -> object:
+        self.models_seen.append(model)
+        raise RuntimeError("recording llm — not meant to actually run")
+
+
+@pytest.mark.asyncio
+async def test_overrides_replace_settings_models() -> None:
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    settings.anthropic_api_key = "from-settings"
+    settings.claude_planner_model = "from-settings-planner"
+    settings.claude_researcher_model = "from-settings-researcher"
+    settings.claude_synthesizer_model = "from-settings-synthesizer"
+
+    overrides = RuntimeOverrides(
+        api_key="from-overrides-key",
+        planner_model="haiku-from-overrides",
+        researcher_model="haiku-from-overrides",
+        synthesizer_model="haiku-from-overrides",
+        options=options_for_depth("quick", web_search_enabled=False),
+    )
+
+    store = InMemoryReportStore()
+    rid = uuid4()
+    owner = uuid4()
+
+    llm = _RecordingLLM()
+    await run_report(
+        report_id=rid,
+        question="anything",
+        store=store,
+        settings=settings,
+        overrides=overrides,
+        owner_id=owner,
+        llm=llm,  # type: ignore[arg-type]
+    )
+
+    assert llm.models_seen, "graph should have at least attempted one call"
+    assert all(
+        m == "haiku-from-overrides" for m in llm.models_seen
+    ), f"orchestrator must use overrides, not settings — saw {llm.models_seen}"
+
+
+@pytest.mark.asyncio
+async def test_orchestrator_persists_real_owner_depth_byok() -> None:
+    """Verify Task 4's placeholder uuid4()/depth='standard' is fully replaced."""
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    settings.anthropic_api_key = "server-free-tier-key"
+
+    overrides = RuntimeOverrides(
+        api_key="server-free-tier-key",  # same as settings → used_byok=False
+        planner_model="x",
+        researcher_model="x",
+        synthesizer_model="x",
+        options=options_for_depth("quick", web_search_enabled=False),
+    )
+
+    store = InMemoryReportStore()
+    rid = uuid4()
+    owner = uuid4()
+
+    llm = _RecordingLLM()
+    await run_report(
+        report_id=rid,
+        question="q",
+        store=store,
+        settings=settings,
+        overrides=overrides,
+        owner_id=owner,
+        llm=llm,  # type: ignore[arg-type]
+    )
+
+    state = store.get_state(rid)
+    assert state is not None
+    assert state.owner_id == owner
+    assert state.depth == "quick"
+    assert state.browse_web is False
+    assert state.used_byok is False
+
+
+@pytest.mark.asyncio
+async def test_orchestrator_marks_used_byok_when_key_differs() -> None:
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    settings.anthropic_api_key = "server-key"
+
+    overrides = RuntimeOverrides(
+        api_key="user-byok-key",
+        planner_model="x",
+        researcher_model="x",
+        synthesizer_model="x",
+        options=options_for_depth("deep", web_search_enabled=True),
+    )
+
+    store = InMemoryReportStore()
+    rid = uuid4()
+    llm = _RecordingLLM()
+    await run_report(
+        report_id=rid,
+        question="q",
+        store=store,
+        settings=settings,
+        overrides=overrides,
+        owner_id=uuid4(),
+        llm=llm,  # type: ignore[arg-type]
+    )
+
+    state = store.get_state(rid)
+    assert state is not None
+    assert state.used_byok is True
+    assert state.depth == "deep"
+    assert state.browse_web is True
+
+
+@pytest.mark.asyncio
+async def test_orchestrator_records_error_status_on_failure() -> None:
+    """When the graph raises a terminal error, close() must record status='error'."""
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    overrides = RuntimeOverrides(
+        api_key="k",
+        planner_model="x",
+        researcher_model="x",
+        synthesizer_model="x",
+        options=options_for_depth("quick", web_search_enabled=False),
+    )
+    store = InMemoryReportStore()
+    rid = uuid4()
+    llm = _RecordingLLM()  # will RuntimeError on first call
+    await run_report(
+        report_id=rid,
+        question="q",
+        store=store,
+        settings=settings,
+        overrides=overrides,
+        owner_id=uuid4(),
+        llm=llm,  # type: ignore[arg-type]
+    )
+    state = store.get_state(rid)
+    assert state is not None
+    assert state.status == "error"
+    assert state.error_message is not None
