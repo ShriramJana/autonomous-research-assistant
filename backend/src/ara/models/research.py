@@ -75,3 +75,6 @@ class FinalReport(BaseModel):
     sections: list[ReportSection] = Field(min_length=1)
     citations: list[Source] = Field(default_factory=list)
     web_search_enabled: bool = True
+
+
+ReportEnvelope = FinalReport

@@ -13,9 +13,12 @@ import asyncio
 from collections import deque
 from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
+from typing import Literal
 from uuid import UUID
 
 from ara.models.events import ResearchEvent
+from ara.models.research import ReportEnvelope
+from ara.options import Depth
 
 _DEFAULT_BUFFER_SIZE = 50
 
@@ -23,9 +26,17 @@ _DEFAULT_BUFFER_SIZE = 50
 @dataclass
 class _ReportState:
     question: str
+    owner_id: UUID
+    depth: Depth
+    browse_web: bool
+    used_byok: bool
     buffer: deque[ResearchEvent]
     live_queues: list[asyncio.Queue[ResearchEvent | None]] = field(default_factory=list)
     closed: bool = False
+    status: Literal["running", "completed", "error"] = "running"
+    cost_usd: float | None = None
+    report_payload: ReportEnvelope | None = None
+    error_message: str | None = None
 
 
 class InMemoryReportStore:
@@ -35,16 +46,24 @@ class InMemoryReportStore:
         self._buffer_size = buffer_size
         self._reports: dict[UUID, _ReportState] = {}
 
-    async def create(self, report_id: UUID, question: str) -> None:
-        """Idempotent: creating the same report twice is a no-op, not an overwrite.
-
-        This lets the API layer pre-create the report before spawning the
-        orchestrator task without racing the orchestrator's own create call.
-        """
+    async def create(
+        self,
+        report_id: UUID,
+        question: str,
+        *,
+        owner_id: UUID,
+        depth: Depth,
+        browse_web: bool,
+        used_byok: bool,
+    ) -> None:
         if report_id in self._reports:
             return
         self._reports[report_id] = _ReportState(
             question=question,
+            owner_id=owner_id,
+            depth=depth,
+            browse_web=browse_web,
+            used_byok=used_byok,
             buffer=deque(maxlen=self._buffer_size),
         )
 
@@ -60,11 +79,23 @@ class InMemoryReportStore:
         for q in list(state.live_queues):
             await q.put(event)
 
-    async def close(self, report_id: UUID) -> None:
+    async def close(
+        self,
+        report_id: UUID,
+        *,
+        status: Literal["completed", "error"],
+        cost_usd: float | None = None,
+        report_payload: ReportEnvelope | None = None,
+        error_message: str | None = None,
+    ) -> None:
         state = self._reports.get(report_id)
         if state is None or state.closed:
             return
         state.closed = True
+        state.status = status
+        state.cost_usd = cost_usd
+        state.report_payload = report_payload
+        state.error_message = error_message
         for q in list(state.live_queues):
             await q.put(None)
 
@@ -78,8 +109,6 @@ class InMemoryReportStore:
                 yield event
             return
 
-        # Register queue BEFORE snapshotting the buffer. Both ops are
-        # synchronous, so no put_event can interleave and cause duplication.
         queue: asyncio.Queue[ResearchEvent | None] = asyncio.Queue()
         state.live_queues.append(queue)
         buffered_snapshot = list(state.buffer)
@@ -95,3 +124,9 @@ class InMemoryReportStore:
         finally:
             if queue in state.live_queues:
                 state.live_queues.remove(queue)
+
+    # ---- Helpers used by tests (not part of the Protocol) ----
+
+    def get_state(self, report_id: UUID) -> _ReportState | None:
+        """Inspection hook for tests — not part of `ReportStore`."""
+        return self._reports.get(report_id)

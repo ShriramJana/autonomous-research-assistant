@@ -80,7 +80,15 @@ async def create_research(req: CreateResearchRequest, request: Request) -> Creat
     options = options_for_depth(req.depth, web_search_enabled=req.browse_web)
 
     report_id = uuid4()
-    await store.create(report_id, req.question)
+    # Minimal compile-fix only; Task 5 threads the real owner through.
+    await store.create(
+        report_id,
+        req.question,
+        owner_id=uuid4(),
+        depth=req.depth,
+        browse_web=req.browse_web,
+        used_byok=False,
+    )
 
     task = asyncio.create_task(
         run_report(
