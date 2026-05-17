@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    # Anthropic
+    # Anthropic — `anthropic_api_key` is the server-side free-tier key.
     anthropic_api_key: str = Field(default="")
     claude_planner_model: str = "claude-sonnet-4-5"
     claude_researcher_model: str = "claude-sonnet-4-5"
@@ -31,6 +31,16 @@ class Settings(BaseSettings):
 
     # Per-report SSE ring buffer (reconnect continuity)
     ara_event_buffer_size: int = 50
+
+    # Supabase (auth + persistence)
+    supabase_url: str = Field(default="")
+    supabase_jwt_secret: str = Field(default="")
+    supabase_db_url: str = Field(default="")
+    admin_user_id: str | None = Field(default=None)
+
+    # Free tier
+    free_tier_per_user_monthly: int = 3
+    free_tier_global_cap_usd: float = 20.0
 
     @property
     def cors_origins_list(self) -> list[str]:
