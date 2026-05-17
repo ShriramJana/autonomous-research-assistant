@@ -8,7 +8,7 @@ by the time they bubble up here, so we swallow them silently.
 
 from __future__ import annotations
 
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from ara.agents import PlannerError, SynthesizerError
 from ara.config import Settings
@@ -40,7 +40,15 @@ async def run_report(
     """
     if options is None:
         options = options_for_depth("standard")
-    await store.create(report_id, question)
+    # Minimal compile-fix only; Task 5 threads the real owner through.
+    await store.create(
+        report_id,
+        question,
+        owner_id=uuid4(),
+        depth="standard",
+        browse_web=options.web_search_enabled,
+        used_byok=False,
+    )
     cumulative_usd = 0.0
 
     async def emit(event: ResearchEvent) -> None:
@@ -69,4 +77,4 @@ async def run_report(
         # Stage-scoped ErrorEvent already emitted by the failing node.
         pass
     finally:
-        await store.close(report_id)
+        await store.close(report_id, status="completed")
