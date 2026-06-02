@@ -1,23 +1,39 @@
-"""HTTP routes: POST /api/research, GET /api/research/{report_id}/stream."""
+"""HTTP routes.
+
+Auth: all endpoints require a signed-in Supabase user EXCEPT:
+- GET  /api/config             (public)
+- GET  /api/gallery            (public — lists is_sample=true reports)
+- GET  /api/reports/{id}       (public when is_sample OR ?t=share_token)
+- GET  /api/research/{id}/stream  (same rule as GET /reports/{id})
+"""
 
 from __future__ import annotations
 
 import asyncio
 from collections.abc import AsyncIterator
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Request
+import asyncpg
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
-from ara.config import get_settings
+from ara.auth import User, get_current_user, get_optional_user, require_admin
+from ara.config import Settings, get_settings
 from ara.options import Depth, depth_presets, options_for_depth
+from ara.quota import QuotaDenial, check_free_tier
 from ara.runtime.orchestrator import run_report
 from ara.runtime.overrides import RuntimeOverrides
 from ara.storage.base import ReportStore
 
 router = APIRouter(prefix="/api")
+
+FREE_TIER_MODEL = "claude-haiku-4-5"
+
+
+# ---------- Request / response models ----------
 
 
 class CreateResearchRequest(BaseModel):
@@ -42,10 +58,111 @@ class DepthPresetConfig(BaseModel):
 
 
 class ConfigResponse(BaseModel):
-    """Sanitized view of runtime config. Excludes secrets and infra."""
-
     models: ModelsConfig
     depth_presets: dict[str, DepthPresetConfig]
+
+
+class MeResponse(BaseModel):
+    id: UUID
+    email: str
+
+
+class ReportSummary(BaseModel):
+    id: UUID
+    question: str
+    status: Literal["running", "completed", "error"]
+    depth: Depth
+    used_byok: bool
+    is_sample: bool
+    cost_usd: float | None
+    created_at: str
+    completed_at: str | None
+
+
+class ReportDetail(ReportSummary):
+    report_payload: dict[str, Any] | None
+    error_message: str | None
+    share_token: UUID | None
+
+
+class ShareResponse(BaseModel):
+    share_url_path: str
+    share_token: UUID
+
+
+class QuotaResponse(BaseModel):
+    used: int
+    limit: int
+    global_spend_usd: float
+    global_cap_usd: float
+    circuit_breaker_tripped: bool
+
+
+# ---------- Helpers ----------
+
+
+def _pool_or_503(request: Request) -> asyncpg.Pool:
+    pool = request.app.state.db_pool
+    if pool is None:
+        raise HTTPException(
+            status_code=503,
+            detail="Database not configured (set SUPABASE_DB_URL)",
+        )
+    return pool
+
+
+async def _fetch_report_row(pool: asyncpg.Pool, report_id: UUID) -> asyncpg.Record | None:
+    async with pool.acquire() as conn:
+        return await conn.fetchrow("select * from reports where id = $1", report_id)
+
+
+async def _require_report_access(
+    pool: asyncpg.Pool,
+    report_id: UUID,
+    user: User | None,
+    share_token: UUID | None,
+) -> asyncpg.Record:
+    """Three-path access check. Returns the row or raises 403/404."""
+    row = await _fetch_report_row(pool, report_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+    if user is not None and row["owner_id"] == user.id:
+        return row
+    if row["is_sample"]:
+        return row
+    if (
+        share_token is not None
+        and row["share_token"] is not None
+        and row["share_token"] == share_token
+    ):
+        return row
+    raise HTTPException(status_code=403, detail="Not authorized to view this report")
+
+
+def _row_to_summary(row: asyncpg.Record) -> ReportSummary:
+    return ReportSummary(
+        id=row["id"],
+        question=row["question"],
+        status=row["status"],
+        depth=row["depth"],
+        used_byok=row["used_byok"],
+        is_sample=row["is_sample"],
+        cost_usd=float(row["cost_usd"]) if row["cost_usd"] is not None else None,
+        created_at=row["created_at"].isoformat(),
+        completed_at=row["completed_at"].isoformat() if row["completed_at"] else None,
+    )
+
+
+def _row_to_detail(row: asyncpg.Record) -> ReportDetail:
+    return ReportDetail(
+        **_row_to_summary(row).model_dump(),
+        report_payload=row["report_payload"],
+        error_message=row["error_message"],
+        share_token=row["share_token"],
+    )
+
+
+# ---------- Public endpoints ----------
 
 
 @router.get("/config", response_model=ConfigResponse)
@@ -57,37 +174,212 @@ async def get_config() -> ConfigResponse:
             researcher=settings.claude_researcher_model,
             synthesizer=settings.claude_synthesizer_model,
         ),
-        depth_presets={
-            d: DepthPresetConfig(
-                max_sub_queries=p["max_sub_queries"],
-                max_iterations=p["max_iterations"],
-            )
-            for d, p in depth_presets().items()
-        },
+        depth_presets={d: DepthPresetConfig(**p) for d, p in depth_presets().items()},
     )
+
+
+@router.get("/gallery", response_model=list[ReportSummary])
+async def get_gallery(request: Request) -> list[ReportSummary]:
+    pool = _pool_or_503(request)
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "select * from reports where is_sample = true order by created_at desc"
+        )
+    return [_row_to_summary(r) for r in rows]
+
+
+# ---------- Authed: identity, quota ----------
+
+
+@router.get("/me", response_model=MeResponse)
+async def get_me(user: User = Depends(get_current_user)) -> MeResponse:
+    return MeResponse(id=user.id, email=user.email)
+
+
+@router.get("/quota", response_model=QuotaResponse)
+async def get_quota(
+    request: Request,
+    user: User = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+) -> QuotaResponse:
+    pool = _pool_or_503(request)
+    status_ = await check_free_tier(user.id, pool, settings)
+    return QuotaResponse(
+        used=status_.used,
+        limit=status_.limit,
+        global_spend_usd=status_.global_spend_usd,
+        global_cap_usd=status_.global_cap_usd,
+        circuit_breaker_tripped=(
+            isinstance(status_, QuotaDenial)
+            and status_.reason == "free_tier_global_cap_reached"
+        ),
+    )
+
+
+# ---------- Reports CRUD ----------
+
+
+@router.get("/reports", response_model=list[ReportSummary])
+async def list_reports(
+    request: Request, user: User = Depends(get_current_user)
+) -> list[ReportSummary]:
+    pool = _pool_or_503(request)
+    async with pool.acquire() as conn:
+        rows = await conn.fetch(
+            "select * from reports where owner_id = $1 order by created_at desc",
+            user.id,
+        )
+    return [_row_to_summary(r) for r in rows]
+
+
+@router.get("/reports/{report_id}", response_model=ReportDetail)
+async def get_report(
+    report_id: UUID,
+    request: Request,
+    t: UUID | None = Query(default=None),
+    user: User | None = Depends(get_optional_user),
+) -> ReportDetail:
+    pool = _pool_or_503(request)
+    row = await _require_report_access(pool, report_id, user, t)
+    return _row_to_detail(row)
+
+
+@router.delete("/reports/{report_id}", status_code=204)
+async def delete_report(
+    report_id: UUID, request: Request, user: User = Depends(get_current_user)
+) -> None:
+    pool = _pool_or_503(request)
+    async with pool.acquire() as conn:
+        result = await conn.execute(
+            "delete from reports where id = $1 and owner_id = $2",
+            report_id, user.id,
+        )
+    if result.endswith("0"):
+        raise HTTPException(status_code=404, detail="Report not found")
+
+
+@router.post("/reports/{report_id}/share", response_model=ShareResponse)
+async def share_report(
+    report_id: UUID, request: Request, user: User = Depends(get_current_user)
+) -> ShareResponse:
+    pool = _pool_or_503(request)
+    token = uuid4()
+    async with pool.acquire() as conn:
+        row = await conn.fetchrow(
+            """
+            update reports
+            set share_token = coalesce(share_token, $1)
+            where id = $2 and owner_id = $3
+            returning share_token
+            """,
+            token, report_id, user.id,
+        )
+    if row is None:
+        raise HTTPException(status_code=404, detail="Report not found")
+    return ShareResponse(
+        share_url_path=f"/r/{report_id}?t={row['share_token']}",
+        share_token=row["share_token"],
+    )
+
+
+@router.delete("/reports/{report_id}/share", status_code=204)
+async def revoke_share(
+    report_id: UUID, request: Request, user: User = Depends(get_current_user)
+) -> None:
+    pool = _pool_or_503(request)
+    async with pool.acquire() as conn:
+        result = await conn.execute(
+            "update reports set share_token = null where id = $1 and owner_id = $2",
+            report_id, user.id,
+        )
+    if result.endswith("0"):
+        raise HTTPException(status_code=404, detail="Report not found")
+
+
+@router.post("/reports/{report_id}/promote", status_code=204)
+async def promote_report(
+    report_id: UUID, request: Request, _: User = Depends(require_admin)
+) -> None:
+    pool = _pool_or_503(request)
+    async with pool.acquire() as conn:
+        result = await conn.execute(
+            "update reports set is_sample = true where id = $1", report_id
+        )
+    if result.endswith("0"):
+        raise HTTPException(status_code=404, detail="Report not found")
+
+
+@router.delete("/reports/{report_id}/promote", status_code=204)
+async def unpromote_report(
+    report_id: UUID, request: Request, _: User = Depends(require_admin)
+) -> None:
+    pool = _pool_or_503(request)
+    async with pool.acquire() as conn:
+        result = await conn.execute(
+            "update reports set is_sample = false where id = $1", report_id
+        )
+    if result.endswith("0"):
+        raise HTTPException(status_code=404, detail="Report not found")
+
+
+# ---------- POST /research ----------
 
 
 @router.post("/research", response_model=CreateResearchResponse)
-async def create_research(req: CreateResearchRequest, request: Request) -> CreateResearchResponse:
-    """Start a new research run and return its id.
-
-    Owner_id is a placeholder until Task 8 wires real auth.
-    """
+async def create_research(
+    req: CreateResearchRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+    x_anthropic_key: str | None = Header(default=None, alias="X-Anthropic-Key"),
+) -> CreateResearchResponse:
+    pool = _pool_or_503(request)
     store: ReportStore = request.app.state.store
     tasks: set[asyncio.Task[None]] = request.app.state.tasks
-    settings = get_settings()
-    options = options_for_depth(req.depth, web_search_enabled=req.browse_web)
 
-    overrides = RuntimeOverrides(
-        api_key=settings.anthropic_api_key,
-        planner_model=settings.claude_planner_model,
-        researcher_model=settings.claude_researcher_model,
-        synthesizer_model=settings.claude_synthesizer_model,
-        options=options,
-    )
+    if x_anthropic_key:
+        api_key = x_anthropic_key
+        options = options_for_depth(req.depth, web_search_enabled=req.browse_web)
+        overrides = RuntimeOverrides(
+            api_key=api_key,
+            planner_model=settings.claude_planner_model,
+            researcher_model=settings.claude_researcher_model,
+            synthesizer_model=settings.claude_synthesizer_model,
+            options=options,
+        )
+    else:
+        if not settings.anthropic_api_key:
+            raise HTTPException(
+                status_code=503,
+                detail="Free tier disabled (server has no ANTHROPIC_API_KEY)",
+            )
+        quota = await check_free_tier(user.id, pool, settings)
+        if isinstance(quota, QuotaDenial):
+            return JSONResponse(  # type: ignore[return-value]
+                status_code=402,
+                content={
+                    "error": quota.reason,
+                    "message": (
+                        "Free-tier monthly limit reached"
+                        if quota.reason == "free_tier_exhausted"
+                        else "Free tier capped site-wide for this month"
+                    ),
+                    "used": quota.used,
+                    "limit": quota.limit,
+                    "global_spend_usd": quota.global_spend_usd,
+                    "global_cap_usd": quota.global_cap_usd,
+                },
+            )
+        options = options_for_depth("quick", web_search_enabled=False)
+        overrides = RuntimeOverrides(
+            api_key=settings.anthropic_api_key,
+            planner_model=FREE_TIER_MODEL,
+            researcher_model=FREE_TIER_MODEL,
+            synthesizer_model=FREE_TIER_MODEL,
+            options=options,
+        )
 
     report_id = uuid4()
-
     task = asyncio.create_task(
         run_report(
             report_id=report_id,
@@ -95,23 +387,29 @@ async def create_research(req: CreateResearchRequest, request: Request) -> Creat
             store=store,
             settings=settings,
             overrides=overrides,
-            owner_id=uuid4(),  # placeholder until Task 8 wires real auth
+            owner_id=user.id,
         )
     )
     tasks.add(task)
     task.add_done_callback(tasks.discard)
-
     return CreateResearchResponse(report_id=report_id)
 
 
+# ---------- SSE stream ----------
+
+
 @router.get("/research/{report_id}/stream")
-async def stream_research(report_id: UUID, request: Request) -> EventSourceResponse:
+async def stream_research(
+    report_id: UUID,
+    request: Request,
+    t: UUID | None = Query(default=None),
+    user: User | None = Depends(get_optional_user),
+) -> EventSourceResponse:
+    pool = _pool_or_503(request)
+    await _require_report_access(pool, report_id, user, t)
     store: ReportStore = request.app.state.store
 
     async def event_source() -> AsyncIterator[dict[str, Any]]:
-        # Emit only `data:` (no `event:` field) so the frontend can use a
-        # single EventSource.onmessage handler and discriminate on the
-        # parsed `type` field. Keeps the consumer ~15 lines smaller.
         async for event in store.subscribe(report_id):
             yield {"data": event.model_dump_json()}
 

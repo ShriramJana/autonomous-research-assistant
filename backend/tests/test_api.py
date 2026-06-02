@@ -15,10 +15,11 @@ from __future__ import annotations
 import json
 from typing import Any
 from unittest.mock import patch
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import httpx
 
+from ara.auth import User, get_current_user, get_optional_user
 from ara.main import create_app
 from ara.models.research import (
     FinalReport,
@@ -30,6 +31,15 @@ from ara.models.research import (
     SubQuery,
     SubQueryFinding,
 )
+
+_TEST_USER = User(id=uuid4(), email="test@example.com")
+_BYOK_HEADER = {"X-Anthropic-Key": "test-byok-key"}
+
+
+async def _bypass_access(
+    _pool: Any, _report_id: Any, _user: Any, _share_token: Any
+) -> dict[str, Any]:
+    return {"owner_id": _TEST_USER.id, "is_sample": False, "share_token": None}
 
 
 def _plan(n: int = 3) -> ResearchPlan:
@@ -72,13 +82,23 @@ def _fakes() -> tuple[Any, Any, Any]:
 
 
 async def _async_client() -> httpx.AsyncClient:
-    transport = httpx.ASGITransport(app=create_app())
+    app = create_app()
+    # Bypass Supabase auth in tests by force-injecting a stable fake user.
+    app.dependency_overrides[get_current_user] = lambda: _TEST_USER
+    app.dependency_overrides[get_optional_user] = lambda: _TEST_USER
+    # POST /research calls _pool_or_503 before branching on BYOK. Set a
+    # truthy sentinel pool so the gate passes; the BYOK path then never
+    # actually uses the pool (no quota check).
+    app.state.db_pool = object()
+    transport = httpx.ASGITransport(app=app)
     return httpx.AsyncClient(transport=transport, base_url="http://test")
 
 
 async def test_post_research_rejects_empty_question() -> None:
     async with await _async_client() as client:
-        resp = await client.post("/api/research", json={"question": ""})
+        resp = await client.post(
+            "/api/research", json={"question": ""}, headers=_BYOK_HEADER
+        )
     assert resp.status_code == 422
 
 
@@ -114,7 +134,11 @@ async def test_post_research_returns_report_id() -> None:
         patch("ara.graph.dag.synthesize_report", fake_synth),
     ):
         async with await _async_client() as client:
-            resp = await client.post("/api/research", json={"question": "what is rag?"})
+            resp = await client.post(
+                "/api/research",
+                json={"question": "what is rag?"},
+                headers=_BYOK_HEADER,
+            )
 
     assert resp.status_code == 200
     body = resp.json()
@@ -145,9 +169,14 @@ async def test_stream_delivers_plan_ready_and_report_complete() -> None:
         patch("ara.graph.dag.plan_research", fake_plan),
         patch("ara.graph.dag.research_sub_query", fake_research),
         patch("ara.graph.dag.synthesize_report", fake_synth),
+        # Streaming route's access check expects a real DB row; stub it
+        # so the in-memory store path can be exercised.
+        patch("ara.api.routes._require_report_access", _bypass_access),
     ):
         async with await _async_client() as client:
-            resp = await client.post("/api/research", json={"question": "q"})
+            resp = await client.post(
+                "/api/research", json={"question": "q"}, headers=_BYOK_HEADER
+            )
             report_id = resp.json()["report_id"]
 
             async with client.stream(
