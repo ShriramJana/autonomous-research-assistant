@@ -150,15 +150,18 @@ export function useResearchStream(
     if (!reportId && !streamUrl) return;
     dispatch({ kind: "reset" });
 
-    const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    // Same-origin via the Next.js /api/:path* rewrite. EventSource can't
+    // attach custom headers; only cookies. Supabase cookies are scoped to
+    // the Next dev origin (:3000), so we MUST hit :3000 here — going to
+    // :8000 directly would drop the session and 403 on private reports.
     let url: string;
     if (streamUrl) {
-      url = streamUrl.startsWith("http") ? streamUrl : `${base}${streamUrl}`;
+      url = streamUrl;
     } else {
       const qs = shareToken ? `?t=${encodeURIComponent(shareToken)}` : "";
-      url = `${base}/api/research/${reportId}/stream${qs}`;
+      url = `/api/research/${reportId}/stream${qs}`;
     }
-    const es = new EventSource(url);
+    const es = new EventSource(url, { withCredentials: true });
 
     es.onmessage = (msg) => {
       try {

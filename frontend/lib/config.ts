@@ -2,7 +2,7 @@
 
 import type { Depth } from "@/hooks/use-depth";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// Same-origin via the Next.js /api/:path* rewrite — see frontend/next.config.ts.
 
 export interface ModelsConfig {
   planner: string;
@@ -21,7 +21,7 @@ export interface Config {
 }
 
 export async function fetchConfig(): Promise<Config> {
-  const res = await fetch(`${BASE}/api/config`, {
+  const res = await fetch("/api/config", {
     headers: { Accept: "application/json" },
   });
   if (!res.ok) {
