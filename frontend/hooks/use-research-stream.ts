@@ -139,7 +139,10 @@ function reducer(state: ResearchStreamState, action: Action): ResearchStreamStat
   }
 }
 
-export function useResearchStream(reportId: string | null): ResearchStreamState {
+export function useResearchStream(
+  reportId: string | null,
+  shareToken?: string,
+): ResearchStreamState {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -147,7 +150,8 @@ export function useResearchStream(reportId: string | null): ResearchStreamState 
     dispatch({ kind: "reset" });
 
     const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-    const url = `${base}/api/research/${reportId}/stream`;
+    const qs = shareToken ? `?t=${encodeURIComponent(shareToken)}` : "";
+    const url = `${base}/api/research/${reportId}/stream${qs}`;
     const es = new EventSource(url);
 
     es.onmessage = (msg) => {
@@ -168,7 +172,7 @@ export function useResearchStream(reportId: string | null): ResearchStreamState 
     return () => {
       es.close();
     };
-  }, [reportId]);
+  }, [reportId, shareToken]);
 
   // Special-case: the very first event after submit is plan_ready, but
   // before that arrives, surface "planning" so the UI shows progress.

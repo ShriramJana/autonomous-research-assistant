@@ -1,8 +1,71 @@
-// Tiny HTTP client for the POST /api/research endpoint.
+"use client";
 
 import type { Depth } from "@/hooks/use-depth";
+import { getStoredApiKey } from "@/lib/api-key";
+import { createSupabaseBrowser } from "@/lib/supabase/client";
 
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+export interface ApiError extends Error {
+  status: number;
+  body: unknown;
+}
+
+async function authedFetch(input: string, init: RequestInit = {}): Promise<Response> {
+  const supabase = createSupabaseBrowser();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const headers = new Headers(init.headers);
+  if (session?.access_token) {
+    headers.set("Authorization", `Bearer ${session.access_token}`);
+  }
+  const key = getStoredApiKey();
+  if (key) {
+    headers.set("X-Anthropic-Key", key);
+  }
+  const url = input.startsWith("http") ? input : `${BASE}${input}`;
+  return fetch(url, { ...init, headers, credentials: "include" });
+}
+
+export async function apiGet<T>(path: string): Promise<T> {
+  const res = await authedFetch(path, { method: "GET" });
+  return throwOrJson<T>(res);
+}
+
+export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+  const res = await authedFetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  return throwOrJson<T>(res);
+}
+
+export async function apiDelete(path: string): Promise<void> {
+  const res = await authedFetch(path, { method: "DELETE" });
+  if (!res.ok) await throwOrJson(res);
+}
+
+async function throwOrJson<T>(res: Response): Promise<T> {
+  if (res.ok) {
+    if (res.status === 204) return undefined as unknown as T;
+    return (await res.json()) as T;
+  }
+  let body: unknown;
+  try {
+    body = await res.json();
+  } catch {
+    body = await res.text();
+  }
+  const err = new Error(`API ${res.status}`) as ApiError;
+  err.status = res.status;
+  err.body = body;
+  throw err;
+}
+
+// --- Legacy helpers kept for the existing research form -------------------
 
 export interface CreateResearchResponse {
   report_id: string;
@@ -20,15 +83,5 @@ export async function createResearch(
   const body: Record<string, unknown> = { question };
   if (options.depth) body.depth = options.depth;
   if (typeof options.browseWeb === "boolean") body.browse_web = options.browseWeb;
-
-  const res = await fetch(`${BASE}/api/research`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(`Failed to create research (${res.status}): ${text}`);
-  }
-  return (await res.json()) as CreateResearchResponse;
+  return apiPost<CreateResearchResponse>("/api/research", body);
 }
