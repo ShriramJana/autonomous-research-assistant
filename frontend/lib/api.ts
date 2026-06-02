@@ -4,7 +4,9 @@ import type { Depth } from "@/hooks/use-depth";
 import { getStoredApiKey } from "@/lib/api-key";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+// All API calls are same-origin via the Next.js /api/:path* rewrite (see
+// frontend/next.config.ts). Going cross-origin would break cookie-based auth
+// for EventSource, so we keep every call site on relative paths.
 
 export interface ApiError extends Error {
   status: number;
@@ -25,8 +27,7 @@ async function authedFetch(input: string, init: RequestInit = {}): Promise<Respo
   if (key) {
     headers.set("X-Anthropic-Key", key);
   }
-  const url = input.startsWith("http") ? input : `${BASE}${input}`;
-  return fetch(url, { ...init, headers, credentials: "include" });
+  return fetch(input, { ...init, headers, credentials: "include" });
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
