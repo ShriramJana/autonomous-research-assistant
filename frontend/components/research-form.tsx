@@ -9,9 +9,16 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { createResearch } from "@/lib/api";
+import { apiGet, createResearch } from "@/lib/api";
+import { hasStoredApiKey } from "@/lib/api-key";
 import { useBrowseWeb } from "@/hooks/use-browse-web";
 import { type Depth, useDepth } from "@/hooks/use-depth";
+
+interface Quota {
+  used: number;
+  limit: number;
+  circuit_breaker_tripped: boolean;
+}
 
 const DEPTH_OPTIONS: Array<{
   value: Depth;
@@ -41,6 +48,25 @@ export function ResearchForm({
   const [depthOpen, setDepthOpen] = useState(false);
   const { depth, setDepth } = useDepth();
   const { browseWeb, toggleBrowseWeb } = useBrowseWeb();
+  const [hasKey, setHasKey] = useState(false);
+  const [quota, setQuota] = useState<Quota | null>(null);
+
+  useEffect(() => {
+    // Read localStorage post-mount to avoid SSR/CSR hydration mismatch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setHasKey(hasStoredApiKey());
+  }, []);
+  useEffect(() => {
+    apiGet<Quota>("/api/quota")
+      .then(setQuota)
+      .catch(() => setQuota(null));
+  }, []);
+
+  const freeTier = !hasKey;
+  const freeBlocked =
+    freeTier &&
+    quota !== null &&
+    (quota.used >= quota.limit || quota.circuit_breaker_tripped);
 
   useEffect(() => {
     const focusOnHash = () => {
@@ -83,6 +109,12 @@ export function ResearchForm({
 
   return (
     <form onSubmit={onSubmit} className="w-full">
+      {freeBlocked ? (
+        <p className="border-destructive/40 bg-destructive/10 text-destructive mb-3 rounded-md border px-4 py-2 font-mono text-xs">
+          Free tier exhausted — add your Anthropic API key in Settings to keep
+          running reports
+        </p>
+      ) : null}
       <div className="bg-secondary focus-within:ring-border group relative rounded-xl p-1 transition-all duration-300 focus-within:ring-1">
         <textarea
           ref={textareaRef}
@@ -98,12 +130,18 @@ export function ResearchForm({
           <div className="flex gap-4">
             <Popover open={depthOpen} onOpenChange={setDepthOpen}>
               <PopoverTrigger
-                className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
+                disabled={freeTier}
+                title={
+                  freeTier
+                    ? "Free tier locked to quick depth — add API key in Settings to unlock"
+                    : undefined
+                }
+                className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label={`Depth: ${depthLabel(depth)}`}
               >
                 <Layers className="h-3.5 w-3.5" strokeWidth={1.75} />
                 <span className="font-mono text-[10px] uppercase tracking-wider">
-                  Depth · {depthLabel(depth)}
+                  Depth · {freeTier ? "Quick" : depthLabel(depth)}
                 </span>
               </PopoverTrigger>
               <PopoverContent align="start" className="w-64 p-1.5">
@@ -146,16 +184,19 @@ export function ResearchForm({
             <button
               type="button"
               onClick={toggleBrowseWeb}
+              disabled={freeTier}
               aria-pressed={browseWeb}
               title={
-                browseWeb
-                  ? "Web search enabled — click to disable"
-                  : "Web search disabled — click to enable"
+                freeTier
+                  ? "Free tier locked to quick depth — add API key in Settings to unlock"
+                  : browseWeb
+                    ? "Web search enabled — click to disable"
+                    : "Web search disabled — click to enable"
               }
               className={
                 browseWeb
-                  ? "text-primary hover:text-primary/80 flex items-center gap-2 transition-colors"
-                  : "text-muted-foreground/50 hover:text-foreground flex items-center gap-2 transition-colors"
+                  ? "text-primary hover:text-primary/80 flex items-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                  : "text-muted-foreground/50 hover:text-foreground flex items-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
               }
             >
               <Globe className="h-3.5 w-3.5" strokeWidth={1.75} />
@@ -166,7 +207,7 @@ export function ResearchForm({
           </div>
           <button
             type="submit"
-            disabled={!question.trim() || submitting}
+            disabled={!question.trim() || submitting || freeBlocked}
             className="from-primary to-primary-container text-primary-foreground shadow-primary/10 inline-flex items-center gap-2 rounded-md bg-gradient-to-r px-8 py-2 text-sm font-bold shadow-lg transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span className="font-mono text-xs tracking-tight">
@@ -181,6 +222,11 @@ export function ResearchForm({
       {error ? (
         <p className="text-destructive mt-3 px-2 font-mono text-xs">
           {error}
+        </p>
+      ) : null}
+      {freeTier && quota !== null ? (
+        <p className="text-muted-foreground/70 mt-3 px-2 font-mono text-[10px] tracking-wider">
+          {quota.used} of {quota.limit} free reports used this month
         </p>
       ) : null}
     </form>

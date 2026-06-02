@@ -10,6 +10,7 @@ import { CostMeter } from "@/components/cost-meter";
 import { StatusPill } from "@/components/status-pill";
 import { SourcesList } from "@/components/sources-list";
 import { useResearchStream } from "@/hooks/use-research-stream";
+import { apiPost } from "@/lib/api";
 import { composeReportMarkdown } from "@/lib/report";
 import type { Source } from "@/lib/types";
 
@@ -23,15 +24,19 @@ const TABS: Array<{ value: Tab; label: string }> = [
 
 type Flash = "copy" | "share" | null;
 
+export interface ResearchLiveProps {
+  reportId?: string;
+  shareToken?: string;
+  streamUrl?: string;
+}
+
 export function ResearchLive({
   reportId,
   shareToken,
-}: {
-  reportId: string;
-  shareToken?: string;
-}) {
+  streamUrl,
+}: ResearchLiveProps) {
   // TODO(Task 12): surface a proper "access denied" UI when SSE 403s.
-  const state = useResearchStream(reportId, shareToken);
+  const state = useResearchStream(reportId ?? null, shareToken, streamUrl);
   const [mobileTab, setMobileTab] = useState<Tab>("report");
   const [flash, setFlash] = useState<Flash>(null);
 
@@ -74,22 +79,17 @@ export function ResearchLive({
   };
 
   const onShare = async () => {
-    const url =
-      typeof window !== "undefined" ? window.location.href : `/r/${reportId}`;
-    const title = originalQuestion ?? "ARA report";
-    if (typeof navigator !== "undefined" && "share" in navigator) {
-      try {
-        await navigator.share({ title, url });
-        return;
-      } catch {
-        /* user cancelled or share failed — fall through to clipboard */
-      }
-    }
+    if (!reportId) return;
     try {
-      await navigator.clipboard.writeText(url);
+      const { share_url_path } = await apiPost<{
+        share_url_path: string;
+        share_token: string;
+      }>(`/api/reports/${reportId}/share`, {});
+      const fullUrl = `${window.location.origin}${share_url_path}`;
+      await navigator.clipboard.writeText(fullUrl);
       flashFor("share");
     } catch {
-      /* clipboard API blocked — swallow silently */
+      /* share/clipboard failed — swallow silently */
     }
   };
 

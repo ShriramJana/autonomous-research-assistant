@@ -1,4 +1,4 @@
-import { ResearchLive } from "@/components/research-live";
+import { ReportPageActions } from "@/components/report-page-actions";
 
 export default async function ReportPage({
   params,
@@ -9,5 +9,5 @@ export default async function ReportPage({
 }) {
   const { reportId } = await params;
   const { t } = await searchParams;
-  return <ResearchLive reportId={reportId} shareToken={t} />;
+  return <ReportPageActions reportId={reportId} shareToken={t} />;
 }
