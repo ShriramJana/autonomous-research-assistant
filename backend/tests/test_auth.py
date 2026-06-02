@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import base64
+import json
 import time
 from collections.abc import Iterator
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 from uuid import UUID, uuid4
 
 import jwt as pyjwt
@@ -15,10 +17,14 @@ from cryptography.hazmat.primitives.asymmetric.types import (
     CertificatePublicKeyTypes,
     PublicKeyTypes,
 )
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 
 from ara.auth import jwt as auth_jwt
-from ara.auth.dependencies import get_optional_user, require_admin
+from ara.auth.dependencies import (
+    _extract_cookie_token,
+    get_optional_user,
+    require_admin,
+)
 from ara.auth.jwt import User, verify_jwt
 from ara.config import Settings
 
@@ -191,14 +197,21 @@ def test_verify_jwt_rejects_non_uuid_sub(
 # --- get_optional_user -------------------------------------------------------
 
 
+def _fake_request(cookies: dict[str, str] | None = None) -> Request:
+    """Minimal Request object whose `.cookies` property returns our dict."""
+    req = MagicMock(spec=Request)
+    req.cookies = cookies or {}
+    return req
+
+
 def test_get_optional_user_returns_none_on_bad_token(
     signing_keypair: tuple[ec.EllipticCurvePrivateKey, ec.EllipticCurvePublicKey],
 ) -> None:
     _, public = signing_keypair
     with _patch_signing_key(public):
         user = get_optional_user(
+            request=_fake_request(),
             authorization="Bearer not-a-jwt",
-            sb_access_token=None,
             settings=_settings(),
         )
     assert user is None
@@ -212,8 +225,8 @@ def test_get_optional_user_returns_user_on_good_token(
     token = _make_token(private, sub=uid)
     with _patch_signing_key(public):
         user = get_optional_user(
+            request=_fake_request(),
             authorization=f"Bearer {token}",
-            sb_access_token=None,
             settings=_settings(),
         )
     assert user is not None
@@ -228,11 +241,83 @@ def test_get_optional_user_propagates_500(
     token = _make_token(private)
     with pytest.raises(HTTPException) as exc:
         get_optional_user(
+            request=_fake_request(),
             authorization=f"Bearer {token}",
-            sb_access_token=None,
             settings=_settings(url=""),
         )
     assert exc.value.status_code == 500
+
+
+# --- Supabase auth-cookie parsing (chunked + base64) -------------------------
+
+
+def _encode_sb_cookie(access_token: str, *, prefix: bool = False) -> str:
+    """Encode a Supabase session payload the way @supabase/ssr does."""
+    payload = json.dumps(
+        {
+            "access_token": access_token,
+            "refresh_token": "ignored",
+            "expires_in": 3600,
+        }
+    ).encode("utf-8")
+    encoded = base64.urlsafe_b64encode(payload).decode("ascii").rstrip("=")
+    return ("base64-" + encoded) if prefix else encoded
+
+
+def test_cookie_parsing_single_modern_cookie() -> None:
+    """Modern @supabase/ssr writes a single un-prefixed base64 cookie."""
+    cookies = {"sb-abc123-auth-token": _encode_sb_cookie("jwt-token-xyz")}
+    assert _extract_cookie_token(cookies) == "jwt-token-xyz"
+
+
+def test_cookie_parsing_legacy_prefixed_cookie() -> None:
+    """Legacy auth-helpers prepended 'base64-' to the value."""
+    cookies = {
+        "sb-abc123-auth-token": _encode_sb_cookie("jwt-legacy", prefix=True),
+    }
+    assert _extract_cookie_token(cookies) == "jwt-legacy"
+
+
+def test_cookie_parsing_two_chunks() -> None:
+    """Long sessions are split into ``...auth-token.0`` + ``...auth-token.1``."""
+    full = _encode_sb_cookie("jwt-chunked-value")
+    half = len(full) // 2
+    cookies = {
+        "sb-projref-auth-token.0": full[:half],
+        "sb-projref-auth-token.1": full[half:],
+        "unrelated": "ignored",
+    }
+    assert _extract_cookie_token(cookies) == "jwt-chunked-value"
+
+
+def test_cookie_parsing_chunks_out_of_order() -> None:
+    """Chunks must reassemble by numeric index, not dict iteration order."""
+    full = _encode_sb_cookie("jwt-order-test")
+    third = len(full) // 3
+    cookies = {
+        "sb-x-auth-token.2": full[2 * third :],
+        "sb-x-auth-token.0": full[:third],
+        "sb-x-auth-token.1": full[third : 2 * third],
+    }
+    assert _extract_cookie_token(cookies) == "jwt-order-test"
+
+
+def test_cookie_parsing_no_supabase_cookie() -> None:
+    assert _extract_cookie_token({"unrelated": "x"}) is None
+    assert _extract_cookie_token({}) is None
+
+
+def test_cookie_parsing_garbage_returns_none() -> None:
+    assert _extract_cookie_token({"sb-x-auth-token": "!!!not-base64!!!"}) is None
+    bad_json = base64.urlsafe_b64encode(b"not json at all").decode("ascii")
+    assert _extract_cookie_token({"sb-x-auth-token": bad_json}) is None
+
+
+def test_cookie_parsing_missing_access_token_field() -> None:
+    payload = base64.urlsafe_b64encode(
+        json.dumps({"refresh_token": "r"}).encode()
+    ).decode("ascii")
+    assert _extract_cookie_token({"sb-x-auth-token": payload}) is None
 
 
 # --- require_admin -----------------------------------------------------------

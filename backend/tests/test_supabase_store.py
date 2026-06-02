@@ -123,3 +123,69 @@ async def test_subscribe_replays_then_lives(
     assert len(received) == 2
     assert isinstance(received[0], PlanReady)
     assert isinstance(received[1], ResearcherStarted)
+
+
+@requires_db
+@pytest.mark.asyncio
+async def test_subscribe_no_duplicate_on_concurrent_put(
+    store: SupabaseReportStore, fake_owner: UUID
+) -> None:
+    """Regression: a put_event that interleaves with subscribe's replay
+    SELECT must be delivered exactly once, not once from replay + once
+    from the live queue."""
+    rid = uuid4()
+    await store.create(
+        rid,
+        "q",
+        owner_id=fake_owner,
+        depth="quick",
+        browse_web=False,
+        used_byok=False,
+    )
+
+    plan = _plan()
+    # Pre-existing event so replay returns >=1 row.
+    await store.put_event(rid, PlanReady(plan=plan))
+
+    received: list[object] = []
+
+    async def consume() -> None:
+        async for ev in store.subscribe(rid):
+            received.append(ev)
+            if len(received) == 3:
+                return
+
+    # Subscribe and race a put_event into the same event-loop tick. The
+    # subscribe() coroutine yields at its first `await` inside _replay_tail
+    # (the SELECT); the put_event below runs in that window so both the
+    # replay AND the live queue see it.
+    task = asyncio.create_task(consume())
+    await asyncio.sleep(0)  # let subscribe register its queue
+    await store.put_event(
+        rid,
+        ResearcherStarted(
+            sub_query_id=plan.sub_queries[0].id,
+            question=plan.sub_queries[0].question,
+        ),
+    )
+    # Drive a third event so the consumer's `len == 3` exit condition is
+    # only reachable if the racing event was NOT double-delivered.
+    await store.put_event(
+        rid,
+        ResearcherStarted(
+            sub_query_id=plan.sub_queries[1].id,
+            question=plan.sub_queries[1].question,
+        ),
+    )
+    await asyncio.wait_for(task, timeout=2.0)
+    await store.close(rid, status="completed", cost_usd=0.0)
+
+    assert len(received) == 3
+    assert isinstance(received[0], PlanReady)
+    started = [ev for ev in received if isinstance(ev, ResearcherStarted)]
+    # Two distinct ResearcherStarted events, each delivered exactly once.
+    assert len(started) == 2
+    assert {ev.sub_query_id for ev in started} == {
+        plan.sub_queries[0].id,
+        plan.sub_queries[1].id,
+    }
