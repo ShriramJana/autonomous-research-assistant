@@ -10,7 +10,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { createResearch } from "@/lib/api";
-import { addHistoryItem } from "@/lib/history";
 import { useBrowseWeb } from "@/hooks/use-browse-web";
 import { type Depth, useDepth } from "@/hooks/use-depth";
 
@@ -61,12 +60,6 @@ export function ResearchForm({
     try {
       const trimmed = question.trim();
       const { report_id } = await createResearch(trimmed, { depth, browseWeb });
-      addHistoryItem({
-        reportId: report_id,
-        question: trimmed,
-        createdAt: Date.now(),
-        status: "running",
-      });
       router.push(`/r/${report_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");

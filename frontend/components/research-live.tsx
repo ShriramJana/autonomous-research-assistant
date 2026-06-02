@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Check, Copy, Download, Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import { CostMeter } from "@/components/cost-meter";
 import { StatusPill } from "@/components/status-pill";
 import { SourcesList } from "@/components/sources-list";
 import { useResearchStream } from "@/hooks/use-research-stream";
-import { updateHistoryItem } from "@/lib/history";
 import { composeReportMarkdown } from "@/lib/report";
 import type { Source } from "@/lib/types";
 
@@ -24,8 +23,15 @@ const TABS: Array<{ value: Tab; label: string }> = [
 
 type Flash = "copy" | "share" | null;
 
-export function ResearchLive({ reportId }: { reportId: string }) {
-  const state = useResearchStream(reportId);
+export function ResearchLive({
+  reportId,
+  shareToken,
+}: {
+  reportId: string;
+  shareToken?: string;
+}) {
+  // TODO(Task 12): surface a proper "access denied" UI when SSE 403s.
+  const state = useResearchStream(reportId, shareToken);
   const [mobileTab, setMobileTab] = useState<Tab>("report");
   const [flash, setFlash] = useState<Flash>(null);
 
@@ -49,17 +55,6 @@ export function ResearchLive({ reportId }: { reportId: string }) {
 
   const webSearchEnabled =
     state.plan?.web_search_enabled ?? state.report?.web_search_enabled;
-
-  useEffect(() => {
-    if (state.status === "complete" && state.report) {
-      updateHistoryItem(reportId, {
-        status: "complete",
-        executiveSummary: state.report.executive_summary,
-      });
-    } else if (state.status === "error") {
-      updateHistoryItem(reportId, { status: "error" });
-    }
-  }, [state.status, state.report, reportId]);
 
   const isComplete = state.status === "complete" && state.report !== null;
 
