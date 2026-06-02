@@ -48,7 +48,7 @@ namespace_packages = true
 explicit_package_bases = true
 
 [[tool.mypy.overrides]]
-module = ["langgraph.*"]
+module = ["langgraph.*", "asyncpg.*"]
 ignore_missing_imports = true
 
 [tool.ruff]
