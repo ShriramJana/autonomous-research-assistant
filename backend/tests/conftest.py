@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import AsyncIterator
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 
 def make_usage(input_tokens: int = 10, output_tokens: int = 5) -> MagicMock:
@@ -80,3 +83,13 @@ def make_fake_anthropic(
     if stream_return is not None:
         fake.messages.stream = MagicMock(return_value=stream_return)
     return fake
+
+
+# --- Postgres-dependent skip marker (Task 6) ----------------------------------
+
+
+def _has_db() -> bool:
+    return bool(os.environ.get("SUPABASE_DB_URL"))
+
+
+requires_db = pytest.mark.skipif(not _has_db(), reason="SUPABASE_DB_URL not set")
