@@ -34,7 +34,6 @@ class Settings(BaseSettings):
 
     # Supabase (auth + persistence)
     supabase_url: str = Field(default="")
-    supabase_jwt_secret: str = Field(default="")
     supabase_db_url: str = Field(default="")
     admin_user_id: str | None = Field(default=None)
 

@@ -9,7 +9,6 @@ def test_supabase_fields_default_empty() -> None:
     """In tests with no env, Supabase fields default to empty strings — not None."""
     s = Settings(_env_file=None)  # type: ignore[call-arg]
     assert s.supabase_url == ""
-    assert s.supabase_jwt_secret == ""
     assert s.supabase_db_url == ""
 
 
