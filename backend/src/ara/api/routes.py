@@ -31,6 +31,7 @@ from ara.storage.base import ReportStore
 router = APIRouter(prefix="/api")
 
 FREE_TIER_MODEL = "claude-haiku-4-5"
+REPLAY_INTER_EVENT_DELAY_MS = 80
 
 
 # ---------- Request / response models ----------
@@ -412,5 +413,32 @@ async def stream_research(
     async def event_source() -> AsyncIterator[dict[str, Any]]:
         async for event in store.subscribe(report_id):
             yield {"data": event.model_dump_json()}
+
+    return EventSourceResponse(event_source())
+
+
+@router.get("/reports/{report_id}/replay")
+async def replay_report(
+    report_id: UUID,
+    request: Request,
+    t: UUID | None = Query(default=None),
+    user: User | None = Depends(get_optional_user),
+) -> EventSourceResponse:
+    pool = _pool_or_503(request)
+    await _require_report_access(pool, report_id, user, t)
+
+    async def event_source() -> AsyncIterator[dict[str, Any]]:
+        async with pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                select event from report_events
+                where report_id = $1
+                order by id asc
+                """,
+                report_id,
+            )
+        for row in rows:
+            yield {"data": row["event"]}
+            await asyncio.sleep(REPLAY_INTER_EVENT_DELAY_MS / 1000)
 
     return EventSourceResponse(event_source())
