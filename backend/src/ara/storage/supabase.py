@@ -8,6 +8,13 @@ Persistence per Protocol method:
 
 In-process pubsub stays (single-process for v1). When ARA goes
 multi-instance we add a LISTEN/NOTIFY variant; Protocol unchanged.
+
+Duplicate-delivery guard (subscribe vs concurrent put_event):
+the live queue carries ``(event_id, event)`` tuples. ``subscribe``
+records the max ``report_events.id`` it saw during replay and drops any
+live-queue item whose id is already ``<=`` that high-water mark. This
+keeps replay + live merging exactly-once even if a put_event interleaves
+between queue registration and the replay SELECT.
 """
 
 from __future__ import annotations
@@ -26,10 +33,16 @@ from ara.options import Depth
 
 _REPLAY_TAIL = 50  # how many trailing events to replay to a fresh subscriber
 
+# Sentinel "no event" id used so the queue can also carry the close signal.
+# `report_events.id` is bigserial (>=1), so 0 is a safe "below everything" id.
+_NO_ID = 0
+
 
 @dataclass
 class _Subscribers:
-    queues: list[asyncio.Queue[ResearchEvent | None]] = field(default_factory=list)
+    queues: list[asyncio.Queue[tuple[int, ResearchEvent] | None]] = field(
+        default_factory=list
+    )
     closed: bool = False
 
 
@@ -84,16 +97,21 @@ class SupabaseReportStore:
     async def put_event(self, report_id: UUID, event: ResearchEvent) -> None:
         payload_json = event.model_dump_json()
         async with self._pool.acquire() as conn:
-            await conn.execute(
-                "insert into report_events (report_id, event) values ($1, $2::jsonb)",
+            row = await conn.fetchrow(
+                """
+                insert into report_events (report_id, event)
+                values ($1, $2::jsonb)
+                returning id
+                """,
                 report_id,
                 payload_json,
             )
+        event_id: int = row["id"]
         subs = self._subs.get(report_id)
         if subs is None or subs.closed:
             return
         for q in list(subs.queues):
-            await q.put(event)
+            await q.put((event_id, event))
 
     async def close(
         self,
@@ -127,36 +145,46 @@ class SupabaseReportStore:
             await q.put(None)
 
     async def subscribe(self, report_id: UUID) -> AsyncIterator[ResearchEvent]:
-        # Register the live queue BEFORE snapshotting tail events from the
-        # DB so a put_event arriving during snapshot is delivered live and
-        # not lost.
         subs = self._subs.setdefault(report_id, _Subscribers())
-        queue: asyncio.Queue[ResearchEvent | None] = asyncio.Queue()
+        queue: asyncio.Queue[tuple[int, ResearchEvent] | None] = asyncio.Queue()
         if subs.closed:
             # Report finished before this subscriber arrived. Just replay tail.
-            async for ev in self._replay_tail(report_id):
+            async for _id, ev in self._replay_tail(report_id):
                 yield ev
             return
+        # Register the live queue BEFORE running the replay SELECT so that
+        # any put_event landing concurrently with replay is captured on the
+        # queue. We then dedupe against the replay's max id below.
         subs.queues.append(queue)
 
         try:
-            async for ev in self._replay_tail(report_id):
+            high_water = _NO_ID
+            async for event_id, ev in self._replay_tail(report_id):
+                high_water = max(high_water, event_id)
                 yield ev
             while True:
                 item = await queue.get()
                 if item is None:
                     return
-                yield item
+                event_id, ev = item
+                # Drop anything already covered by the replay snapshot — that
+                # event was both persisted (so replay returned it) AND fanned
+                # out to this queue by the concurrent put_event.
+                if event_id <= high_water:
+                    continue
+                yield ev
         finally:
             if queue in subs.queues:
                 subs.queues.remove(queue)
 
-    async def _replay_tail(self, report_id: UUID) -> AsyncIterator[ResearchEvent]:
-        """Yield the last `_REPLAY_TAIL` events for a report, oldest first."""
+    async def _replay_tail(
+        self, report_id: UUID
+    ) -> AsyncIterator[tuple[int, ResearchEvent]]:
+        """Yield the last `_REPLAY_TAIL` ``(id, event)`` pairs, oldest first."""
         async with self._pool.acquire() as conn:
             rows = await conn.fetch(
                 """
-                select event from (
+                select id, event from (
                   select id, event from report_events
                   where report_id = $1
                   order by id desc
@@ -170,4 +198,4 @@ class SupabaseReportStore:
         for row in rows:
             # asyncpg returns jsonb as a raw JSON string unless a codec is set;
             # use validate_json so we don't need a per-connection codec hook.
-            yield ResearchEventAdapter.validate_json(row["event"])
+            yield row["id"], ResearchEventAdapter.validate_json(row["event"])
