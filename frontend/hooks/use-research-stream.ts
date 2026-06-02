@@ -142,16 +142,22 @@ function reducer(state: ResearchStreamState, action: Action): ResearchStreamStat
 export function useResearchStream(
   reportId: string | null,
   shareToken?: string,
+  streamUrl?: string,
 ): ResearchStreamState {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
-    if (!reportId) return;
+    if (!reportId && !streamUrl) return;
     dispatch({ kind: "reset" });
 
     const base = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
-    const qs = shareToken ? `?t=${encodeURIComponent(shareToken)}` : "";
-    const url = `${base}/api/research/${reportId}/stream${qs}`;
+    let url: string;
+    if (streamUrl) {
+      url = streamUrl.startsWith("http") ? streamUrl : `${base}${streamUrl}`;
+    } else {
+      const qs = shareToken ? `?t=${encodeURIComponent(shareToken)}` : "";
+      url = `${base}/api/research/${reportId}/stream${qs}`;
+    }
     const es = new EventSource(url);
 
     es.onmessage = (msg) => {
@@ -172,12 +178,12 @@ export function useResearchStream(
     return () => {
       es.close();
     };
-  }, [reportId, shareToken]);
+  }, [reportId, shareToken, streamUrl]);
 
   // Special-case: the very first event after submit is plan_ready, but
   // before that arrives, surface "planning" so the UI shows progress.
   const effectiveStatus: StreamStatus =
-    state.status === "idle" && reportId ? "planning" : state.status;
+    state.status === "idle" && (reportId || streamUrl) ? "planning" : state.status;
 
   return { ...state, status: effectiveStatus };
 }
