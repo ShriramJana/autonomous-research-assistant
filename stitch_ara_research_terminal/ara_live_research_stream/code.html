@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@100..900&amp;family=Geist+Mono:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#dbe1ff",
+                    "secondary-fixed": "#dbe1ff",
+                    "on-tertiary-container": "#471e00",
+                    "on-primary-fixed": "#00174c",
+                    "surface-container": "#201f1f",
+                    "on-primary-fixed-variant": "#003dab",
+                    "surface": "#131313",
+                    "primary-container": "#638aff",
+                    "inverse-surface": "#e5e2e1",
+                    "surface-variant": "#353534",
+                    "surface-container-low": "#1c1b1b",
+                    "on-secondary-fixed-variant": "#344478",
+                    "error-container": "#93000a",
+                    "on-error": "#690005",
+                    "surface-bright": "#3a3939",
+                    "surface-dim": "#131313",
+                    "outline-variant": "#434654",
+                    "background": "#131313",
+                    "on-tertiary-fixed": "#311300",
+                    "on-secondary-fixed": "#02174a",
+                    "secondary-container": "#344478",
+                    "on-error-container": "#ffdad6",
+                    "tertiary": "#ffb688",
+                    "on-surface": "#e5e2e1",
+                    "error": "#ffb4ab",
+                    "inverse-on-surface": "#313030",
+                    "surface-container-highest": "#353534",
+                    "secondary-fixed-dim": "#b5c4ff",
+                    "inverse-primary": "#1653d6",
+                    "on-tertiary-fixed-variant": "#733600",
+                    "primary-fixed-dim": "#b5c4ff",
+                    "on-tertiary": "#512400",
+                    "tertiary-fixed": "#ffdbc7",
+                    "on-primary-container": "#00236b",
+                    "on-secondary": "#1c2d60",
+                    "secondary": "#b5c4ff",
+                    "tertiary-fixed-dim": "#ffb688",
+                    "outline": "#8d90a0",
+                    "on-surface-variant": "#c3c5d7",
+                    "on-background": "#e5e2e1",
+                    "on-secondary-container": "#a3b3ee",
+                    "on-primary": "#00297a",
+                    "surface-container-high": "#2a2a2a",
+                    "surface-container-lowest": "#0e0e0e",
+                    "tertiary-container": "#e07313",
+                    "surface-tint": "#b5c4ff",
+                    "primary": "#b5c4ff"
+            },
+            "fontFamily": {
+                    "sans": ["Geist Sans", "Inter", "sans-serif"],
+                    "mono": ["Geist Mono", "monospace"],
+                    "headline": ["Geist Sans", "sans-serif"],
+                    "body": ["Geist Sans", "sans-serif"],
+                    "label": ["Geist Mono", "monospace"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Geist Sans', sans-serif; }
+        .mono-label { font-family: 'Geist Mono', monospace; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #434654; border-radius: 10px; }
+    </style>
+</head>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container h-screen flex flex-col overflow-hidden">
+<!-- TopNavBar (Shared Component Execution) -->
+<header class="bg-[#131313] border-b border-white/10 flex justify-between items-center w-full px-6 h-14 z-50">
+<div class="flex items-center gap-6 flex-1">
+<span class="font-mono font-bold text-xl tracking-tighter text-blue-400">ARA</span>
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-zinc-500 hover:text-blue-300 transition-colors uppercase font-mono text-[10px] tracking-widest" href="#">Dashboard</a>
+<a class="text-blue-400 border-b-2 border-blue-400 pb-1 uppercase font-mono text-[10px] tracking-widest" href="#">History</a>
+<a class="text-zinc-500 hover:text-blue-300 transition-colors uppercase font-mono text-[10px] tracking-widest" href="#">Settings</a>
+</div>
+</div>
+<div class="flex-1 flex justify-center max-w-xl">
+<div class="bg-surface-container-low px-4 py-1.5 rounded border border-white/5 flex items-center gap-3 w-full">
+<span class="material-symbols-outlined text-[16px] text-zinc-500">search</span>
+<span class="text-on-surface-variant text-sm truncate">How will solid-state battery technology impact the EV market by 2030?</span>
+</div>
+</div>
+<div class="flex items-center gap-4 flex-1 justify-end">
+<button class="bg-error-container text-on-error-container px-3 py-1 rounded text-[10px] font-mono font-bold hover:opacity-80 transition-opacity">KILL_SWITCH</button>
+<div class="flex gap-3 text-zinc-500">
+<span class="material-symbols-outlined text-[20px] hover:text-blue-300 cursor-pointer">account_balance_wallet</span>
+<span class="material-symbols-outlined text-[20px] hover:text-blue-300 cursor-pointer">notifications</span>
+<span class="material-symbols-outlined text-[20px] hover:text-blue-300 cursor-pointer">account_circle</span>
+</div>
+</div>
+</header>
+<main class="flex-1 flex overflow-hidden">
+<!-- Left Rail: SideNavBar + Plan Tree -->
+<aside class="bg-[#1c1b1b] border-r border-white/5 w-72 flex flex-col h-full">
+<div class="p-4 border-b border-white/5">
+<div class="flex items-center justify-between mb-4">
+<span class="mono-label text-[10px] text-zinc-500 tracking-[0.2em] uppercase">Status</span>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="mono-label text-[10px] text-primary">RESEARCH_ACTIVE</span>
+</div>
+</div>
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-on-primary py-2 rounded-md font-mono text-xs font-bold tracking-tight mb-2 uppercase">New Research</button>
+</div>
+<!-- Navigation Links (SideNavBar Context) -->
+<nav class="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+<div class="px-2 py-3">
+<h3 class="mono-label text-[9px] text-zinc-600 uppercase tracking-widest mb-4">Research Plan</h3>
+<div class="space-y-4">
+<!-- Node 1 -->
+<div class="space-y-2 group cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="text-xs text-on-surface-variant leading-tight group-hover:text-on-surface transition-colors">Market analysis of solid-state batteries</span>
+<span class="material-symbols-outlined text-[14px] text-primary">check_circle</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-full"></div>
+</div>
+</div>
+<!-- Node 2 -->
+<div class="space-y-2 group cursor-pointer">
+<div class="flex justify-between items-start">
+<span class="text-xs text-on-surface leading-tight">Comparison of cobalt-free cathodes</span>
+<span class="mono-label text-[8px] text-primary animate-pulse uppercase">Active</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[45%]"></div>
+</div>
+</div>
+<!-- Node 3 -->
+<div class="space-y-2 group cursor-pointer opacity-50">
+<div class="flex justify-between items-start">
+<span class="text-xs text-on-surface-variant leading-tight">Global supply chain bottlenecks for electrolyte materials</span>
+<span class="mono-label text-[8px] text-zinc-500 uppercase">Queued</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-0"></div>
+</div>
+</div>
+<!-- Node 4 -->
+<div class="space-y-2 group cursor-pointer opacity-50">
+<div class="flex justify-between items-start">
+<span class="text-xs text-on-surface-variant leading-tight">Safety profile vs current Li-ion tech</span>
+<span class="mono-label text-[8px] text-zinc-500 uppercase">Queued</span>
+</div>
+<div class="w-full bg-surface-container-highest h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-0"></div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+<div class="p-4 bg-surface-container-lowest border-t border-white/5 space-y-4">
+<div class="flex items-center gap-3 group cursor-pointer">
+<span class="material-symbols-outlined text-zinc-500 group-hover:text-on-surface transition-colors">help</span>
+<span class="mono-label text-xs text-zinc-500 group-hover:text-on-surface transition-colors">Docs</span>
+</div>
+<div class="flex items-center gap-3 group cursor-pointer">
+<span class="material-symbols-outlined text-zinc-500 group-hover:text-on-surface transition-colors">terminal</span>
+<span class="mono-label text-xs text-zinc-500 group-hover:text-on-surface transition-colors">v1.2.4-stable</span>
+</div>
+</div>
+</aside>
+<!-- Center: Live Stream -->
+<section class="flex-1 bg-surface flex flex-col overflow-hidden">
+<div class="px-8 py-4 border-b border-white/5 flex justify-between items-center bg-surface">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary" data-weight="fill">sensors</span>
+<span class="mono-label text-[10px] tracking-widest text-zinc-400 uppercase">Live Stream [Channel_01]</span>
+</div>
+<div class="flex gap-2">
+<span class="text-[10px] mono-label text-zinc-600">TOKENS/SEC: 42</span>
+<span class="text-[10px] mono-label text-zinc-600">LATENCY: 124ms</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-12 custom-scrollbar">
+<div class="max-w-3xl mx-auto space-y-8">
+<div class="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+<h1 class="text-3xl font-headline font-semibold text-on-surface tracking-tight leading-tight">Comprehensive Technical Assessment: Cobalt-Free Cathode Alternatives</h1>
+<p class="text-on-surface-variant leading-relaxed text-lg font-light">
+                            The transition toward cobalt-free cathodes is primarily driven by ESG concerns and cost volatility in the Democratic Republic of Congo supply chain <sup class="text-primary font-mono text-xs px-1 bg-primary/10 rounded cursor-help">[1]</sup>. Research indicates that High-Nickel Layered Oxides (NMX) and Lithium Iron Phosphate (LFP) are the current leaders in commercial feasibility <sup class="text-primary font-mono text-xs px-1 bg-primary/10 rounded cursor-help">[2]</sup>. 
+                        </p>
+<div class="bg-surface-container-low border-l-2 border-primary p-6 space-y-4">
+<h4 class="mono-label text-[10px] text-primary tracking-widest uppercase">Comparative Data Matrix</h4>
+<p class="text-on-surface-variant font-light">
+                                While LFP offers superior cycle life and thermal stability, its lower energy density (approx. 160-210 Wh/kg) remains a bottleneck for high-performance long-range EVs <sup class="text-primary font-mono text-xs px-1 bg-primary/10 rounded cursor-help">[4]</sup>. Conversely, Lithium Manganese Iron Phosphate (LMFP) is emerging as a "goldilocks" solution, bridging the gap between LFP safety and high-nickel energy density <sup class="text-primary font-mono text-xs px-1 bg-primary/10 rounded cursor-help">[7]</sup>.
+                            </p>
+</div>
+<p class="text-on-surface-variant leading-relaxed text-lg font-light">
+                            Solid-state configurations using these cathodes require interfacial stabilization layers to prevent dendrite growth. Initial benchmarks from QuantumScape and Solid Power suggest that sulfide-based solid electrolytes paired with zero-cobalt cathodes can achieve &gt;800 Wh/L volumetric density <sup class="text-primary font-mono text-xs px-1 bg-primary/10 rounded cursor-help">[9]</sup>. Streaming additional data on solid-state interface resistance...
+                        </p>
+<div class="flex items-center gap-2 pt-4">
+<div class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></div>
+<span class="mono-label text-xs text-primary/70 italic">ARA is analyzing source [12]: 'Interfacial Chemistry of Solid Electrolytes'...</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Right Rail: Sources & Cost -->
+<aside class="w-80 bg-surface-container-low border-l border-white/5 flex flex-col overflow-hidden">
+<div class="p-4 border-b border-white/5">
+<span class="mono-label text-[10px] text-zinc-500 tracking-[0.2em] uppercase">Verified Sources [14]</span>
+</div>
+<div class="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4">
+<!-- Source 1 -->
+<div class="bg-surface-container rounded p-3 border border-transparent hover:border-white/10 transition-all cursor-pointer group">
+<div class="flex items-start gap-3 mb-2">
+<div class="w-6 h-6 rounded bg-surface-variant flex items-center justify-center text-[10px] mono-label text-zinc-400">1</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-xs font-bold text-on-surface truncate group-hover:text-primary transition-colors">Advanced Energy Materials</h4>
+<p class="text-[9px] mono-label text-zinc-500 truncate">wiley.com/journal/aenm</p>
+</div>
+</div>
+<p class="text-[10px] text-on-surface-variant leading-relaxed line-clamp-2">Recent breakthroughs in high-nickel cathode stabilization using atomic layer deposition...</p>
+</div>
+<!-- Source 2 -->
+<div class="bg-surface-container rounded p-3 border border-transparent hover:border-white/10 transition-all cursor-pointer group">
+<div class="flex items-start gap-3 mb-2">
+<div class="w-6 h-6 rounded bg-surface-variant flex items-center justify-center text-[10px] mono-label text-zinc-400">2</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-xs font-bold text-on-surface truncate group-hover:text-primary transition-colors">BloombergNEF Battery Report 2024</h4>
+<p class="text-[9px] mono-label text-zinc-500 truncate">bnef.com/insights/battery-price</p>
+</div>
+</div>
+<p class="text-[10px] text-on-surface-variant leading-relaxed line-clamp-2">Market dynamics shifted as LFP adoption surpassed 40% globally in the passenger vehicle segment...</p>
+</div>
+<!-- Source 3 -->
+<div class="bg-surface-container rounded p-3 border border-transparent hover:border-white/10 transition-all cursor-pointer group">
+<div class="flex items-start gap-3 mb-2">
+<div class="w-6 h-6 rounded bg-surface-variant flex items-center justify-center text-[10px] mono-label text-zinc-400">3</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-xs font-bold text-on-surface truncate group-hover:text-primary transition-colors">Journal of Power Sources</h4>
+<p class="text-[9px] mono-label text-zinc-500 truncate">sciencedirect.com/jps</p>
+</div>
+</div>
+<p class="text-[10px] text-on-surface-variant leading-relaxed line-clamp-2">Dendrite suppression mechanisms in solid-state electrolytes: A comprehensive review...</p>
+</div>
+<!-- Source 4 -->
+<div class="bg-surface-container rounded p-3 border border-transparent hover:border-white/10 transition-all cursor-pointer group">
+<div class="flex items-start gap-3 mb-2">
+<div class="w-6 h-6 rounded bg-surface-variant flex items-center justify-center text-[10px] mono-label text-zinc-400">4</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-xs font-bold text-on-surface truncate group-hover:text-primary transition-colors">US Dept of Energy (EERE)</h4>
+<p class="text-[9px] mono-label text-zinc-500 truncate">energy.gov/eere/vehicles</p>
+</div>
+</div>
+<p class="text-[10px] text-on-surface-variant leading-relaxed line-clamp-2">Target benchmarks for EV battery performance and cost reduction strategies for 2030.</p>
+</div>
+</div>
+<!-- Cost Meter -->
+<div class="p-6 bg-surface-container-highest border-t border-white/10 shadow-2xl">
+<div class="flex flex-col gap-1">
+<span class="mono-label text-[9px] text-zinc-400 tracking-[0.2em] uppercase">Compute Expenditure</span>
+<div class="flex items-baseline gap-2">
+<span class="text-2xl font-mono font-bold text-primary">$0.4281</span>
+<span class="mono-label text-[10px] text-zinc-500">USD_ACCUMULATED</span>
+</div>
+</div>
+<div class="mt-4 grid grid-cols-2 gap-2">
+<div class="bg-black/20 p-2 rounded">
+<span class="block mono-label text-[8px] text-zinc-500">LLM_UNITS</span>
+<span class="block mono-label text-[10px] text-on-surface">1.2M</span>
+</div>
+<div class="bg-black/20 p-2 rounded">
+<span class="block mono-label text-[8px] text-zinc-500">SEARCH_OPS</span>
+<span class="block mono-label text-[10px] text-on-surface">14/50</span>
+</div>
+</div>
+</div>
+</aside>
+</main>
+<!-- Floating UI Contextual Helper (Suppressed but available for semantic structure) -->
+<div class="hidden">
+<span class="material-symbols-outlined" data-icon="account_tree">account_tree</span>
+<span class="material-symbols-outlined" data-icon="sensors">sensors</span>
+<span class="material-symbols-outlined" data-icon="menu_book">menu_book</span>
+<span class="material-symbols-outlined" data-icon="payments">payments</span>
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</div>
+</body></html>
