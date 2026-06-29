@@ -1,0 +1,99 @@
+{
+  "slug": "sample-quantum",
+  "title": "What is quantum supremacy?",
+  "question": "What is quantum supremacy?",
+  "model": "claude-opus-4-5",
+  "created_at": "2026-06-28T00:00:00Z",
+  "events": [
+    {
+      "t_ms": 0,
+      "event": {
+        "type": "plan_ready",
+        "plan": {
+          "original_question": "What is quantum supremacy?",
+          "web_search_enabled": true,
+          "sub_queries": [
+            { "id": "11111111-1111-1111-1111-111111111111", "question": "Define quantum supremacy", "rationale": "Establish the core definition.", "priority": 3 },
+            { "id": "22222222-2222-2222-2222-222222222222", "question": "Notable demonstrations of quantum supremacy", "rationale": "Ground it in real experiments.", "priority": 2 },
+            { "id": "33333333-3333-3333-3333-333333333333", "question": "Criticisms of quantum supremacy claims", "rationale": "Balance the picture with skepticism.", "priority": 1 }
+          ]
+        }
+      }
+    },
+    { "t_ms": 300, "event": { "type": "researcher_started", "sub_query_id": "11111111-1111-1111-1111-111111111111", "question": "Define quantum supremacy" } },
+    { "t_ms": 350, "event": { "type": "researcher_started", "sub_query_id": "22222222-2222-2222-2222-222222222222", "question": "Notable demonstrations of quantum supremacy" } },
+    { "t_ms": 400, "event": { "type": "researcher_started", "sub_query_id": "33333333-3333-3333-3333-333333333333", "question": "Criticisms of quantum supremacy claims" } },
+    { "t_ms": 700, "event": { "type": "researcher_progress", "sub_query_id": "11111111-1111-1111-1111-111111111111", "tool_call": "web_search: quantum supremacy definition" } },
+    {
+      "t_ms": 1400,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "11111111-1111-1111-1111-111111111111",
+        "finding": {
+          "sub_query_id": "11111111-1111-1111-1111-111111111111",
+          "summary": "Quantum supremacy is the point at which a quantum computer solves a problem no classical computer can in feasible time.",
+          "key_facts": [],
+          "sources": [
+            { "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "url": "https://example.com/quantum-supremacy", "title": "Quantum supremacy explained" }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 1600,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "22222222-2222-2222-2222-222222222222",
+        "finding": {
+          "sub_query_id": "22222222-2222-2222-2222-222222222222",
+          "summary": "Google's 2019 Sycamore experiment is the best-known claimed demonstration.",
+          "key_facts": [],
+          "sources": [
+            { "id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", "url": "https://example.com/sycamore", "title": "Sycamore processor" }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 1750,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "33333333-3333-3333-3333-333333333333",
+        "finding": {
+          "sub_query_id": "33333333-3333-3333-3333-333333333333",
+          "summary": "IBM argued the classical runtime estimate was inflated, so the 'supremacy' label is contested.",
+          "key_facts": [],
+          "sources": [
+            { "id": "cccccccc-cccc-cccc-cccc-cccccccccccc", "url": "https://example.com/ibm-response", "title": "IBM's response" }
+          ]
+        }
+      }
+    },
+    { "t_ms": 1900, "event": { "type": "synthesis_token", "token": "Quantum supremacy marks the moment " } },
+    { "t_ms": 2000, "event": { "type": "synthesis_token", "token": "a quantum computer outperforms any classical one [1]. " } },
+    { "t_ms": 2100, "event": { "type": "synthesis_token", "token": "The landmark demonstration was Google's Sycamore in 2019 [2]." } },
+    {
+      "t_ms": 2300,
+      "event": {
+        "type": "report_complete",
+        "report": {
+          "report_id": "99999999-9999-9999-9999-999999999999",
+          "original_question": "What is quantum supremacy?",
+          "web_search_enabled": true,
+          "executive_summary": "Quantum supremacy is the milestone at which a programmable quantum device solves a problem no classical computer can solve in feasible time [1]. The most prominent demonstration was Google's 2019 Sycamore experiment [2], though the claim has drawn methodological criticism [3].",
+          "sections": [
+            { "heading": "Definition", "content": "Quantum supremacy denotes the point where a quantum computer outperforms the best classical computer on a specific task [1].", "citation_ids": ["aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"] },
+            { "heading": "Landmark demonstration", "content": "In 2019 Google reported that its 53-qubit Sycamore processor performed a sampling task in 200 seconds that it estimated would take a classical supercomputer millennia [2].", "citation_ids": ["bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"] },
+            { "heading": "Criticism", "content": "IBM argued the classical runtime estimate was inflated and the task could be simulated far faster, so the 'supremacy' label remains contested [3].", "citation_ids": ["cccccccc-cccc-cccc-cccc-cccccccccccc"] }
+          ],
+          "citations": [
+            { "id": "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa", "url": "https://example.com/quantum-supremacy", "title": "Quantum supremacy explained" },
+            { "id": "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb", "url": "https://example.com/sycamore", "title": "Sycamore processor" },
+            { "id": "cccccccc-cccc-cccc-cccc-cccccccccccc", "url": "https://example.com/ibm-response", "title": "IBM's response" }
+          ]
+        }
+      }
+    },
+    { "t_ms": 2300, "event": { "type": "cost_update", "model": "claude-opus-4-5", "input_tokens": 4200, "output_tokens": 600, "cumulative_usd": 0.0492 } }
+  ]
+}
