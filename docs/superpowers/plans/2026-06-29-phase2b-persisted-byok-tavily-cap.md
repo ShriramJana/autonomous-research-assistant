@@ -853,7 +853,7 @@ from ara.credentials import CredentialError, CredentialRecord
 from ara.crypto import CredentialDecryptError, encrypt_secret
 from ara.runtime.resolver import resolve_overrides
 
-KEY = "tF8m4Q7nQ4t0r6m2yq3uVtR1pXzJ0aB2cD4eF6gH8I="
+KEY = "nPQdjPgh3-EHVpruwF9thxZ6C-RntJeekJ05w6lAB4c="  # a valid 32-byte urlsafe-b64 Fernet key
 
 
 def _settings() -> Settings:
