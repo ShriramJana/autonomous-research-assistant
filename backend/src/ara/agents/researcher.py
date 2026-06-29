@@ -17,6 +17,7 @@ Failure modes (all raise `ResearcherError`):
 
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from typing import Any
 from uuid import UUID
 
@@ -27,6 +28,8 @@ from ara.llm.client import AnthropicClient, LLMClient, ToolSpec
 from ara.llm.search import format_search_results, tavily_search
 from ara.models.events import ResearcherProgress, ResearcherStarted
 from ara.models.research import KeyFact, Source, SubQuery, SubQueryFinding
+
+OnTavilySearch = Callable[[], Awaitable[None]]
 
 SUBMIT_FINDING_TOOL_NAME = "submit_finding"
 
@@ -165,6 +168,7 @@ async def research_sub_query(
     max_tokens: int = 8192,
     web_search_enabled: bool = True,
     tavily_api_key: str | None = None,
+    on_tavily_search: OnTavilySearch | None = None,
 ) -> SubQueryFinding:
     """Research one sub-query end-to-end.
 
@@ -193,6 +197,7 @@ async def research_sub_query(
             input_token_budget=input_token_budget,
             max_tokens=max_tokens,
             tavily_api_key=tavily_api_key,
+            on_tavily_search=on_tavily_search,
         )
 
     tools: list[ToolSpec]
@@ -252,6 +257,7 @@ async def _research_with_tavily(
     input_token_budget: int,
     max_tokens: int,
     tavily_api_key: str | None,
+    on_tavily_search: OnTavilySearch | None = None,
 ) -> SubQueryFinding:
     """Client-side search loop for providers without server-side web search.
 
@@ -311,6 +317,8 @@ async def _research_with_tavily(
                     tool_call=f"{WEB_SEARCH_CLIENT_TOOL_NAME}({query!r})",
                 )
             )
+            if on_tavily_search is not None:
+                await on_tavily_search()
             rows = await tavily_search(query, api_key=tavily_api_key)
             messages.append(
                 {"role": "tool", "tool_call_id": tu.id, "content": format_search_results(rows)}

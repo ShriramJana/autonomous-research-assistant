@@ -438,6 +438,47 @@ async def test_researcher_tavily_loop_raises_when_stuck(monkeypatch: Any) -> Non
         )
 
 
+async def test_tavily_loop_invokes_on_tavily_search(monkeypatch: Any) -> None:
+    from ara.agents import researcher as researcher_mod
+
+    async def fake_tavily(query: str, *, api_key: str | None, max_results: int = 5) -> list[Any]:
+        return []
+
+    monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
+
+    counter = {"n": 0}
+
+    async def on_search() -> None:
+        counter["n"] += 1
+
+    sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
+    llm = _ScriptedLLM(
+        [
+            _result(
+                tool_uses=[_tu("web_search", {"query": "a"}), _tu("web_search", {"query": "b"})]
+            ),
+            _result(
+                tool_uses=[
+                    _tu(
+                        SUBMIT_FINDING_TOOL_NAME,
+                        {
+                            "summary": "s",
+                            "key_facts": [{"statement": "x", "source_urls": ["https://a.com"]}],
+                            "sources": [{"url": "https://a.com", "title": "A"}],
+                        },
+                    )
+                ]
+            ),
+        ]
+    )
+    emit, _ = _make_emit()
+    await research_sub_query(
+        sub_query=sq, llm=llm, model="gpt-4o", emit=emit,
+        tavily_api_key="k", on_tavily_search=on_search,
+    )
+    assert counter["n"] == 2  # one per web_search call
+
+
 async def test_researcher_offline_works_for_openai_client() -> None:
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
     llm = _ScriptedLLM(
