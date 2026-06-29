@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { apiGet, createResearch } from "@/lib/api";
-import { hasStoredApiKey } from "@/lib/api-key";
+import { getCredentials } from "@/lib/credentials";
 import { useBrowseWeb } from "@/hooks/use-browse-web";
 import { type Depth, useDepth } from "@/hooks/use-depth";
 
@@ -48,17 +48,11 @@ export function ResearchForm({
   const [depthOpen, setDepthOpen] = useState(false);
   const { depth, setDepth } = useDepth();
   const { browseWeb, toggleBrowseWeb } = useBrowseWeb();
-  const [hasKey, setHasKey] = useState(false);
+  const [activeProvider, setActiveProvider] = useState<"free" | "anthropic" | "openai">("free");
   const [quota, setQuota] = useState<Quota | null>(null);
-  const [provider, setProvider] = useState<"anthropic" | "openai">("anthropic");
-  const [baseUrl, setBaseUrl] = useState("https://api.openai.com/v1");
-  const [providerModel, setProviderModel] = useState("");
-  const [providerKey, setProviderKey] = useState("");
 
   useEffect(() => {
-    // Read localStorage post-mount to avoid SSR/CSR hydration mismatch.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setHasKey(hasStoredApiKey());
+    getCredentials().then((c) => setActiveProvider(c.active_provider)).catch(() => setActiveProvider("free"));
   }, []);
   useEffect(() => {
     apiGet<Quota>("/api/quota")
@@ -66,7 +60,7 @@ export function ResearchForm({
       .catch(() => setQuota(null));
   }, []);
 
-  const freeTier = !hasKey;
+  const freeTier = activeProvider === "free";
   const freeBlocked =
     freeTier &&
     quota !== null &&
@@ -92,10 +86,6 @@ export function ResearchForm({
       const { report_id } = await createResearch(trimmed, {
         depth,
         browseWeb,
-        provider,
-        ...(provider === "openai"
-          ? { baseUrl, model: providerModel, providerKey }
-          : {}),
       });
       router.push(`/r/${report_id}`);
     } catch (err) {
@@ -215,25 +205,10 @@ export function ResearchForm({
                 Browse Web · {browseWeb ? "On" : "Off"}
               </span>
             </button>
-            <button
-              type="button"
-              onClick={() => setProvider((p) => (p === "anthropic" ? "openai" : "anthropic"))}
-              className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
-              aria-label={`Provider: ${provider}`}
-            >
-              <span className="font-mono text-[10px] uppercase tracking-wider">
-                Provider · {provider === "anthropic" ? "Anthropic" : "OpenAI-compat"}
-              </span>
-            </button>
           </div>
           <button
             type="submit"
-            disabled={
-              !question.trim() ||
-              submitting ||
-              freeBlocked ||
-              (provider === "openai" && (!baseUrl || !providerModel || !providerKey))
-            }
+            disabled={!question.trim() || submitting || freeBlocked}
             className="from-primary to-primary-container text-primary-foreground shadow-primary/10 inline-flex items-center gap-2 rounded-md bg-gradient-to-r px-8 py-2 text-sm font-bold shadow-lg transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span className="font-mono text-xs tracking-tight">
@@ -245,33 +220,6 @@ export function ResearchForm({
           </button>
         </div>
       </div>
-      {provider === "openai" ? (
-        <div className="mt-3 flex flex-col gap-2">
-          <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
-            Bring an Anthropic key for built-in web search (recommended). Other
-            providers search via Tavily; quality scales with the model you bring.
-          </p>
-          <input
-            value={baseUrl}
-            onChange={(e) => setBaseUrl(e.target.value)}
-            placeholder="Base URL (e.g. https://api.openai.com/v1)"
-            className="bg-secondary text-foreground placeholder:text-muted-foreground/50 rounded-md px-3 py-2 font-mono text-xs outline-none"
-          />
-          <input
-            value={providerModel}
-            onChange={(e) => setProviderModel(e.target.value)}
-            placeholder="Model (e.g. gpt-4o)"
-            className="bg-secondary text-foreground placeholder:text-muted-foreground/50 rounded-md px-3 py-2 font-mono text-xs outline-none"
-          />
-          <input
-            type="password"
-            value={providerKey}
-            onChange={(e) => setProviderKey(e.target.value)}
-            placeholder="Provider API key (sent per request, not stored)"
-            className="bg-secondary text-foreground placeholder:text-muted-foreground/50 rounded-md px-3 py-2 font-mono text-xs outline-none"
-          />
-        </div>
-      ) : null}
       {error ? (
         <p className="text-destructive mt-3 px-2 font-mono text-xs">
           {error}
