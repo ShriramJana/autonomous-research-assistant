@@ -1,0 +1,2020 @@
+{
+  "slug": "financial-crisis-2008",
+  "title": "What caused the 2008 financial crisis?",
+  "question": "What caused the 2008 financial crisis?",
+  "model": "claude-sonnet-4-5",
+  "created_at": "2026-06-29T02:54:10.266839+00:00",
+  "events": [
+    {
+      "t_ms": 18076,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 1056,
+        "output_tokens": 448,
+        "cumulative_usd": 0.009888000000000001
+      }
+    },
+    {
+      "t_ms": 18076,
+      "event": {
+        "type": "plan_ready",
+        "plan": {
+          "original_question": "What caused the 2008 financial crisis?",
+          "sub_queries": [
+            {
+              "id": "88642744-d5f8-4b0f-8daf-f31488ee6769",
+              "question": "What were the primary causes and triggers of the 2008 financial crisis, including the role of subprime mortgages and housing bubble?",
+              "rationale": "This foundational query establishes the core mechanisms and direct causes that led to the crisis, which is essential for understanding the overall event.",
+              "priority": 3
+            },
+            {
+              "id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+              "question": "What role did financial deregulation and regulatory failures play in enabling the 2008 financial crisis?",
+              "rationale": "Understanding the regulatory environment and policy decisions that allowed risky practices to flourish provides critical context for how the crisis became systemic.",
+              "priority": 3
+            },
+            {
+              "id": "3c716bcd-12c1-434f-8452-98cda0ff0c7f",
+              "question": "How did financial instruments like mortgage-backed securities (MBS), collateralized debt obligations (CDOs), and credit default swaps contribute to the 2008 crisis?",
+              "rationale": "These complex financial products were central to spreading and amplifying the crisis throughout the financial system, making this a key substantive component.",
+              "priority": 2
+            },
+            {
+              "id": "527cb39b-1574-472e-a961-14723357dc20",
+              "question": "What were the roles of major financial institutions like Lehman Brothers, Bear Stearns, and AIG in the 2008 financial crisis collapse?",
+              "rationale": "Concrete case studies of specific institutions provide tangible examples that illustrate how the crisis unfolded in practice and its severity.",
+              "priority": 2
+            },
+            {
+              "id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+              "question": "What are the main criticisms and alternative explanations economists have offered for the causes of the 2008 financial crisis?",
+              "rationale": "Exploring different perspectives and debates among economists adds nuance and acknowledges that there are multiple viewpoints on the crisis's causes.",
+              "priority": 1
+            }
+          ],
+          "web_search_enabled": true
+        }
+      }
+    },
+    {
+      "t_ms": 18077,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "88642744-d5f8-4b0f-8daf-f31488ee6769",
+        "question": "What were the primary causes and triggers of the 2008 financial crisis, including the role of subprime mortgages and housing bubble?"
+      }
+    },
+    {
+      "t_ms": 18079,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+        "question": "What role did financial deregulation and regulatory failures play in enabling the 2008 financial crisis?"
+      }
+    },
+    {
+      "t_ms": 18080,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "3c716bcd-12c1-434f-8452-98cda0ff0c7f",
+        "question": "How did financial instruments like mortgage-backed securities (MBS), collateralized debt obligations (CDOs), and credit default swaps contribute to the 2008 crisis?"
+      }
+    },
+    {
+      "t_ms": 18081,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "527cb39b-1574-472e-a961-14723357dc20",
+        "question": "What were the roles of major financial institutions like Lehman Brothers, Bear Stearns, and AIG in the 2008 financial crisis collapse?"
+      }
+    },
+    {
+      "t_ms": 18081,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+        "question": "What are the main criticisms and alternative explanations economists have offered for the causes of the 2008 financial crisis?"
+      }
+    },
+    {
+      "t_ms": 58280,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 22206,
+        "output_tokens": 1686,
+        "cumulative_usd": 0.101796
+      }
+    },
+    {
+      "t_ms": 58280,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "88642744-d5f8-4b0f-8daf-f31488ee6769",
+        "tool_call": "web_search('2008 financial crisis causes subprime mortgages housing bubble')"
+      }
+    },
+    {
+      "t_ms": 58280,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "88642744-d5f8-4b0f-8daf-f31488ee6769",
+        "tool_call": "web_search('housing bubble 2008 triggers collapse')"
+      }
+    },
+    {
+      "t_ms": 58280,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "88642744-d5f8-4b0f-8daf-f31488ee6769",
+        "tool_call": "web_search('subprime mortgage crisis role 2008')"
+      }
+    },
+    {
+      "t_ms": 58282,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "88642744-d5f8-4b0f-8daf-f31488ee6769",
+        "finding": {
+          "sub_query_id": "88642744-d5f8-4b0f-8daf-f31488ee6769",
+          "summary": "The 2008 financial crisis was primarily caused by a housing bubble fueled by excessive speculation, risky subprime mortgage lending, and regulatory failures. The crisis began when housing prices peaked in 2006 and borrowers, especially those with adjustable-rate subprime mortgages, could no longer afford payments as the Federal Reserve raised interest rates. This triggered mass foreclosures and the collapse of mortgage-backed securities, which spread throughout the financial system and led to the failure of major institutions like Lehman Brothers in September 2008.",
+          "key_facts": [
+            {
+              "statement": "The housing bubble was driven by excessive speculation on property values by both homeowners and financial institutions, exacerbated by predatory lending for subprime mortgages and deficiencies in regulation.",
+              "citation_ids": [
+                "9a1830f4-e885-41d7-a9f0-1305282f4dfc"
+              ]
+            },
+            {
+              "statement": "Subprime mortgages\u2014loans given to borrowers with bad credit\u2014made up nearly one in four mortgages (23.4%) by 2006, with financial institutions lending out $600 billion in subprime mortgages that year.",
+              "citation_ids": [
+                "78170150-438a-41eb-ad05-25894663e786"
+              ]
+            },
+            {
+              "statement": "Cheap credit and relaxed lending standards, including interest-only loans and adjustable-rate mortgages with little documentation requirements, allowed high-risk borrowers to purchase overpriced homes, fueling the housing bubble.",
+              "citation_ids": [
+                "78170150-438a-41eb-ad05-25894663e786",
+                "ea159844-64db-45cf-aa3d-f002a611ce4d"
+              ]
+            },
+            {
+              "statement": "The Federal Reserve lowered interest rates from 6.5% to 1.0% between 2000 and 2003 to combat the dot-com bubble collapse and September 11 attacks, which encouraged borrowing and helped fuel the housing bubble.",
+              "citation_ids": [
+                "9a1830f4-e885-41d7-a9f0-1305282f4dfc"
+              ]
+            },
+            {
+              "statement": "Housing prices peaked in 2006, then fell by 27.4% from their peak to their low point in 2012, leaving many homeowners owing more than their homes were worth.",
+              "citation_ids": [
+                "9a1830f4-e885-41d7-a9f0-1305282f4dfc",
+                "6e04ccb6-ebf5-492a-8668-b430b1cd5817"
+              ]
+            },
+            {
+              "statement": "When the Federal Reserve raised interest rates, homeowners with adjustable-rate mortgages and interest-only loans were unable to make their monthly payments and could not refinance or sell their homes due to falling real estate prices.",
+              "citation_ids": [
+                "78170150-438a-41eb-ad05-25894663e786"
+              ]
+            },
+            {
+              "statement": "The crisis was amplified by Wall Street demand for mortgage-backed securities (MBS) and collateralized debt obligations (CDOs), which were composed of high-risk subprime mortgages but received high ratings from credit agencies.",
+              "citation_ids": [
+                "3164e229-06f5-436e-adaf-9cf2d752e4bf"
+              ]
+            },
+            {
+              "statement": "The first phase of the crisis began in early 2007 when mortgage-backed securities tied to U.S. real estate collapsed in value, spreading to a global liquidity crisis by mid-2007 and culminating with Lehman Brothers' bankruptcy in September 2008.",
+              "citation_ids": [
+                "9a1830f4-e885-41d7-a9f0-1305282f4dfc",
+                "98749b14-b9b1-412b-8d90-ac6443c20ca3"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "9a1830f4-e885-41d7-a9f0-1305282f4dfc",
+              "url": "https://en.wikipedia.org/wiki/2008_financial_crisis",
+              "title": "2008 financial crisis - Wikipedia"
+            },
+            {
+              "id": "78170150-438a-41eb-ad05-25894663e786",
+              "url": "https://www.fool.com/the-ascent/mortgages/subprime-mortgage-crisis/",
+              "title": "The Subprime Mortgage Crisis of 2008: A Beginner's Guide | The Motley Fool"
+            },
+            {
+              "id": "98749b14-b9b1-412b-8d90-ac6443c20ca3",
+              "url": "https://en.wikipedia.org/wiki/Subprime_mortgage_crisis",
+              "title": "Subprime mortgage crisis - Wikipedia"
+            },
+            {
+              "id": "3164e229-06f5-436e-adaf-9cf2d752e4bf",
+              "url": "https://www.americanprogress.org/article/2008-housing-crisis/",
+              "title": "The 2008 Housing Crisis - Center for American Progress"
+            },
+            {
+              "id": "6e04ccb6-ebf5-492a-8668-b430b1cd5817",
+              "url": "https://www.noradarealestate.com/blog/housing-market-crash-2008/",
+              "title": "Housing Market Crash 2008 Explained: Causes and Effects"
+            },
+            {
+              "id": "ea159844-64db-45cf-aa3d-f002a611ce4d",
+              "url": "https://www.terry.uga.edu/study-offers-new-perspective-2008-housing-crash/",
+              "title": "Study offers new perspective on the 2008 housing crash - Terry College of Business"
+            },
+            {
+              "id": "0f81c2f2-bf24-43f1-8d3b-42b308cd4135",
+              "url": "https://www.federalreservehistory.org/essays/subprime-mortgage-crisis",
+              "title": "Subprime Mortgage Crisis | Federal Reserve History"
+            },
+            {
+              "id": "bd4e8114-1dcd-4b45-be22-5801085deb60",
+              "url": "https://retroreport.org/video/the-2008-financial-crisis-explained-housing-bubble-to-bailout/",
+              "title": "The 2008 Financial Crisis Explained: Housing Bubble to Bailout - Retro Report"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 61977,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 20947,
+        "output_tokens": 1661,
+        "cumulative_usd": 0.189552
+      }
+    },
+    {
+      "t_ms": 61977,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+        "tool_call": "web_search('economist criticisms causes 2008 financial crisis')"
+      }
+    },
+    {
+      "t_ms": 61977,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+        "tool_call": "web_search('alternative explanations 2008 financial crisis economists')"
+      }
+    },
+    {
+      "t_ms": 61977,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+        "tool_call": "web_search('heterodox economists 2008 crisis Austrian Keynesian')"
+      }
+    },
+    {
+      "t_ms": 61977,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+        "tool_call": "web_search('regulatory failure deregulation 2008 financial crisis debate')"
+      }
+    },
+    {
+      "t_ms": 61977,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+        "tool_call": "web_search('monetary policy Federal Reserve 2008 crisis blame')"
+      }
+    },
+    {
+      "t_ms": 61978,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+        "finding": {
+          "sub_query_id": "3ae74293-3ebb-4956-8a5e-23bc01b81bac",
+          "summary": "Economists have offered diverse criticisms and alternative explanations for the 2008 financial crisis. Mainstream economists primarily blame flawed financial regulation and supervision, followed by underestimation of risk in securities and irrational beliefs about house prices. Alternative explanations include the Austrian School's attribution to excessive central bank credit expansion causing malinvestment, the Keynesian/savings glut thesis pointing to insufficient productive investment relative to savings, and critiques that mainstream DSGE models ignored financial intermediaries and credit cycles.",
+          "key_facts": [
+            {
+              "statement": "Surveyed economists identified flawed financial regulation and supervision as the main culprit of the crisis, followed closely by underestimating risks in securities created with financial engineering, with mortgage fraud ranking third.",
+              "citation_ids": [
+                "7631e614-f057-4ffb-8e17-e49e2d3390d0",
+                "4eda1dfd-2653-45fc-a23e-a35b80167893"
+              ]
+            },
+            {
+              "statement": "After regulation, the most highly rated causes were irrational beliefs on house prices or risk and corrupt incentives including fraud in mortgages and credit rating agencies.",
+              "citation_ids": [
+                "4eda1dfd-2653-45fc-a23e-a35b80167893"
+              ]
+            },
+            {
+              "statement": "Economists were criticized for failing to anticipate the crisis because existing models ignored the behavior of financial intermediaries and other credit-related factors.",
+              "citation_ids": [
+                "8f7dee0c-9a6e-44c8-9be8-2f00e4f8e17c"
+              ]
+            },
+            {
+              "statement": "Mainstream DSGE models left no room for financial markets and ignored other types of shocks such as credit cycles in which central bank credit boosts create malinvestment and subsequent busts, or disruptions in financial intermediation.",
+              "citation_ids": [
+                "c6436d58-6b6e-4d4b-bcb5-4459d27a025c"
+              ]
+            },
+            {
+              "statement": "The monetarist explanation blames loose monetary policy for igniting the credit boom that led to the crisis.",
+              "citation_ids": [
+                "02d26c7e-a398-40c0-a876-8c073d18e4d0"
+              ]
+            },
+            {
+              "statement": "The Keynesian or savings glut thesis attributes the crisis to insufficient aggregate investment relative to savings, with too few productive assets created, driving the private sector towards over-indebtedness.",
+              "citation_ids": [
+                "02d26c7e-a398-40c0-a876-8c073d18e4d0"
+              ]
+            },
+            {
+              "statement": "Austrian School economists argue crises result from distortions caused by artificial credit expansion and low interest rates driven by central bank policies, creating malinvestments in unproductive or unsustainable sectors leading to market corrections.",
+              "citation_ids": [
+                "8475234c-457a-4eb6-808b-18677c2d6b8b"
+              ]
+            },
+            {
+              "statement": "Some economists criticized the profession for becoming detached from real-world complexities and sustained by unrealistic assumptions and uncritical views of markets.",
+              "citation_ids": [
+                "60d1b509-a522-416e-9932-862f2ad0373f"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "7631e614-f057-4ffb-8e17-e49e2d3390d0",
+              "url": "https://www.chicagobooth.edu/media-relations-and-communications/press-releases/what-economists-think-caused-financial-crisis",
+              "title": "What economists think caused the financial crisis"
+            },
+            {
+              "id": "4eda1dfd-2653-45fc-a23e-a35b80167893",
+              "url": "https://www.promarket.org/2017/10/17/blame-2008-financial-crisis/",
+              "title": "Who Is to Blame for the 2008 Financial Crisis? - ProMarket"
+            },
+            {
+              "id": "8f7dee0c-9a6e-44c8-9be8-2f00e4f8e17c",
+              "url": "https://cepr.org/voxeu/columns/economists-2008-crisis-slow-see-fast-act",
+              "title": "Economists in the 2008 crisis: Slow to see, fast to act | CEPR"
+            },
+            {
+              "id": "c6436d58-6b6e-4d4b-bcb5-4459d27a025c",
+              "url": "https://www.sciencedirect.com/science/article/abs/pii/S1572308922000158",
+              "title": "Economists in the 2008 financial crisis: Slow to see, fast to act - ScienceDirect"
+            },
+            {
+              "id": "02d26c7e-a398-40c0-a876-8c073d18e4d0",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009346/",
+              "title": "Financial production and the subprime mortgage crisis"
+            },
+            {
+              "id": "8475234c-457a-4eb6-808b-18677c2d6b8b",
+              "url": "https://www.tutor2u.net/economics/reference/financial-crises-keynesian-and-austrian-school-perspectives",
+              "title": "Financial Crises: Keynesian and Austrian School Perspectives | Reference Library | Economics | tutor2u"
+            },
+            {
+              "id": "60d1b509-a522-416e-9932-862f2ad0373f",
+              "url": "https://arxiv.org/pdf/2508.09079",
+              "title": "The shape of economics before and after the financial crisis"
+            },
+            {
+              "id": "77aae348-4722-4c44-a8e0-d8ba4dd49ceb",
+              "url": "https://en.wikipedia.org/wiki/2008_financial_crisis",
+              "title": "2008 financial crisis - Wikipedia"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 62607,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 27450,
+        "output_tokens": 1576,
+        "cumulative_usd": 0.29554199999999997
+      }
+    },
+    {
+      "t_ms": 62607,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "3c716bcd-12c1-434f-8452-98cda0ff0c7f",
+        "tool_call": "web_search('mortgage-backed securities MBS 2008 financial crisis')"
+      }
+    },
+    {
+      "t_ms": 62607,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "3c716bcd-12c1-434f-8452-98cda0ff0c7f",
+        "tool_call": "web_search('collateralized debt obligations CDOs 2008 crisis')"
+      }
+    },
+    {
+      "t_ms": 62607,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "3c716bcd-12c1-434f-8452-98cda0ff0c7f",
+        "tool_call": "web_search('credit default swaps CDS 2008 financial crisis')"
+      }
+    },
+    {
+      "t_ms": 62607,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "3c716bcd-12c1-434f-8452-98cda0ff0c7f",
+        "finding": {
+          "sub_query_id": "3c716bcd-12c1-434f-8452-98cda0ff0c7f",
+          "summary": "Mortgage-backed securities (MBS), collateralized debt obligations (CDOs), and credit default swaps (CDS) contributed to the 2008 crisis through multiple mechanisms. MBS and CDOs, backed heavily by subprime mortgages, were given high credit ratings that proved inaccurate when housing prices declined and defaults rose. CDOs packaged risky mortgage securities into complex, opaque instruments that spread risk throughout the global financial system. CDS contracts amplified systemic risk by creating unregulated insurance-like products that concentrated exposure, particularly evident when institutions like AIG and Lehman Brothers faced collapse due to CDS obligations.",
+          "key_facts": [
+            {
+              "statement": "The housing bubble preceding the 2008 crisis was financed with mortgage-backed securities and collateralized debt obligations, which initially offered higher interest rates than government securities along with attractive risk ratings.",
+              "citation_ids": [
+                "dc785422-d66e-4c79-ab6b-5550e57a08f1"
+              ]
+            },
+            {
+              "statement": "By 2007, an estimated $3.2 trillion in loans were made to homebuyers with bad credit and undocumented incomes, bundled into MBS and CDOs, and given top ratings to appeal to global investors.",
+              "citation_ids": [
+                "dc785422-d66e-4c79-ab6b-5550e57a08f1"
+              ]
+            },
+            {
+              "statement": "By the end of 2008, 80% of the CDOs by value rated triple-A were downgraded to junk status, and 91% of CDO securities overall were downgraded.",
+              "citation_ids": [
+                "dc785422-d66e-4c79-ab6b-5550e57a08f1",
+                "c1ea592e-59e0-4b8b-901c-c96b1398c0e0"
+              ]
+            },
+            {
+              "statement": "Securitization led to complex and hard-to-value assets on financial institution balance sheets, with uncertainty about the value of derived securities affecting a large number of balance sheets across the economy.",
+              "citation_ids": [
+                "ed61874b-8740-4549-96b6-79120b2d70c8"
+              ]
+            },
+            {
+              "statement": "CDOs heavily incorporated subprime mortgage loans issued to borrowers with poor credit histories and high risk of default. When housing prices declined and mortgage delinquencies rose, CDO values plummeted, leading to substantial losses for investors worldwide.",
+              "citation_ids": [
+                "d0b6eba3-ba7f-48b6-9e16-2f1fd267a8ee"
+              ]
+            },
+            {
+              "statement": "Synthetic CDOs were backed by credit default swaps rather than actual mortgage assets, reflecting bets on the mortgage market that increased leverage in the system without actually financing mortgages.",
+              "citation_ids": [
+                "9767e7b9-8f77-4774-a875-2763d3e19741"
+              ]
+            },
+            {
+              "statement": "Major investment banks had invested in CDOs and purchased massive amounts of credit default swaps from counterparties like AIG to insure against losses. CDS work essentially as put options paying large amounts when underlying CDOs lose value or default.",
+              "citation_ids": [
+                "c99b470a-8390-43ba-a672-2a46ce749701"
+              ]
+            },
+            {
+              "statement": "The size of the CDS market, combined with its structural opacity, concentration and interconnectedness, posed systemic risk to financial market stability during the 2008 crisis. Large banks trading in CDS were forced to declare bankruptcy when numerous underlying credit instruments defaulted simultaneously.",
+              "citation_ids": [
+                "7eae8515-a79c-4ed5-8005-025cdc3898a8",
+                "d7be3df3-5e9c-4908-a46c-5b82e91ed306"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "dc785422-d66e-4c79-ab6b-5550e57a08f1",
+              "url": "https://en.wikipedia.org/wiki/Subprime_mortgage_crisis",
+              "title": "Subprime mortgage crisis - Wikipedia"
+            },
+            {
+              "id": "ed61874b-8740-4549-96b6-79120b2d70c8",
+              "url": "https://www.imf.org/external/pubs/ft/fandd/2009/06/blanchard.htm",
+              "title": "Finance & Development, June 2009 - The Perfect Storm"
+            },
+            {
+              "id": "9767e7b9-8f77-4774-a875-2763d3e19741",
+              "url": "https://www.fdic.gov/media/18636",
+              "title": "1 Origins of the Crisis Overview - FDIC"
+            },
+            {
+              "id": "d0b6eba3-ba7f-48b6-9e16-2f1fd267a8ee",
+              "url": "https://featured.com/questions/cdos-2008-financial-crisis",
+              "title": "How Did Collateralized Debt Obligations (CDOs) Contribute To The 2008 Financial Crisis?"
+            },
+            {
+              "id": "c1ea592e-59e0-4b8b-901c-c96b1398c0e0",
+              "url": "https://en.wikipedia.org/wiki/Collateralized_debt_obligation",
+              "title": "Collateralized debt obligation - Wikipedia"
+            },
+            {
+              "id": "c99b470a-8390-43ba-a672-2a46ce749701",
+              "url": "https://arxiv.org/pdf/1211.1949",
+              "title": "Dynamical Diagnosis and Solutions for Resilient Natural and Social Systems"
+            },
+            {
+              "id": "7eae8515-a79c-4ed5-8005-025cdc3898a8",
+              "url": "https://www.sciencedirect.com/science/article/pii/S1877042811015941",
+              "title": "The Role of Credit Default Swaps on Financial Market Stability - ScienceDirect"
+            },
+            {
+              "id": "d7be3df3-5e9c-4908-a46c-5b82e91ed306",
+              "url": "https://www.law.cornell.edu/wex/credit_default_swap",
+              "title": "Credit default swap - Wex - US Law - LII / Legal Information Institute"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 65655,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 21969,
+        "output_tokens": 2243,
+        "cumulative_usd": 0.39509399999999995
+      }
+    },
+    {
+      "t_ms": 65655,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "527cb39b-1574-472e-a961-14723357dc20",
+        "tool_call": "web_search('Lehman Brothers collapse 2008 financial crisis role')"
+      }
+    },
+    {
+      "t_ms": 65655,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "527cb39b-1574-472e-a961-14723357dc20",
+        "tool_call": "web_search('Bear Stearns failure 2008 financial crisis')"
+      }
+    },
+    {
+      "t_ms": 65655,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "527cb39b-1574-472e-a961-14723357dc20",
+        "tool_call": "web_search('AIG bailout 2008 financial crisis role')"
+      }
+    },
+    {
+      "t_ms": 65655,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "527cb39b-1574-472e-a961-14723357dc20",
+        "finding": {
+          "sub_query_id": "527cb39b-1574-472e-a961-14723357dc20",
+          "summary": "Lehman Brothers, Bear Stearns, and AIG played critical roles in the 2008 financial crisis through their heavy exposure to risky mortgage-backed securities. Bear Stearns collapsed first in March 2008 and was sold to JPMorgan Chase in a government-assisted rescue, signaling the start of the crisis. Lehman Brothers filed for bankruptcy on September 15, 2008\u2014the largest bankruptcy in U.S. history\u2014which triggered widespread market panic. AIG, meanwhile, required an unprecedented $182 billion government bailout due to its extensive credit default swap obligations that threatened to cause systemic collapse across the financial system.",
+          "key_facts": [
+            {
+              "statement": "Bear Stearns collapsed in March 2008 after becoming heavily involved in mortgage-backed securities and was sold to JPMorgan Chase for $10 per share (down from $133.20) in a government-assisted rescue, marking the first major domino to fall in the financial crisis.",
+              "citation_ids": [
+                "70a5c331-94cd-4269-9e88-ad0fae1ab7ca",
+                "0b15373e-9e75-4afd-ab2e-a316ef1b0593",
+                "8944c894-f9c6-48a9-9576-46f2696612d4"
+              ]
+            },
+            {
+              "statement": "Bear Stearns' failure was caused by its exposure to risky mortgage assets, reliance on short-term funding, high leverage, and weak corporate governance and risk management.",
+              "citation_ids": [
+                "328d6858-9403-4b46-92e1-00c706fe9a70",
+                "0b15373e-9e75-4afd-ab2e-a316ef1b0593"
+              ]
+            },
+            {
+              "statement": "Lehman Brothers filed for Chapter 11 bankruptcy on September 15, 2008, the largest bankruptcy in U.S. history with over $600 billion in assets, due to its involvement in subprime mortgages and exposure to illiquid assets.",
+              "citation_ids": [
+                "1fbc0da1-dce1-4c7b-b4cf-dc71bc4392ec",
+                "470e22f8-fbf0-477c-832a-831dbd46ee7d",
+                "ef5c8fe8-4e45-4c0d-bf41-397342371f6d"
+              ]
+            },
+            {
+              "statement": "Lehman's collapse triggered record-breaking stock losses, with the S&P 500 dropping nearly 5% on September 15, 2008, weakened bank portfolios, fostered distrust among banks, and reduced interbank lending.",
+              "citation_ids": [
+                "470e22f8-fbf0-477c-832a-831dbd46ee7d",
+                "48d851a3-a2b7-4ae4-aa12-3616650ddd01"
+              ]
+            },
+            {
+              "statement": "The U.S. government did not bail out Lehman Brothers, unlike Bear Stearns, because the Treasury had no legal authority to invest capital in the firm as Congress had not yet authorized the Troubled Asset Relief Program.",
+              "citation_ids": [
+                "10f5a1d7-ff02-41d1-8340-c5f492ed6e42",
+                "1fbc0da1-dce1-4c7b-b4cf-dc71bc4392ec"
+              ]
+            },
+            {
+              "statement": "AIG received a $182 billion government bailout (initially $85 billion, later expanded) because it had become a major seller of credit default swaps and faced a liquidity crisis that threatened systemic collapse across the financial system.",
+              "citation_ids": [
+                "2bbeecba-9986-49aa-902e-d3be4573e64f",
+                "c19d9585-3831-4949-8e1e-66a70df4a519"
+              ]
+            },
+            {
+              "statement": "AIG operated as a non-bank insurance company and could engage in risky credit default swap trading without being subject to bank regulation or requirements to keep capital reserves against risky assets.",
+              "citation_ids": [
+                "54cad737-017d-4f1f-90c6-b5aee9be0d0e",
+                "2bbeecba-9986-49aa-902e-d3be4573e64f"
+              ]
+            },
+            {
+              "statement": "The government ultimately made a $22.7 billion profit from the AIG bailout when the Treasury sold its last shares in December 2012, as AIG was worth significantly more in 2012 than in 2008.",
+              "citation_ids": [
+                "2bbeecba-9986-49aa-902e-d3be4573e64f",
+                "c19d9585-3831-4949-8e1e-66a70df4a519"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "470e22f8-fbf0-477c-832a-831dbd46ee7d",
+              "url": "https://www.britannica.com/event/bankruptcy-of-Lehman-Brothers",
+              "title": "Bankruptcy of Lehman Brothers | Description, Cause, & Facts | Britannica"
+            },
+            {
+              "id": "1fbc0da1-dce1-4c7b-b4cf-dc71bc4392ec",
+              "url": "https://en.wikipedia.org/wiki/Lehman_Brothers",
+              "title": "Lehman Brothers - Wikipedia"
+            },
+            {
+              "id": "ef5c8fe8-4e45-4c0d-bf41-397342371f6d",
+              "url": "https://en.wikipedia.org/wiki/Bankruptcy_of_Lehman_Brothers",
+              "title": "Bankruptcy of Lehman Brothers - Wikipedia"
+            },
+            {
+              "id": "10f5a1d7-ff02-41d1-8340-c5f492ed6e42",
+              "url": "https://www.thebalancemoney.com/lehman-brothers-collapse-causes-impact-4842338",
+              "title": "How the 2008 Lehman Brothers Collapse Affects You Today"
+            },
+            {
+              "id": "48d851a3-a2b7-4ae4-aa12-3616650ddd01",
+              "url": "https://www.brookings.edu/articles/history-credits-lehman-brothers-collapse-for-the-2008-financial-crisis-heres-why-that-narrative-is-wrong/",
+              "title": "Lehman Brothers' Collapse: Financial Crisis Myth or Fact?"
+            },
+            {
+              "id": "70a5c331-94cd-4269-9e88-ad0fae1ab7ca",
+              "url": "https://en.wikipedia.org/wiki/Bear_Stearns",
+              "title": "Bear Stearns - Wikipedia"
+            },
+            {
+              "id": "0b15373e-9e75-4afd-ab2e-a316ef1b0593",
+              "url": "https://www.cnn.com/2018/09/30/investing/bear-stearns-2008-crisis-jimmy-cayne",
+              "title": "The stunning downfall of Bear Stearns and its bridge-playing CEO | CNN Business"
+            },
+            {
+              "id": "8944c894-f9c6-48a9-9576-46f2696612d4",
+              "url": "https://www.thebalancemoney.com/bearn-stearns-collapse-and-bailout-3305613",
+              "title": "Your Guide to Bear Stearns, Its Collapse, and Bailout"
+            },
+            {
+              "id": "328d6858-9403-4b46-92e1-00c706fe9a70",
+              "url": "https://fcic-static.law.stanford.edu/cdn_media/fcic-reports/fcic_final_report_chapter15.pdf",
+              "title": "15 MARCH 2008: THE FALL OF BEAR STEARNS CONTENTS"
+            },
+            {
+              "id": "2bbeecba-9986-49aa-902e-d3be4573e64f",
+              "url": "https://www.thebalancemoney.com/aig-bailout-cost-timeline-bonuses-causes-effects-3305693",
+              "title": "AIG Bailout: Cost, Timeline, Bonuses, Causes, Effects"
+            },
+            {
+              "id": "c19d9585-3831-4949-8e1e-66a70df4a519",
+              "url": "https://academyflex.com/the-aig-bailout-a-case-study-in-financial-rescue-operations/",
+              "title": "The AIG Bailout: A Case Study in Financial Rescue Operations - Flexible Academy of Finance"
+            },
+            {
+              "id": "54cad737-017d-4f1f-90c6-b5aee9be0d0e",
+              "url": "https://www.shortform.com/blog/aig-bailout-2008/",
+              "title": "AIG Bailout in 2008: The Fate of a Giant Too Big to Fail - Shortform Books"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 69973,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 21458,
+        "output_tokens": 2248,
+        "cumulative_usd": 0.49318799999999996
+      }
+    },
+    {
+      "t_ms": 69973,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+        "tool_call": "web_search('financial deregulation regulatory failures 2008 financial crisis')"
+      }
+    },
+    {
+      "t_ms": 69973,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+        "tool_call": "web_search('Glass-Steagall repeal Gramm-Leach-Bliley 2008 crisis')"
+      }
+    },
+    {
+      "t_ms": 69973,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+        "tool_call": "web_search('SEC regulatory failures shadow banking 2008')"
+      }
+    },
+    {
+      "t_ms": 69973,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+        "tool_call": "web_search('credit rating agencies regulatory oversight 2008 crisis')"
+      }
+    },
+    {
+      "t_ms": 69973,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+        "tool_call": "web_search('derivatives regulation Commodity Futures Modernization Act 2008')"
+      }
+    },
+    {
+      "t_ms": 69973,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+        "finding": {
+          "sub_query_id": "fed1e90e-62fb-49da-bb90-58b25600b54e",
+          "summary": "Financial deregulation and regulatory failures played a significant but debated role in enabling the 2008 financial crisis. Key issues included the 1999 repeal of Glass-Steagall Act provisions through the Gramm-Leach-Bliley Act, which allowed commercial and investment banks to merge; inadequate oversight of shadow banking institutions that operated outside traditional banking regulation; the SEC's weak voluntary supervision program for investment banks; and reliance on self-regulation. However, some scholars argue that regulatory failures and gaps in oversight were more significant than outright deregulation, noting that the total volume of financial regulations actually increased before 2008.",
+          "key_facts": [
+            {
+              "statement": "The Gramm-Leach-Bliley Act of 1999 repealed key provisions of the Glass-Steagall Act, allowing commercial banks to affiliate with investment banks and securities firms, which critics argue enabled the use of federally insured deposits to underwrite high-risk securities including subprime mortgage-backed assets.",
+              "citation_ids": [
+                "c2314583-9e26-4611-9ed2-e90c2ca2160e",
+                "4647a312-f3e4-4829-9cc0-de4ac0414818",
+                "d27df8d8-b7ab-4347-b228-0ab09cb208a4"
+              ]
+            },
+            {
+              "statement": "The deregulation movement failed to properly regulate mortgage-backed securities that were at the heart of the financial crisis, with continuous deregulation causing financial institutions to become consumed in risky innovations.",
+              "citation_ids": [
+                "396aa4b8-bfb2-479c-aa49-9704fb620c3f",
+                "a3498941-426f-4b8c-bd47-65593c310ee5"
+              ]
+            },
+            {
+              "statement": "Shadow banking institutions that functioned like banks but operated outside regulatory oversight were at the heart of the 2007-2008 crisis, with institutions like Lehman Brothers only lightly supervised by the SEC through a weak voluntary program.",
+              "citation_ids": [
+                "3aecc3e1-aa47-467e-a5b4-87c744cfd432",
+                "f9ddc9a2-6626-41bc-8d91-43a5e8aa6ec5",
+                "e4eee682-5b99-48bb-8f1d-41e9b3d2a3cd"
+              ]
+            },
+            {
+              "statement": "The SEC's voluntary supervision program for investment banking holding companies allowed firms like Lehman Brothers, Bear Stearns, and Goldman Sachs to opt in and out at their discretion, with SEC Chairman Chris Cox stating in 2008 that 'The last six months have made it abundantly clear that voluntary regulation does not work.'",
+              "citation_ids": [
+                "f9ddc9a2-6626-41bc-8d91-43a5e8aa6ec5"
+              ]
+            },
+            {
+              "statement": "Regulators trusted self-regulating mechanisms and relied on internal value-at-risk computer models of investment banks, essentially outsourcing the job of monitoring risk to the firms themselves.",
+              "citation_ids": [
+                "a3498941-426f-4b8c-bd47-65593c310ee5"
+              ]
+            },
+            {
+              "statement": "Some scholars dispute that deregulation was the primary cause, arguing that financial regulatory restrictions actually increased 18.6 percent from 1997 to 2008, rising from 40,067 to 47,508 restrictions, and that the crisis represented a failure of regulation rather than deregulation.",
+              "citation_ids": [
+                "bf4bfc83-a39a-4982-854b-37ab5a64a30a",
+                "95b67950-10a5-4f09-80ee-4f2fc9905019"
+              ]
+            },
+            {
+              "statement": "The U.S. government adopted many deregulatory measures from the 1980s to the 2000s with the intent of improving the competitiveness of the U.S. financial industry in the global economy, which initially stimulated impressive economic growth before the 2008 crisis.",
+              "citation_ids": [
+                "f087d919-8b36-4606-98a6-f5405ae44ef6"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "f087d919-8b36-4606-98a6-f5405ae44ef6",
+              "url": "https://grdspublishing.org/index.php/people/article/view/132",
+              "title": "DEREGULATION AND THE 2008 FINANCIAL CRISIS IN AMERICA | PEOPLE: International Journal of Social Sciences"
+            },
+            {
+              "id": "396aa4b8-bfb2-479c-aa49-9704fb620c3f",
+              "url": "https://digitalcommons.lib.uconn.edu/cgi/viewcontent.cgi?article=1318&context=srhonors_theses",
+              "title": "Financial Regulation and the Crisis of 2008"
+            },
+            {
+              "id": "c2314583-9e26-4611-9ed2-e90c2ca2160e",
+              "url": "https://grokipedia.com/page/Repeal_of_the_Glass%E2%80%93Steagall_Act",
+              "title": "Repeal of the Glass\u2013Steagall Act"
+            },
+            {
+              "id": "4647a312-f3e4-4829-9cc0-de4ac0414818",
+              "url": "https://ballotpedia.org/Gramm-Leach-Bliley_Act",
+              "title": "Gramm-Leach-Bliley Act - Ballotpedia"
+            },
+            {
+              "id": "d27df8d8-b7ab-4347-b228-0ab09cb208a4",
+              "url": "https://legalclarity.org/the-repeal-of-glass-steagall-and-its-aftermath/",
+              "title": "The Repeal of Glass-Steagall: Causes and Consequences - LegalClarity"
+            },
+            {
+              "id": "a3498941-426f-4b8c-bd47-65593c310ee5",
+              "url": "https://www.saintpeters.edu/wp-content/uploads/blogs.dir/270/files/2022/12/Suneha-Bamboli-Financial-Engineering-and-Deregulation-The-Biggest-Causes-of-Financial-Crises.pdf",
+              "title": "Financial Engineering and Deregulation"
+            },
+            {
+              "id": "f9ddc9a2-6626-41bc-8d91-43a5e8aa6ec5",
+              "url": "https://www.americanprogress.org/article/strengthening-regulation-oversight-shadow-banks/",
+              "title": "Strengthening the Regulation and Oversight of Shadow Banks - Center for American Progress"
+            },
+            {
+              "id": "3aecc3e1-aa47-467e-a5b4-87c744cfd432",
+              "url": "https://corpgov.law.harvard.edu/2024/09/25/shadow-banking-and-securities-law/",
+              "title": "Shadow Banking and Securities Law"
+            },
+            {
+              "id": "e4eee682-5b99-48bb-8f1d-41e9b3d2a3cd",
+              "url": "https://www.philadelphiafed.org/the-economy/banking-and-financial-markets/shadow-banking-and-the-crisis-of-2007-08",
+              "title": "Shadow Banking and the Crisis of 2007-08"
+            },
+            {
+              "id": "bf4bfc83-a39a-4982-854b-37ab5a64a30a",
+              "url": "https://www.quantgov.org/finance-crisis",
+              "title": "Did Deregulation Cause the Financial Crisis of 2008?"
+            },
+            {
+              "id": "95b67950-10a5-4f09-80ee-4f2fc9905019",
+              "url": "https://www.mercatus.org/research/data-visualizations/did-deregulation-cause-financial-crisis",
+              "title": "Did Deregulation Cause the Financial Crisis? | Mercatus Center"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 71374,
+      "event": {
+        "type": "synthesis_token",
+        "token": "# Executive"
+      }
+    },
+    {
+      "t_ms": 71809,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Summary\n\nThe 2008 financial crisis resulted from a complex convergence of factors that created systemic vulnerabilities throughout the global financial system. At"
+      }
+    },
+    {
+      "t_ms": 72743,
+      "event": {
+        "type": "synthesis_token",
+        "token": " its core, the crisis stemmed from a massive housing bubble fueled by risky subprime mortgage lending, inadequ"
+      }
+    },
+    {
+      "t_ms": 72744,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ate regulation, and financial innovation that obscured and amplified risk. When housing prices peaked in"
+      }
+    },
+    {
+      "t_ms": 73638,
+      "event": {
+        "type": "synthesis_token",
+        "token": " 2006 and subsequently declined, cascading failures spread through"
+      }
+    },
+    {
+      "t_ms": 73680,
+      "event": {
+        "type": "synthesis_token",
+        "token": " mortgage-backed securities and derivatives markets, ultimately causing the collapse of major financial institutions and trigg"
+      }
+    },
+    {
+      "t_ms": 74151,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ering the worst economic downturn since the Great Depression.\n\nThe crisis was characterized by multiple interconnected failures:"
+      }
+    },
+    {
+      "t_ms": 74728,
+      "event": {
+        "type": "synthesis_token",
+        "token": " lenders issued hundreds of billions of dollars in subprime mortgages to"
+      }
+    },
+    {
+      "t_ms": 75091,
+      "event": {
+        "type": "synthesis_token",
+        "token": " unqualified borrowers; Wall Street packaged these risky loans into complex securities that received"
+      }
+    },
+    {
+      "t_ms": 76300,
+      "event": {
+        "type": "synthesis_token",
+        "token": " fraudulently high credit ratings; regulatory frameworks failed to oversee shadow banking institutions"
+      }
+    },
+    {
+      "t_ms": 76300,
+      "event": {
+        "type": "synthesis_token",
+        "token": " and new financial instruments; and excessive leverage throughout the system transformed localized mortgage defaults"
+      }
+    },
+    {
+      "t_ms": 78631,
+      "event": {
+        "type": "synthesis_token",
+        "token": " into a global financial catastrophe. The September 2008 bankruptcy of Lehman Brothers marked the crisis's acute phase, though warning signs had emerged"
+      }
+    },
+    {
+      "t_ms": 78631,
+      "event": {
+        "type": "synthesis_token",
+        "token": " over a year earlier with Bear Stearns' collapse. Understanding these causes remains"
+      }
+    },
+    {
+      "t_ms": 78632,
+      "event": {
+        "type": "synthesis_token",
+        "token": " essential for preventing future systemic failures.\n\n# The Housing Bubble and Subprime Mortgage"
+      }
+    },
+    {
+      "t_ms": 78632,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Lending\n\nThe foundation of the 2008 crisis was an unprecedented housing bubble driven by excessive speculation and pred"
+      }
+    },
+    {
+      "t_ms": 78632,
+      "event": {
+        "type": "synthesis_token",
+        "token": "atory lending practices. Between 2000 and 2006, the Federal Reserve maintained historically low interest rates, dropping from 6.5% to "
+      }
+    },
+    {
+      "t_ms": 79019,
+      "event": {
+        "type": "synthesis_token",
+        "token": "1.0% to combat the dot-com bubble collapse and"
+      }
+    },
+    {
+      "t_ms": 79509,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the economic impact of the September 11 attacks [1]. This cheap credit"
+      }
+    },
+    {
+      "t_ms": 81896,
+      "event": {
+        "type": "synthesis_token",
+        "token": " environment encouraged widespread borrowing and real estate speculation by both"
+      }
+    },
+    {
+      "t_ms": 81896,
+      "event": {
+        "type": "synthesis_token",
+        "token": " homeowners and financial institutions [1][6].\n\nL"
+      }
+    },
+    {
+      "t_ms": 81897,
+      "event": {
+        "type": "synthesis_token",
+        "token": "enders dramatically relaxed underwriting standards, offering subprime mortgages\u2014loans to borrowers with poor credit histories\u2014"
+      }
+    },
+    {
+      "t_ms": 81897,
+      "event": {
+        "type": "synthesis_token",
+        "token": "at an alarming scale. By 2006, subprime mortgages constituted nearly"
+      }
+    },
+    {
+      "t_ms": 81897,
+      "event": {
+        "type": "synthesis_token",
+        "token": " one in four mortgages (23.4%),"
+      }
+    },
+    {
+      "t_ms": 82302,
+      "event": {
+        "type": "synthesis_token",
+        "token": " with financial institutions lending $600 billion in subprime mortgages that"
+      }
+    },
+    {
+      "t_ms": 82916,
+      "event": {
+        "type": "synthesis_token",
+        "token": " single year [2]. These loans frequently featured high-risk"
+      }
+    },
+    {
+      "t_ms": 85738,
+      "event": {
+        "type": "synthesis_token",
+        "token": " structures including adjustable-rate mortgages, interest-only payments, and minimal documentation requirements"
+      }
+    },
+    {
+      "t_ms": 85738,
+      "event": {
+        "type": "synthesis_token",
+        "token": " that enabled unqualified borrowers to purchase overpriced homes [2"
+      }
+    },
+    {
+      "t_ms": 85739,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][6].\n\nHousing prices peaked in 2006 before entering a severe decline, ultimately"
+      }
+    },
+    {
+      "t_ms": 85739,
+      "event": {
+        "type": "synthesis_token",
+        "token": " falling 27.4% from peak to trough by"
+      }
+    },
+    {
+      "t_ms": 85739,
+      "event": {
+        "type": "synthesis_token",
+        "token": " 2012 [1][5]. When the Federal Reserve raised interest rates,"
+      }
+    },
+    {
+      "t_ms": 85739,
+      "event": {
+        "type": "synthesis_token",
+        "token": " borrowers with adjustable-rate mortgages found themselves unable to make"
+      }
+    },
+    {
+      "t_ms": 85973,
+      "event": {
+        "type": "synthesis_token",
+        "token": " payments and unable to refinance or sell due to declining property values [2"
+      }
+    },
+    {
+      "t_ms": 86437,
+      "event": {
+        "type": "synthesis_token",
+        "token": "]. This triggered mass foreclosures that initiated the crisis's first"
+      }
+    },
+    {
+      "t_ms": 86908,
+      "event": {
+        "type": "synthesis_token",
+        "token": " phase in early 2007, as mortgage-backed securities tied"
+      }
+    },
+    {
+      "t_ms": 87431,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to U.S. real estate began collapsing in value [1][3"
+      }
+    },
+    {
+      "t_ms": 87850,
+      "event": {
+        "type": "synthesis_token",
+        "token": "].\n\n# Regulatory Failures and Deregulation\n\nThe regulatory framework governing financial institutions proved inadequate to prevent or contain the crisis,"
+      }
+    },
+    {
+      "t_ms": 88320,
+      "event": {
+        "type": "synthesis_token",
+        "token": " though scholars debate whether outright deregulation or regulatory gaps bear primary responsibility."
+      }
+    },
+    {
+      "t_ms": 88812,
+      "event": {
+        "type": "synthesis_token",
+        "token": " The 1999 Gramm-Leach-Bliley Act repealed key provisions of the Glass"
+      }
+    },
+    {
+      "t_ms": 89282,
+      "event": {
+        "type": "synthesis_token",
+        "token": "-Steagall Act, eliminating Depression-era barriers between commercial and investment banking [11][12]. Critics argue this allowed"
+      }
+    },
+    {
+      "t_ms": 89735,
+      "event": {
+        "type": "synthesis_token",
+        "token": " commercial banks to use federally insured deposits to underwrite high-risk securities"
+      }
+    },
+    {
+      "t_ms": 93401,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", including subprime mortgage-backed assets [11][13].\n\nPerhaps more significantly"
+      }
+    },
+    {
+      "t_ms": 93401,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", shadow banking institutions\u2014entities that functioned like banks but operated outside traditional regulatory oversight\u2014played a central role in the crisis while"
+      }
+    },
+    {
+      "t_ms": 93402,
+      "event": {
+        "type": "synthesis_token",
+        "token": " receiving minimal supervision [15][16][17]. Major investment banks like Lehman Brothers and"
+      }
+    },
+    {
+      "t_ms": 93402,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Bear Stearns participated in the SEC's voluntary supervision program, which allowed"
+      }
+    },
+    {
+      "t_ms": 93402,
+      "event": {
+        "type": "synthesis_token",
+        "token": " firms to opt in and out at their discretion [15]. SEC"
+      }
+    },
+    {
+      "t_ms": 93402,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Chairman Chris Cox acknowledged in 2008 that \"voluntary regulation does"
+      }
+    },
+    {
+      "t_ms": 93402,
+      "event": {
+        "type": "synthesis_token",
+        "token": " not work,\" highlighting the program's fundamental inadequacy [15].\n\nRegulators also"
+      }
+    },
+    {
+      "t_ms": 93644,
+      "event": {
+        "type": "synthesis_token",
+        "token": " relied heavily on self-regulation, trusting internal risk models developed by the"
+      }
+    },
+    {
+      "t_ms": 94037,
+      "event": {
+        "type": "synthesis_token",
+        "token": " financial institutions themselves rather than implementing independent oversight [14]. The deregulatory approach failed"
+      }
+    },
+    {
+      "t_ms": 94514,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to establish appropriate frameworks for mortgage-backed securities and other financial innovations that"
+      }
+    },
+    {
+      "t_ms": 95028,
+      "event": {
+        "type": "synthesis_token",
+        "token": " became crisis catalysts [10][14]. However, some economists contest the de"
+      }
+    },
+    {
+      "t_ms": 95437,
+      "event": {
+        "type": "synthesis_token",
+        "token": "regulation narrative, noting that financial regulatory restrictions actually increased "
+      }
+    },
+    {
+      "t_ms": 95982,
+      "event": {
+        "type": "synthesis_token",
+        "token": "18.6% from 1997 to 2008,"
+      }
+    },
+    {
+      "t_ms": 96381,
+      "event": {
+        "type": "synthesis_token",
+        "token": " suggesting the crisis represented regulatory failure rather than simple deregulation"
+      }
+    },
+    {
+      "t_ms": 96849,
+      "event": {
+        "type": "synthesis_token",
+        "token": " [18][19].\n\n# Financial Engineering and Complex Securities\n\nFinancial innovation created instruments that obscured risk,"
+      }
+    },
+    {
+      "t_ms": 97320,
+      "event": {
+        "type": "synthesis_token",
+        "token": " amplified leverage, and distributed toxic assets throughout the global financial system. Mortgage-backed securities ("
+      }
+    },
+    {
+      "t_ms": 97790,
+      "event": {
+        "type": "synthesis_token",
+        "token": "MBS) and collateralized debt obligations (CDOs) transformed local mortgage markets into international crises by"
+      }
+    },
+    {
+      "t_ms": 98260,
+      "event": {
+        "type": "synthesis_token",
+        "token": " packaging subprime loans into securities marketed to global investors [3][20].\n\nBy"
+      }
+    },
+    {
+      "t_ms": 98730,
+      "event": {
+        "type": "synthesis_token",
+        "token": " 2007, approximately $3.2 trillion in loans to borrowers with bad"
+      }
+    },
+    {
+      "t_ms": 99392,
+      "event": {
+        "type": "synthesis_token",
+        "token": " credit and undocumented incomes had been bundled into MBS and"
+      }
+    },
+    {
+      "t_ms": 99934,
+      "event": {
+        "type": "synthesis_token",
+        "token": " CDOs, many receiving top credit ratings despite underlying portfolio"
+      }
+    },
+    {
+      "t_ms": 100223,
+      "event": {
+        "type": "synthesis_token",
+        "token": " quality [3]. These high ratings proved catastrophically in"
+      }
+    },
+    {
+      "t_ms": 100649,
+      "event": {
+        "type": "synthesis_token",
+        "token": "accurate: by the end of 2008, 80% of triple-A rated CD"
+      }
+    },
+    {
+      "t_ms": 101089,
+      "event": {
+        "type": "synthesis_token",
+        "token": "O tranches were downgraded to junk status, and 91% of all CDO securities"
+      }
+    },
+    {
+      "t_ms": 101555,
+      "event": {
+        "type": "synthesis_token",
+        "token": " were downgraded [3][23]. The complexity and opacity of these instruments made them nearly"
+      }
+    },
+    {
+      "t_ms": 102123,
+      "event": {
+        "type": "synthesis_token",
+        "token": " impossible to value accurately, creating widespread uncertainty about financial institution balance"
+      }
+    },
+    {
+      "t_ms": 102604,
+      "event": {
+        "type": "synthesis_token",
+        "token": " sheet health [20].\n\nCDOs heavily incorporated subprime mortgages issued"
+      }
+    },
+    {
+      "t_ms": 103031,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to high-risk borrowers, meaning their value plummeted as housing prices declined and"
+      }
+    },
+    {
+      "t_ms": 103500,
+      "event": {
+        "type": "synthesis_token",
+        "token": " delinquencies rose [22]. Synthetic CDOs further ampl"
+      }
+    },
+    {
+      "t_ms": 103938,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ified systemic risk by creating derivative positions backed by credit default swaps rather than actual mortgage"
+      }
+    },
+    {
+      "t_ms": 104381,
+      "event": {
+        "type": "synthesis_token",
+        "token": " assets, increasing leverage without financing additional mort"
+      }
+    },
+    {
+      "t_ms": 104926,
+      "event": {
+        "type": "synthesis_token",
+        "token": "gages [21].\n\nCredit default swaps (CDS) functioned as unregulated insurance"
+      }
+    },
+    {
+      "t_ms": 105400,
+      "event": {
+        "type": "synthesis_token",
+        "token": " against security defaults, with major investment banks purchasing massive quantities from"
+      }
+    },
+    {
+      "t_ms": 105884,
+      "event": {
+        "type": "synthesis_token",
+        "token": " counterparties like AIG [24]. The CDS market's size,"
+      }
+    },
+    {
+      "t_ms": 106287,
+      "event": {
+        "type": "synthesis_token",
+        "token": " structural opacity, concentration, and interconnectedness created systemic vulnerability [25]["
+      }
+    },
+    {
+      "t_ms": 106735,
+      "event": {
+        "type": "synthesis_token",
+        "token": "26]. When numerous underlying instruments defaulted simultaneously during the crisis, large"
+      }
+    },
+    {
+      "t_ms": 107223,
+      "event": {
+        "type": "synthesis_token",
+        "token": " banks trading CDS faced existential threats, with some forced into"
+      }
+    },
+    {
+      "t_ms": 107709,
+      "event": {
+        "type": "synthesis_token",
+        "token": " bankruptcy [25][26].\n\n# Institutional Failures and Cascade Effects\n\nThe failures of Bear Stearns, Lehman Brothers, and AIG illustrated"
+      }
+    },
+    {
+      "t_ms": 108416,
+      "event": {
+        "type": "synthesis_token",
+        "token": " how institutional vulnerabilities could trigger systemic collapse. Bear Stearns collapsed first in March 2008 after accum"
+      }
+    },
+    {
+      "t_ms": 108746,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ulating heavy exposure to mortgage-backed securities, combined with reliance on short-term funding, excessive leverage, and inadequate risk management [33"
+      }
+    },
+    {
+      "t_ms": 109132,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][35]. The government facilitated its sale to JPMorgan Chase for $10 per share\u2014down"
+      }
+    },
+    {
+      "t_ms": 109754,
+      "event": {
+        "type": "synthesis_token",
+        "token": " from $133.20\u2014in a rescue that signaled the crisis's severity [32][33][34].\n\nLehman Brothers filed"
+      }
+    },
+    {
+      "t_ms": 110032,
+      "event": {
+        "type": "synthesis_token",
+        "token": " for Chapter 11 bankruptcy on September 15, 2008, marking the largest bankruptcy in U.S. history with over $600 billion in assets [27"
+      }
+    },
+    {
+      "t_ms": 110568,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][28][29]. Unlike Bear Stearns, the government did not bail out Lehman because the Treasury lacked legal authority to inject capital before"
+      }
+    },
+    {
+      "t_ms": 111268,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Congress authorized the Troubled Asset Relief Program [28][30]. Lehman's collapse triggered immediate market panic, with the"
+      }
+    },
+    {
+      "t_ms": 111536,
+      "event": {
+        "type": "synthesis_token",
+        "token": " S&P 500 dropping nearly 5% on September 15, while weakening bank portfolios and causing interbank lending to freeze as institutions"
+      }
+    },
+    {
+      "t_ms": 111976,
+      "event": {
+        "type": "synthesis_token",
+        "token": " lost trust in counterparties [27][31].\n\nAIG required an unprecedented $182 billion government bailout"
+      }
+    },
+    {
+      "t_ms": 112512,
+      "event": {
+        "type": "synthesis_token",
+        "token": " (initially $85 billion, later expanded) due to its role as a major credit default swap seller"
+      }
+    },
+    {
+      "t_ms": 112932,
+      "event": {
+        "type": "synthesis_token",
+        "token": " [36][37]. Operating as a non-bank insurance company, AIG had engaged in risky CDS trading without bank"
+      }
+    },
+    {
+      "t_ms": 113534,
+      "event": {
+        "type": "synthesis_token",
+        "token": " regulatory oversight or requirements to maintain capital reserves against risky positions [36][38]. Its potential failure threatened syst"
+      }
+    },
+    {
+      "t_ms": 113869,
+      "event": {
+        "type": "synthesis_token",
+        "token": "emic collapse across the financial system given its extensive counterparty obligations. The government ultimately profited $"
+      }
+    },
+    {
+      "t_ms": 114392,
+      "event": {
+        "type": "synthesis_token",
+        "token": "22.7 billion from the AIG intervention when it sold its final shares in December 2012 [36][37].\n\n# Alternative Explanations and Theoretical"
+      }
+    },
+    {
+      "t_ms": 114852,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Perspectives\n\nEconomists have offered diverse explanations for the crisis beyond the mainstream regulatory failure narrative. Surve"
+      }
+    },
+    {
+      "t_ms": 115883,
+      "event": {
+        "type": "synthesis_token",
+        "token": "yed economists identified flawed financial regulation and supervision as the primary culprit, followed closely by underestimation of risks in engineered securities,"
+      }
+    },
+    {
+      "t_ms": 115911,
+      "event": {
+        "type": "synthesis_token",
+        "token": " with mortgage fraud ranking third [39][40]. Beyond regulation, highly rated causes included irrational beliefs about house prices and"
+      }
+    },
+    {
+      "t_ms": 116634,
+      "event": {
+        "type": "synthesis_token",
+        "token": " risk, plus corrupt incentives including fraud in mortgages and credit rating agencies [40].\n\nAustrian School economists attribute the crisis to excessive central bank credit expansion creating"
+      }
+    },
+    {
+      "t_ms": 116743,
+      "event": {
+        "type": "synthesis_token",
+        "token": " artificially low interest rates that encouraged malinvestment in unproductive or unsustainable sectors [44]. This perspective"
+      }
+    },
+    {
+      "t_ms": 117250,
+      "event": {
+        "type": "synthesis_token",
+        "token": " emphasizes how monetary policy distortions inevitably lead to market corrections when unsustainable investment"
+      }
+    },
+    {
+      "t_ms": 118144,
+      "event": {
+        "type": "synthesis_token",
+        "token": " patterns become apparent [44].\n\nKeynesian and savings glut theorists point to insufficient aggregate"
+      }
+    },
+    {
+      "t_ms": 118153,
+      "event": {
+        "type": "synthesis_token",
+        "token": " investment relative to savings, arguing that too few productive assets were created, driving the private sector toward over-indebtedness [43]. This contrasts with monetarist explan"
+      }
+    },
+    {
+      "t_ms": 118675,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ations that blame loose monetary policy for igniting the credit boom [43].\n\nCritics have faulted mainstream economic"
+      }
+    },
+    {
+      "t_ms": 119095,
+      "event": {
+        "type": "synthesis_token",
+        "token": " models for failing to anticipate the crisis, noting that dominant Dynamic Stochastic General Equilibrium (DSGE)"
+      }
+    },
+    {
+      "t_ms": 123518,
+      "event": {
+        "type": "synthesis_token",
+        "token": " models ignored financial intermediaries, credit cycles, and disruptions in financial intermediation [41][42]. Some economists argue"
+      }
+    },
+    {
+      "t_ms": 123603,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the profession had become detached from real-world complexities, sustained by unrealistic assumptions and uncritical views of markets [45].\n\n# Limitations"
+      }
+    },
+    {
+      "t_ms": 123630,
+      "event": {
+        "type": "synthesis_token",
+        "token": " and Ongoing Debates\n\nWhile broad consensus exists on the crisis's major contributing factors, significant debates remain about relative"
+      }
+    },
+    {
+      "t_ms": 123656,
+      "event": {
+        "type": "synthesis_token",
+        "token": " causation and preventability. The deregulation debate continues, with evidence"
+      }
+    },
+    {
+      "t_ms": 123709,
+      "event": {
+        "type": "synthesis_token",
+        "token": " supporting both increased regulatory volume and decreased regulatory effectiveness [18][19]. The precise"
+      }
+    },
+    {
+      "t_ms": 123755,
+      "event": {
+        "type": "synthesis_token",
+        "token": " mechanisms through which various factors interacted to produce systemic collapse remain subjects of active research."
+      }
+    },
+    {
+      "t_ms": 123777,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nOne notable debate centers on whether Lehman Brothers' failure was a necessary"
+      }
+    },
+    {
+      "t_ms": 123796,
+      "event": {
+        "type": "synthesis_token",
+        "token": " trigger or whether the crisis would have unfolded similarly regardless"
+      }
+    },
+    {
+      "t_ms": 123811,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", with some scholars challenging the dominant narrative that credits Lehman's collapse as"
+      }
+    },
+    {
+      "t_ms": 123987,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the crisis's primary catalyst [31]. Similarly, questions persist about whether more aggressive government intervention in"
+      }
+    },
+    {
+      "t_ms": 124353,
+      "event": {
+        "type": "synthesis_token",
+        "token": " early stages could have prevented the acute phase.\n\nThe role of global capital flows, international"
+      }
+    },
+    {
+      "t_ms": 124804,
+      "event": {
+        "type": "synthesis_token",
+        "token": " regulatory coordination, and cross-border financial integration in amplifying the crisis represents an area where additional"
+      }
+    },
+    {
+      "t_ms": 125311,
+      "event": {
+        "type": "synthesis_token",
+        "token": " research continues. The interaction between housing policy objectives, government-sponsored"
+      }
+    },
+    {
+      "t_ms": 125744,
+      "event": {
+        "type": "synthesis_token",
+        "token": " enterprises like Fannie Mae and Freddie Mac, and private sector behavior also remains contested"
+      }
+    },
+    {
+      "t_ms": 126176,
+      "event": {
+        "type": "synthesis_token",
+        "token": " terrain among economists and policymakers seeking to understand the crisis's full complexity."
+      }
+    },
+    {
+      "t_ms": 126225,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 5164,
+        "output_tokens": 2282,
+        "cumulative_usd": 0.54291
+      }
+    },
+    {
+      "t_ms": 126226,
+      "event": {
+        "type": "report_complete",
+        "report": {
+          "report_id": "986403fc-a4b3-4d4d-b963-e697a50223ce",
+          "original_question": "What caused the 2008 financial crisis?",
+          "executive_summary": "The 2008 financial crisis resulted from a complex convergence of factors that created systemic vulnerabilities throughout the global financial system. At its core, the crisis stemmed from a massive housing bubble fueled by risky subprime mortgage lending, inadequate regulation, and financial innovation that obscured and amplified risk. When housing prices peaked in 2006 and subsequently declined, cascading failures spread through mortgage-backed securities and derivatives markets, ultimately causing the collapse of major financial institutions and triggering the worst economic downturn since the Great Depression.\n\nThe crisis was characterized by multiple interconnected failures: lenders issued hundreds of billions of dollars in subprime mortgages to unqualified borrowers; Wall Street packaged these risky loans into complex securities that received fraudulently high credit ratings; regulatory frameworks failed to oversee shadow banking institutions and new financial instruments; and excessive leverage throughout the system transformed localized mortgage defaults into a global financial catastrophe. The September 2008 bankruptcy of Lehman Brothers marked the crisis's acute phase, though warning signs had emerged over a year earlier with Bear Stearns' collapse. Understanding these causes remains essential for preventing future systemic failures.",
+          "sections": [
+            {
+              "heading": "The Housing Bubble and Subprime Mortgage Lending",
+              "content": "The foundation of the 2008 crisis was an unprecedented housing bubble driven by excessive speculation and predatory lending practices. Between 2000 and 2006, the Federal Reserve maintained historically low interest rates, dropping from 6.5% to 1.0% to combat the dot-com bubble collapse and the economic impact of the September 11 attacks [1]. This cheap credit environment encouraged widespread borrowing and real estate speculation by both homeowners and financial institutions [1][6].\n\nLenders dramatically relaxed underwriting standards, offering subprime mortgages\u2014loans to borrowers with poor credit histories\u2014at an alarming scale. By 2006, subprime mortgages constituted nearly one in four mortgages (23.4%), with financial institutions lending $600 billion in subprime mortgages that single year [2]. These loans frequently featured high-risk structures including adjustable-rate mortgages, interest-only payments, and minimal documentation requirements that enabled unqualified borrowers to purchase overpriced homes [2][6].\n\nHousing prices peaked in 2006 before entering a severe decline, ultimately falling 27.4% from peak to trough by 2012 [1][5]. When the Federal Reserve raised interest rates, borrowers with adjustable-rate mortgages found themselves unable to make payments and unable to refinance or sell due to declining property values [2]. This triggered mass foreclosures that initiated the crisis's first phase in early 2007, as mortgage-backed securities tied to U.S. real estate began collapsing in value [1][3].",
+              "citation_ids": [
+                "9a1830f4-e885-41d7-a9f0-1305282f4dfc",
+                "ea159844-64db-45cf-aa3d-f002a611ce4d",
+                "78170150-438a-41eb-ad05-25894663e786",
+                "6e04ccb6-ebf5-492a-8668-b430b1cd5817",
+                "98749b14-b9b1-412b-8d90-ac6443c20ca3"
+              ]
+            },
+            {
+              "heading": "Regulatory Failures and Deregulation",
+              "content": "The regulatory framework governing financial institutions proved inadequate to prevent or contain the crisis, though scholars debate whether outright deregulation or regulatory gaps bear primary responsibility. The 1999 Gramm-Leach-Bliley Act repealed key provisions of the Glass-Steagall Act, eliminating Depression-era barriers between commercial and investment banking [11][12]. Critics argue this allowed commercial banks to use federally insured deposits to underwrite high-risk securities, including subprime mortgage-backed assets [11][13].\n\nPerhaps more significantly, shadow banking institutions\u2014entities that functioned like banks but operated outside traditional regulatory oversight\u2014played a central role in the crisis while receiving minimal supervision [15][16][17]. Major investment banks like Lehman Brothers and Bear Stearns participated in the SEC's voluntary supervision program, which allowed firms to opt in and out at their discretion [15]. SEC Chairman Chris Cox acknowledged in 2008 that \"voluntary regulation does not work,\" highlighting the program's fundamental inadequacy [15].\n\nRegulators also relied heavily on self-regulation, trusting internal risk models developed by the financial institutions themselves rather than implementing independent oversight [14]. The deregulatory approach failed to establish appropriate frameworks for mortgage-backed securities and other financial innovations that became crisis catalysts [10][14]. However, some economists contest the deregulation narrative, noting that financial regulatory restrictions actually increased 18.6% from 1997 to 2008, suggesting the crisis represented regulatory failure rather than simple deregulation [18][19].",
+              "citation_ids": [
+                "c2314583-9e26-4611-9ed2-e90c2ca2160e",
+                "4647a312-f3e4-4829-9cc0-de4ac0414818",
+                "d27df8d8-b7ab-4347-b228-0ab09cb208a4",
+                "f9ddc9a2-6626-41bc-8d91-43a5e8aa6ec5",
+                "3aecc3e1-aa47-467e-a5b4-87c744cfd432",
+                "e4eee682-5b99-48bb-8f1d-41e9b3d2a3cd",
+                "a3498941-426f-4b8c-bd47-65593c310ee5",
+                "396aa4b8-bfb2-479c-aa49-9704fb620c3f",
+                "bf4bfc83-a39a-4982-854b-37ab5a64a30a",
+                "95b67950-10a5-4f09-80ee-4f2fc9905019"
+              ]
+            },
+            {
+              "heading": "Financial Engineering and Complex Securities",
+              "content": "Financial innovation created instruments that obscured risk, amplified leverage, and distributed toxic assets throughout the global financial system. Mortgage-backed securities (MBS) and collateralized debt obligations (CDOs) transformed local mortgage markets into international crises by packaging subprime loans into securities marketed to global investors [3][20].\n\nBy 2007, approximately $3.2 trillion in loans to borrowers with bad credit and undocumented incomes had been bundled into MBS and CDOs, many receiving top credit ratings despite underlying portfolio quality [3]. These high ratings proved catastrophically inaccurate: by the end of 2008, 80% of triple-A rated CDO tranches were downgraded to junk status, and 91% of all CDO securities were downgraded [3][23]. The complexity and opacity of these instruments made them nearly impossible to value accurately, creating widespread uncertainty about financial institution balance sheet health [20].\n\nCDOs heavily incorporated subprime mortgages issued to high-risk borrowers, meaning their value plummeted as housing prices declined and delinquencies rose [22]. Synthetic CDOs further amplified systemic risk by creating derivative positions backed by credit default swaps rather than actual mortgage assets, increasing leverage without financing additional mortgages [21].\n\nCredit default swaps (CDS) functioned as unregulated insurance against security defaults, with major investment banks purchasing massive quantities from counterparties like AIG [24]. The CDS market's size, structural opacity, concentration, and interconnectedness created systemic vulnerability [25][26]. When numerous underlying instruments defaulted simultaneously during the crisis, large banks trading CDS faced existential threats, with some forced into bankruptcy [25][26].",
+              "citation_ids": [
+                "98749b14-b9b1-412b-8d90-ac6443c20ca3",
+                "ed61874b-8740-4549-96b6-79120b2d70c8",
+                "c1ea592e-59e0-4b8b-901c-c96b1398c0e0",
+                "d0b6eba3-ba7f-48b6-9e16-2f1fd267a8ee",
+                "9767e7b9-8f77-4774-a875-2763d3e19741",
+                "c99b470a-8390-43ba-a672-2a46ce749701",
+                "7eae8515-a79c-4ed5-8005-025cdc3898a8",
+                "d7be3df3-5e9c-4908-a46c-5b82e91ed306"
+              ]
+            },
+            {
+              "heading": "Institutional Failures and Cascade Effects",
+              "content": "The failures of Bear Stearns, Lehman Brothers, and AIG illustrated how institutional vulnerabilities could trigger systemic collapse. Bear Stearns collapsed first in March 2008 after accumulating heavy exposure to mortgage-backed securities, combined with reliance on short-term funding, excessive leverage, and inadequate risk management [33][35]. The government facilitated its sale to JPMorgan Chase for $10 per share\u2014down from $133.20\u2014in a rescue that signaled the crisis's severity [32][33][34].\n\nLehman Brothers filed for Chapter 11 bankruptcy on September 15, 2008, marking the largest bankruptcy in U.S. history with over $600 billion in assets [27][28][29]. Unlike Bear Stearns, the government did not bail out Lehman because the Treasury lacked legal authority to inject capital before Congress authorized the Troubled Asset Relief Program [28][30]. Lehman's collapse triggered immediate market panic, with the S&P 500 dropping nearly 5% on September 15, while weakening bank portfolios and causing interbank lending to freeze as institutions lost trust in counterparties [27][31].\n\nAIG required an unprecedented $182 billion government bailout (initially $85 billion, later expanded) due to its role as a major credit default swap seller [36][37]. Operating as a non-bank insurance company, AIG had engaged in risky CDS trading without bank regulatory oversight or requirements to maintain capital reserves against risky positions [36][38]. Its potential failure threatened systemic collapse across the financial system given its extensive counterparty obligations. The government ultimately profited $22.7 billion from the AIG intervention when it sold its final shares in December 2012 [36][37].",
+              "citation_ids": [
+                "0b15373e-9e75-4afd-ab2e-a316ef1b0593",
+                "328d6858-9403-4b46-92e1-00c706fe9a70",
+                "70a5c331-94cd-4269-9e88-ad0fae1ab7ca",
+                "8944c894-f9c6-48a9-9576-46f2696612d4",
+                "470e22f8-fbf0-477c-832a-831dbd46ee7d",
+                "1fbc0da1-dce1-4c7b-b4cf-dc71bc4392ec",
+                "ef5c8fe8-4e45-4c0d-bf41-397342371f6d",
+                "10f5a1d7-ff02-41d1-8340-c5f492ed6e42",
+                "48d851a3-a2b7-4ae4-aa12-3616650ddd01",
+                "2bbeecba-9986-49aa-902e-d3be4573e64f",
+                "c19d9585-3831-4949-8e1e-66a70df4a519",
+                "54cad737-017d-4f1f-90c6-b5aee9be0d0e"
+              ]
+            },
+            {
+              "heading": "Alternative Explanations and Theoretical Perspectives",
+              "content": "Economists have offered diverse explanations for the crisis beyond the mainstream regulatory failure narrative. Surveyed economists identified flawed financial regulation and supervision as the primary culprit, followed closely by underestimation of risks in engineered securities, with mortgage fraud ranking third [39][40]. Beyond regulation, highly rated causes included irrational beliefs about house prices and risk, plus corrupt incentives including fraud in mortgages and credit rating agencies [40].\n\nAustrian School economists attribute the crisis to excessive central bank credit expansion creating artificially low interest rates that encouraged malinvestment in unproductive or unsustainable sectors [44]. This perspective emphasizes how monetary policy distortions inevitably lead to market corrections when unsustainable investment patterns become apparent [44].\n\nKeynesian and savings glut theorists point to insufficient aggregate investment relative to savings, arguing that too few productive assets were created, driving the private sector toward over-indebtedness [43]. This contrasts with monetarist explanations that blame loose monetary policy for igniting the credit boom [43].\n\nCritics have faulted mainstream economic models for failing to anticipate the crisis, noting that dominant Dynamic Stochastic General Equilibrium (DSGE) models ignored financial intermediaries, credit cycles, and disruptions in financial intermediation [41][42]. Some economists argue the profession had become detached from real-world complexities, sustained by unrealistic assumptions and uncritical views of markets [45].",
+              "citation_ids": [
+                "7631e614-f057-4ffb-8e17-e49e2d3390d0",
+                "4eda1dfd-2653-45fc-a23e-a35b80167893",
+                "8475234c-457a-4eb6-808b-18677c2d6b8b",
+                "02d26c7e-a398-40c0-a876-8c073d18e4d0",
+                "8f7dee0c-9a6e-44c8-9be8-2f00e4f8e17c",
+                "c6436d58-6b6e-4d4b-bcb5-4459d27a025c",
+                "60d1b509-a522-416e-9932-862f2ad0373f"
+              ]
+            },
+            {
+              "heading": "Limitations and Ongoing Debates",
+              "content": "While broad consensus exists on the crisis's major contributing factors, significant debates remain about relative causation and preventability. The deregulation debate continues, with evidence supporting both increased regulatory volume and decreased regulatory effectiveness [18][19]. The precise mechanisms through which various factors interacted to produce systemic collapse remain subjects of active research.\n\nOne notable debate centers on whether Lehman Brothers' failure was a necessary trigger or whether the crisis would have unfolded similarly regardless, with some scholars challenging the dominant narrative that credits Lehman's collapse as the crisis's primary catalyst [31]. Similarly, questions persist about whether more aggressive government intervention in early stages could have prevented the acute phase.\n\nThe role of global capital flows, international regulatory coordination, and cross-border financial integration in amplifying the crisis represents an area where additional research continues. The interaction between housing policy objectives, government-sponsored enterprises like Fannie Mae and Freddie Mac, and private sector behavior also remains contested terrain among economists and policymakers seeking to understand the crisis's full complexity.",
+              "citation_ids": [
+                "bf4bfc83-a39a-4982-854b-37ab5a64a30a",
+                "95b67950-10a5-4f09-80ee-4f2fc9905019",
+                "48d851a3-a2b7-4ae4-aa12-3616650ddd01"
+              ]
+            }
+          ],
+          "citations": [
+            {
+              "id": "9a1830f4-e885-41d7-a9f0-1305282f4dfc",
+              "url": "https://en.wikipedia.org/wiki/2008_financial_crisis",
+              "title": "2008 financial crisis - Wikipedia"
+            },
+            {
+              "id": "78170150-438a-41eb-ad05-25894663e786",
+              "url": "https://www.fool.com/the-ascent/mortgages/subprime-mortgage-crisis/",
+              "title": "The Subprime Mortgage Crisis of 2008: A Beginner's Guide | The Motley Fool"
+            },
+            {
+              "id": "98749b14-b9b1-412b-8d90-ac6443c20ca3",
+              "url": "https://en.wikipedia.org/wiki/Subprime_mortgage_crisis",
+              "title": "Subprime mortgage crisis - Wikipedia"
+            },
+            {
+              "id": "3164e229-06f5-436e-adaf-9cf2d752e4bf",
+              "url": "https://www.americanprogress.org/article/2008-housing-crisis/",
+              "title": "The 2008 Housing Crisis - Center for American Progress"
+            },
+            {
+              "id": "6e04ccb6-ebf5-492a-8668-b430b1cd5817",
+              "url": "https://www.noradarealestate.com/blog/housing-market-crash-2008/",
+              "title": "Housing Market Crash 2008 Explained: Causes and Effects"
+            },
+            {
+              "id": "ea159844-64db-45cf-aa3d-f002a611ce4d",
+              "url": "https://www.terry.uga.edu/study-offers-new-perspective-2008-housing-crash/",
+              "title": "Study offers new perspective on the 2008 housing crash - Terry College of Business"
+            },
+            {
+              "id": "0f81c2f2-bf24-43f1-8d3b-42b308cd4135",
+              "url": "https://www.federalreservehistory.org/essays/subprime-mortgage-crisis",
+              "title": "Subprime Mortgage Crisis | Federal Reserve History"
+            },
+            {
+              "id": "bd4e8114-1dcd-4b45-be22-5801085deb60",
+              "url": "https://retroreport.org/video/the-2008-financial-crisis-explained-housing-bubble-to-bailout/",
+              "title": "The 2008 Financial Crisis Explained: Housing Bubble to Bailout - Retro Report"
+            },
+            {
+              "id": "f087d919-8b36-4606-98a6-f5405ae44ef6",
+              "url": "https://grdspublishing.org/index.php/people/article/view/132",
+              "title": "DEREGULATION AND THE 2008 FINANCIAL CRISIS IN AMERICA | PEOPLE: International Journal of Social Sciences"
+            },
+            {
+              "id": "396aa4b8-bfb2-479c-aa49-9704fb620c3f",
+              "url": "https://digitalcommons.lib.uconn.edu/cgi/viewcontent.cgi?article=1318&context=srhonors_theses",
+              "title": "Financial Regulation and the Crisis of 2008"
+            },
+            {
+              "id": "c2314583-9e26-4611-9ed2-e90c2ca2160e",
+              "url": "https://grokipedia.com/page/Repeal_of_the_Glass%E2%80%93Steagall_Act",
+              "title": "Repeal of the Glass\u2013Steagall Act"
+            },
+            {
+              "id": "4647a312-f3e4-4829-9cc0-de4ac0414818",
+              "url": "https://ballotpedia.org/Gramm-Leach-Bliley_Act",
+              "title": "Gramm-Leach-Bliley Act - Ballotpedia"
+            },
+            {
+              "id": "d27df8d8-b7ab-4347-b228-0ab09cb208a4",
+              "url": "https://legalclarity.org/the-repeal-of-glass-steagall-and-its-aftermath/",
+              "title": "The Repeal of Glass-Steagall: Causes and Consequences - LegalClarity"
+            },
+            {
+              "id": "a3498941-426f-4b8c-bd47-65593c310ee5",
+              "url": "https://www.saintpeters.edu/wp-content/uploads/blogs.dir/270/files/2022/12/Suneha-Bamboli-Financial-Engineering-and-Deregulation-The-Biggest-Causes-of-Financial-Crises.pdf",
+              "title": "Financial Engineering and Deregulation"
+            },
+            {
+              "id": "f9ddc9a2-6626-41bc-8d91-43a5e8aa6ec5",
+              "url": "https://www.americanprogress.org/article/strengthening-regulation-oversight-shadow-banks/",
+              "title": "Strengthening the Regulation and Oversight of Shadow Banks - Center for American Progress"
+            },
+            {
+              "id": "3aecc3e1-aa47-467e-a5b4-87c744cfd432",
+              "url": "https://corpgov.law.harvard.edu/2024/09/25/shadow-banking-and-securities-law/",
+              "title": "Shadow Banking and Securities Law"
+            },
+            {
+              "id": "e4eee682-5b99-48bb-8f1d-41e9b3d2a3cd",
+              "url": "https://www.philadelphiafed.org/the-economy/banking-and-financial-markets/shadow-banking-and-the-crisis-of-2007-08",
+              "title": "Shadow Banking and the Crisis of 2007-08"
+            },
+            {
+              "id": "bf4bfc83-a39a-4982-854b-37ab5a64a30a",
+              "url": "https://www.quantgov.org/finance-crisis",
+              "title": "Did Deregulation Cause the Financial Crisis of 2008?"
+            },
+            {
+              "id": "95b67950-10a5-4f09-80ee-4f2fc9905019",
+              "url": "https://www.mercatus.org/research/data-visualizations/did-deregulation-cause-financial-crisis",
+              "title": "Did Deregulation Cause the Financial Crisis? | Mercatus Center"
+            },
+            {
+              "id": "ed61874b-8740-4549-96b6-79120b2d70c8",
+              "url": "https://www.imf.org/external/pubs/ft/fandd/2009/06/blanchard.htm",
+              "title": "Finance & Development, June 2009 - The Perfect Storm"
+            },
+            {
+              "id": "9767e7b9-8f77-4774-a875-2763d3e19741",
+              "url": "https://www.fdic.gov/media/18636",
+              "title": "1 Origins of the Crisis Overview - FDIC"
+            },
+            {
+              "id": "d0b6eba3-ba7f-48b6-9e16-2f1fd267a8ee",
+              "url": "https://featured.com/questions/cdos-2008-financial-crisis",
+              "title": "How Did Collateralized Debt Obligations (CDOs) Contribute To The 2008 Financial Crisis?"
+            },
+            {
+              "id": "c1ea592e-59e0-4b8b-901c-c96b1398c0e0",
+              "url": "https://en.wikipedia.org/wiki/Collateralized_debt_obligation",
+              "title": "Collateralized debt obligation - Wikipedia"
+            },
+            {
+              "id": "c99b470a-8390-43ba-a672-2a46ce749701",
+              "url": "https://arxiv.org/pdf/1211.1949",
+              "title": "Dynamical Diagnosis and Solutions for Resilient Natural and Social Systems"
+            },
+            {
+              "id": "7eae8515-a79c-4ed5-8005-025cdc3898a8",
+              "url": "https://www.sciencedirect.com/science/article/pii/S1877042811015941",
+              "title": "The Role of Credit Default Swaps on Financial Market Stability - ScienceDirect"
+            },
+            {
+              "id": "d7be3df3-5e9c-4908-a46c-5b82e91ed306",
+              "url": "https://www.law.cornell.edu/wex/credit_default_swap",
+              "title": "Credit default swap - Wex - US Law - LII / Legal Information Institute"
+            },
+            {
+              "id": "470e22f8-fbf0-477c-832a-831dbd46ee7d",
+              "url": "https://www.britannica.com/event/bankruptcy-of-Lehman-Brothers",
+              "title": "Bankruptcy of Lehman Brothers | Description, Cause, & Facts | Britannica"
+            },
+            {
+              "id": "1fbc0da1-dce1-4c7b-b4cf-dc71bc4392ec",
+              "url": "https://en.wikipedia.org/wiki/Lehman_Brothers",
+              "title": "Lehman Brothers - Wikipedia"
+            },
+            {
+              "id": "ef5c8fe8-4e45-4c0d-bf41-397342371f6d",
+              "url": "https://en.wikipedia.org/wiki/Bankruptcy_of_Lehman_Brothers",
+              "title": "Bankruptcy of Lehman Brothers - Wikipedia"
+            },
+            {
+              "id": "10f5a1d7-ff02-41d1-8340-c5f492ed6e42",
+              "url": "https://www.thebalancemoney.com/lehman-brothers-collapse-causes-impact-4842338",
+              "title": "How the 2008 Lehman Brothers Collapse Affects You Today"
+            },
+            {
+              "id": "48d851a3-a2b7-4ae4-aa12-3616650ddd01",
+              "url": "https://www.brookings.edu/articles/history-credits-lehman-brothers-collapse-for-the-2008-financial-crisis-heres-why-that-narrative-is-wrong/",
+              "title": "Lehman Brothers' Collapse: Financial Crisis Myth or Fact?"
+            },
+            {
+              "id": "70a5c331-94cd-4269-9e88-ad0fae1ab7ca",
+              "url": "https://en.wikipedia.org/wiki/Bear_Stearns",
+              "title": "Bear Stearns - Wikipedia"
+            },
+            {
+              "id": "0b15373e-9e75-4afd-ab2e-a316ef1b0593",
+              "url": "https://www.cnn.com/2018/09/30/investing/bear-stearns-2008-crisis-jimmy-cayne",
+              "title": "The stunning downfall of Bear Stearns and its bridge-playing CEO | CNN Business"
+            },
+            {
+              "id": "8944c894-f9c6-48a9-9576-46f2696612d4",
+              "url": "https://www.thebalancemoney.com/bearn-stearns-collapse-and-bailout-3305613",
+              "title": "Your Guide to Bear Stearns, Its Collapse, and Bailout"
+            },
+            {
+              "id": "328d6858-9403-4b46-92e1-00c706fe9a70",
+              "url": "https://fcic-static.law.stanford.edu/cdn_media/fcic-reports/fcic_final_report_chapter15.pdf",
+              "title": "15 MARCH 2008: THE FALL OF BEAR STEARNS CONTENTS"
+            },
+            {
+              "id": "2bbeecba-9986-49aa-902e-d3be4573e64f",
+              "url": "https://www.thebalancemoney.com/aig-bailout-cost-timeline-bonuses-causes-effects-3305693",
+              "title": "AIG Bailout: Cost, Timeline, Bonuses, Causes, Effects"
+            },
+            {
+              "id": "c19d9585-3831-4949-8e1e-66a70df4a519",
+              "url": "https://academyflex.com/the-aig-bailout-a-case-study-in-financial-rescue-operations/",
+              "title": "The AIG Bailout: A Case Study in Financial Rescue Operations - Flexible Academy of Finance"
+            },
+            {
+              "id": "54cad737-017d-4f1f-90c6-b5aee9be0d0e",
+              "url": "https://www.shortform.com/blog/aig-bailout-2008/",
+              "title": "AIG Bailout in 2008: The Fate of a Giant Too Big to Fail - Shortform Books"
+            },
+            {
+              "id": "7631e614-f057-4ffb-8e17-e49e2d3390d0",
+              "url": "https://www.chicagobooth.edu/media-relations-and-communications/press-releases/what-economists-think-caused-financial-crisis",
+              "title": "What economists think caused the financial crisis"
+            },
+            {
+              "id": "4eda1dfd-2653-45fc-a23e-a35b80167893",
+              "url": "https://www.promarket.org/2017/10/17/blame-2008-financial-crisis/",
+              "title": "Who Is to Blame for the 2008 Financial Crisis? - ProMarket"
+            },
+            {
+              "id": "8f7dee0c-9a6e-44c8-9be8-2f00e4f8e17c",
+              "url": "https://cepr.org/voxeu/columns/economists-2008-crisis-slow-see-fast-act",
+              "title": "Economists in the 2008 crisis: Slow to see, fast to act | CEPR"
+            },
+            {
+              "id": "c6436d58-6b6e-4d4b-bcb5-4459d27a025c",
+              "url": "https://www.sciencedirect.com/science/article/abs/pii/S1572308922000158",
+              "title": "Economists in the 2008 financial crisis: Slow to see, fast to act - ScienceDirect"
+            },
+            {
+              "id": "02d26c7e-a398-40c0-a876-8c073d18e4d0",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10009346/",
+              "title": "Financial production and the subprime mortgage crisis"
+            },
+            {
+              "id": "8475234c-457a-4eb6-808b-18677c2d6b8b",
+              "url": "https://www.tutor2u.net/economics/reference/financial-crises-keynesian-and-austrian-school-perspectives",
+              "title": "Financial Crises: Keynesian and Austrian School Perspectives | Reference Library | Economics | tutor2u"
+            },
+            {
+              "id": "60d1b509-a522-416e-9932-862f2ad0373f",
+              "url": "https://arxiv.org/pdf/2508.09079",
+              "title": "The shape of economics before and after the financial crisis"
+            }
+          ],
+          "web_search_enabled": true
+        }
+      }
+    }
+  ]
+}

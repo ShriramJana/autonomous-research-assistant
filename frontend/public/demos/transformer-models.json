@@ -1,0 +1,2703 @@
+{
+  "slug": "transformer-models",
+  "title": "How do transformer models work?",
+  "question": "How do transformer models work in large language models?",
+  "model": "claude-sonnet-4-5",
+  "created_at": "2026-06-29T03:10:10.604238+00:00",
+  "events": [
+    {
+      "t_ms": 10505,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 1056,
+        "output_tokens": 471,
+        "cumulative_usd": 0.010233
+      }
+    },
+    {
+      "t_ms": 10506,
+      "event": {
+        "type": "plan_ready",
+        "plan": {
+          "original_question": "How do transformer models work in large language models?",
+          "sub_queries": [
+            {
+              "id": "460eab38-23e0-4e41-b2b4-acf7e0ce46fb",
+              "question": "What is the transformer architecture and what are its core components (attention mechanism, encoder-decoder structure, positional encoding)?",
+              "rationale": "This foundational query establishes the basic building blocks and technical concepts necessary to understand how transformers function. Without understanding the core architecture, subsequent details about LLMs cannot be properly contextualized.",
+              "priority": 3
+            },
+            {
+              "id": "30bc7ff5-6c1c-4e6a-a5ed-ffc1606e20da",
+              "question": "How does the self-attention mechanism work in transformer models and why is it important for language understanding?",
+              "rationale": "Self-attention is the key innovation that differentiates transformers from previous architectures. Understanding this mechanism is critical to explaining how transformers process and relate different parts of input text.",
+              "priority": 3
+            },
+            {
+              "id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+              "question": "How are transformer models specifically adapted and scaled for large language models like GPT, BERT, and other modern LLMs?",
+              "rationale": "This bridges the gap between the general transformer architecture and its specific implementation in large language models, covering aspects like decoder-only vs encoder-only architectures, scaling laws, and training approaches.",
+              "priority": 3
+            },
+            {
+              "id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+              "question": "What are the training processes and techniques used for transformer-based LLMs including pre-training, fine-tuning, and optimization methods?",
+              "rationale": "Understanding how these models are trained provides important context for how they acquire language capabilities and helps explain their strengths and behaviors in practice.",
+              "priority": 2
+            },
+            {
+              "id": "c596c267-7a18-44b8-aa61-6591f9c2d7b0",
+              "question": "What are the main advantages and limitations of transformer architectures in LLMs compared to previous approaches like RNNs and LSTMs?",
+              "rationale": "This comparative perspective helps explain why transformers became dominant in NLP and provides context about their practical trade-offs, including computational requirements and performance characteristics.",
+              "priority": 2
+            }
+          ],
+          "web_search_enabled": true
+        }
+      }
+    },
+    {
+      "t_ms": 10507,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "460eab38-23e0-4e41-b2b4-acf7e0ce46fb",
+        "question": "What is the transformer architecture and what are its core components (attention mechanism, encoder-decoder structure, positional encoding)?"
+      }
+    },
+    {
+      "t_ms": 10508,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "30bc7ff5-6c1c-4e6a-a5ed-ffc1606e20da",
+        "question": "How does the self-attention mechanism work in transformer models and why is it important for language understanding?"
+      }
+    },
+    {
+      "t_ms": 10510,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+        "question": "How are transformer models specifically adapted and scaled for large language models like GPT, BERT, and other modern LLMs?"
+      }
+    },
+    {
+      "t_ms": 10511,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+        "question": "What are the training processes and techniques used for transformer-based LLMs including pre-training, fine-tuning, and optimization methods?"
+      }
+    },
+    {
+      "t_ms": 10511,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "c596c267-7a18-44b8-aa61-6591f9c2d7b0",
+        "question": "What are the main advantages and limitations of transformer architectures in LLMs compared to previous approaches like RNNs and LSTMs?"
+      }
+    },
+    {
+      "t_ms": 48043,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 36858,
+        "output_tokens": 1848,
+        "cumulative_usd": 0.148527
+      }
+    },
+    {
+      "t_ms": 48043,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "460eab38-23e0-4e41-b2b4-acf7e0ce46fb",
+        "tool_call": "web_search('transformer architecture attention mechanism encoder decoder')"
+      }
+    },
+    {
+      "t_ms": 48043,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "460eab38-23e0-4e41-b2b4-acf7e0ce46fb",
+        "tool_call": "web_search('transformer positional encoding explained')"
+      }
+    },
+    {
+      "t_ms": 48043,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "460eab38-23e0-4e41-b2b4-acf7e0ce46fb",
+        "tool_call": "web_search('self-attention mechanism multi-head attention transformer')"
+      }
+    },
+    {
+      "t_ms": 48046,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "460eab38-23e0-4e41-b2b4-acf7e0ce46fb",
+        "finding": {
+          "sub_query_id": "460eab38-23e0-4e41-b2b4-acf7e0ce46fb",
+          "summary": "The transformer architecture is a neural network model introduced by Vaswani et al. in 2017 that uses self-attention mechanisms to process sequential data. It consists of an encoder-decoder structure where the encoder processes input sequences and the decoder generates output sequences, connected through cross-attention mechanisms. Key components include multi-head self-attention mechanisms that allow the model to weigh the importance of different parts of the input, and positional encoding that injects position information into the model since transformers process data in parallel rather than sequentially.",
+          "key_facts": [
+            {
+              "statement": "The transformer is a neural network architecture introduced by Vaswani et al. in 2017 that utilizes self-attention mechanisms to process sequential data.",
+              "citation_ids": [
+                "682fa9ec-d739-478a-9e95-225560c86fac"
+              ]
+            },
+            {
+              "statement": "The transformer consists of an encoder-decoder structure, where the encoder processes input data and a decoder produces output, with each consisting of multiple layers of attention mechanisms and neural networks.",
+              "citation_ids": [
+                "f628a2a3-b4da-4c6b-bea5-a8c803a38041",
+                "682fa9ec-d739-478a-9e95-225560c86fac",
+                "3942be0d-91c8-4c53-acea-556c12481804"
+              ]
+            },
+            {
+              "statement": "The self-attention mechanism allows the model to weigh the importance of different words in a sentence regardless of their position, which is essential for understanding context and relationships in language data.",
+              "citation_ids": [
+                "f628a2a3-b4da-4c6b-bea5-a8c803a38041"
+              ]
+            },
+            {
+              "statement": "Multi-head attention is a cornerstone of the transformer architecture that employs multiple attention heads, each learning to attend to different parts of the input simultaneously, allowing the model to capture different types of information or relationships within the input sequence.",
+              "citation_ids": [
+                "abe7c28a-b9bd-430e-b34c-2e0bb029ba6f",
+                "61c47129-a848-4a39-b9d1-0a422af966ab"
+              ]
+            },
+            {
+              "statement": "The multi-head self-attention mechanism uses multiple sets of weight matrices to project input data into different subspaces, with outputs from all attention heads concatenated and projected to produce the final output.",
+              "citation_ids": [
+                "958980e4-3497-4bf7-a39e-496b0f4bb2a6",
+                "9ba3d862-6049-4b4e-9573-6f8fac52b965"
+              ]
+            },
+            {
+              "statement": "Encoder-decoder cross-attention is incorporated within each decoder layer to enable the decoder to selectively focus on relevant parts of the encoded input sequence while generating output.",
+              "citation_ids": [
+                "f04fe419-b96e-4d86-aa80-e18877e1b9d2"
+              ]
+            },
+            {
+              "statement": "Positional encoding is a technique that injects information about the position of words in a sequence to transformer architectures, which is necessary because transformers process input sequences in parallel rather than sequentially and do not inherently capture the order of tokens.",
+              "citation_ids": [
+                "602264ec-9704-49d1-9aa6-1dcb953dd8ea",
+                "93857838-ee6d-46cb-9f19-e4392057091f"
+              ]
+            },
+            {
+              "statement": "The original transformer paper introduced sinusoidal positional encodings using a combination of sine and cosine functions at different frequencies to encode position, ensuring each position has a unique representation while capturing relative positions effectively.",
+              "citation_ids": [
+                "93857838-ee6d-46cb-9f19-e4392057091f",
+                "f7f44743-4d86-4cb8-ae3f-3bef97ed3759",
+                "5d53853e-576e-4b23-aadb-8f57ab4dd798"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "682fa9ec-d739-478a-9e95-225560c86fac",
+              "url": "https://arxiv.org/pdf/2302.11089",
+              "title": "Recent Advancements in Deep Learning Applications and Methods for Autonomous Navigation: A Comprehensive Review"
+            },
+            {
+              "id": "f628a2a3-b4da-4c6b-bea5-a8c803a38041",
+              "url": "https://arxiv.org/pdf/2501.15411",
+              "title": "The Potential of Large Language Models in Supply Chain Management: Advancing Decision-Making, Efficiency, and Innovation"
+            },
+            {
+              "id": "3942be0d-91c8-4c53-acea-556c12481804",
+              "url": "https://arxiv.org/pdf/2508.10687",
+              "title": "Continuous Bangla Sign Language Translation: Mitigating the Expense of Gloss Annotation with the Assistance of Graph"
+            },
+            {
+              "id": "abe7c28a-b9bd-430e-b34c-2e0bb029ba6f",
+              "url": "https://arxiv.org/pdf/2410.16881",
+              "title": "Just In Time Transformers"
+            },
+            {
+              "id": "61c47129-a848-4a39-b9d1-0a422af966ab",
+              "url": "https://arxiv.org/pdf/2312.01232",
+              "title": "A Comprehensive Study of Vision Transformers in Image Classification Tasks"
+            },
+            {
+              "id": "958980e4-3497-4bf7-a39e-496b0f4bb2a6",
+              "url": "https://arxiv.org/pdf/2302.11867",
+              "title": "Transformers in Single Object Tracking: An Experimental Survey"
+            },
+            {
+              "id": "9ba3d862-6049-4b4e-9573-6f8fac52b965",
+              "url": "https://arxiv.org/pdf/2510.16575",
+              "title": "ViT-Transformer: Self-attention mechanism based constitutive modeling for nonlinear heterogeneous materials"
+            },
+            {
+              "id": "f04fe419-b96e-4d86-aa80-e18877e1b9d2",
+              "url": "https://apxml.com/courses/foundations-transformers-architecture/chapter-5-encoder-decoder-stacks/encoder-decoder-cross-attention",
+              "title": "Encoder-Decoder Cross-Attention Mechanism"
+            },
+            {
+              "id": "602264ec-9704-49d1-9aa6-1dcb953dd8ea",
+              "url": "https://www.ibm.com/think/topics/positional-encoding",
+              "title": "What is Positional Encoding? | IBM"
+            },
+            {
+              "id": "93857838-ee6d-46cb-9f19-e4392057091f",
+              "url": "https://medium.com/@lixue421/understanding-positional-encoding-in-transformers-2c7336728be5",
+              "title": "Understanding Positional Encoding in Transformers and Beyond with Code"
+            },
+            {
+              "id": "f7f44743-4d86-4cb8-ae3f-3bef97ed3759",
+              "url": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12153884",
+              "title": "Advanced transformer architecture with epistemic embedding for enhanced natural language processing"
+            },
+            {
+              "id": "5d53853e-576e-4b23-aadb-8f57ab4dd798",
+              "url": "https://medium.com/thedeephub/positional-encoding-explained-a-deep-dive-into-transformer-pe-65cfe8cfe10b",
+              "title": "Positional Encoding Explained: A Deep Dive into Transformer PE"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 49189,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 22265,
+        "output_tokens": 2308,
+        "cumulative_usd": 0.249942
+      }
+    },
+    {
+      "t_ms": 49189,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+        "tool_call": "web_search('transformer architecture scaling techniques LLMs GPT BERT')"
+      }
+    },
+    {
+      "t_ms": 49189,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+        "tool_call": "web_search('GPT architecture adaptations transformer model')"
+      }
+    },
+    {
+      "t_ms": 49189,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+        "tool_call": "web_search('BERT transformer modifications encoder architecture')"
+      }
+    },
+    {
+      "t_ms": 49189,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+        "tool_call": "web_search('large language model scaling laws parameters')"
+      }
+    },
+    {
+      "t_ms": 49189,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+        "tool_call": "web_search('modern LLM training techniques 2024 2025 2026')"
+      }
+    },
+    {
+      "t_ms": 49189,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+        "finding": {
+          "sub_query_id": "52dcd0e0-ead4-4017-9b4d-79dc91bfcd63",
+          "summary": "Transformer models are adapted for large language models through architectural modifications and scaling techniques. GPT models use a decoder-only architecture with masked multi-head attention for autoregressive text generation, while BERT employs an encoder-only architecture with bidirectional transformers for contextual understanding. Modern LLMs scale by increasing parameters (from millions to hundreds of billions), stacking multiple transformer layers, using pre-training and fine-tuning approaches, and implementing techniques like mixture-of-experts for efficient scaling.",
+          "key_facts": [
+            {
+              "statement": "GPT models use a decoder-only architecture that strips away the encoder component, employing stacked layers of masked multi-head attention to enable autoregressive prediction capabilities for text generation.",
+              "citation_ids": [
+                "9c38fe55-845b-4da8-a745-32a60548b93f",
+                "6a562af6-0b66-43f3-a6b2-a3d8d1c21a59",
+                "f2460ef4-00e0-4815-bb85-ab4af707dbd9"
+              ]
+            },
+            {
+              "statement": "BERT uses an encoder-only architecture with bidirectional transformers that read entire sequences simultaneously, employing Masked Language Modeling (MLM) and Next Sentence Prediction (NSP) training strategies to build deep contextual representations.",
+              "citation_ids": [
+                "9c38fe55-845b-4da8-a745-32a60548b93f",
+                "6914ea91-43ab-473d-84c2-150daece2857",
+                "df9bd9e1-b726-4a4e-8998-088dc2194744"
+              ]
+            },
+            {
+              "statement": "LLMs are scaled by stacking multiple transformer blocks, with BERT-Base using 12 encoder layers and BERT-Large using 24 layers, while modern LLMs can contain hundreds of billions of parameters trained on diverse datasets.",
+              "citation_ids": [
+                "95e549d7-f641-4fd8-b8f3-b4e7a274186d",
+                "5b79cfe4-b63b-400d-9f4d-b54c83c33ead",
+                "93664baf-f58d-42ea-8ff1-fd85c24c2253"
+              ]
+            },
+            {
+              "statement": "The transformer architecture enables parallel processing and scalability through multi-head attention mechanisms, feedforward neural layers, and residual connections, making it possible to scale models efficiently.",
+              "citation_ids": [
+                "2e1ad5e8-6e21-4146-9c79-b42b1d07a154",
+                "eb40f9de-294b-4d30-9549-db6e8798328d",
+                "40822522-c256-4555-8de2-86ca0b625645"
+              ]
+            },
+            {
+              "statement": "Modern LLMs apply a two-stage learning process of pre-training on massive text corpora using unsupervised learning, followed by fine-tuning on specific tasks or domains to specialize model capabilities.",
+              "citation_ids": [
+                "2e1ad5e8-6e21-4146-9c79-b42b1d07a154",
+                "40822522-c256-4555-8de2-86ca0b625645",
+                "21a9996c-dcf1-4b3c-beed-4884d911a28d"
+              ]
+            },
+            {
+              "statement": "Scaling laws demonstrate that as model size, data, and compute increase, performance improves predictably, leading to emergent capabilities like zero-shot and few-shot learning in larger models.",
+              "citation_ids": [
+                "93664baf-f58d-42ea-8ff1-fd85c24c2253",
+                "2e1ad5e8-6e21-4146-9c79-b42b1d07a154"
+              ]
+            },
+            {
+              "statement": "Advanced scaling techniques include sparse attention mechanisms to handle longer text sequences efficiently and mixture-of-experts (MoE) architectures where only specialized subnetworks are activated per token.",
+              "citation_ids": [
+                "40822522-c256-4555-8de2-86ca0b625645",
+                "9c38fe55-845b-4da8-a745-32a60548b93f"
+              ]
+            },
+            {
+              "statement": "GPT and BERT represent two main technical routes for LLMs, with GPT's decoder-only pattern becoming the mainstream architecture for models with hundreds of billions of parameters.",
+              "citation_ids": [
+                "eb04f2c9-431c-4037-9813-71f873e3c53f",
+                "1aa0211f-08e0-4e19-b72a-810e56d65555"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "eb04f2c9-431c-4037-9813-71f873e3c53f",
+              "url": "https://arxiv.org/pdf/2409.00089",
+              "title": "Watermarking Techniques for Large Language Models: A Survey"
+            },
+            {
+              "id": "1aa0211f-08e0-4e19-b72a-810e56d65555",
+              "url": "https://arxiv.org/pdf/2312.15388",
+              "title": "DEAP: Design Space Exploration for DNN Accelerator Parallelism"
+            },
+            {
+              "id": "93664baf-f58d-42ea-8ff1-fd85c24c2253",
+              "url": "https://medium.com/tutai-ai/transformers-and-llms-the-architecture-behind-the-ai-revolution-93ba27b4646e",
+              "title": "Transformers and LLMs: The Architecture Behind the AI Revolution"
+            },
+            {
+              "id": "2e1ad5e8-6e21-4146-9c79-b42b1d07a154",
+              "url": "https://www.fabricatedknowledge.com/p/ai-foundations-part-1-transformers",
+              "title": "AI Foundations Part 1: Transformers, Pre-Training and Fine-Tuning, and Scaling"
+            },
+            {
+              "id": "9c38fe55-845b-4da8-a745-32a60548b93f",
+              "url": "https://medium.com/@mustafa.gencc94/transformers-llms-part-9-the-transformer-family-a-deep-dive-into-bert-10ce242b144d",
+              "title": "Transformers & LLMs \u2014 Part 9: The Transformer Family & A Deep Dive into BERT"
+            },
+            {
+              "id": "40822522-c256-4555-8de2-86ca0b625645",
+              "url": "https://sam-solutions.com/blog/llm-transformer-architecture/",
+              "title": "LLM Transformer Architecture Explained: How AI Processes Language"
+            },
+            {
+              "id": "6914ea91-43ab-473d-84c2-150daece2857",
+              "url": "https://www.sciencedirect.com/topics/computer-science/bidirectional-encoder-representations-from-transformers",
+              "title": "Bidirectional Encoder Representations From Transformers - an overview"
+            },
+            {
+              "id": "95e549d7-f641-4fd8-b8f3-b4e7a274186d",
+              "url": "https://medium.com/@pickleprat/encoder-only-architecture-bert-4b27f9c76860",
+              "title": "Encoder Only Architecture: BERT"
+            },
+            {
+              "id": "6a562af6-0b66-43f3-a6b2-a3d8d1c21a59",
+              "url": "https://arxiv.org/pdf/2510.16044",
+              "title": "A Novel GPT-Based Framework for Anomaly Detection in System Logs"
+            },
+            {
+              "id": "f2460ef4-00e0-4815-bb85-ab4af707dbd9",
+              "url": "https://arxiv.org/pdf/2305.10435",
+              "title": "Generative Pre-trained Transformer: A Comprehensive Review on Enabling Technologies, Potential Applications, Emerging Challenges, and Future Directions"
+            },
+            {
+              "id": "eb40f9de-294b-4d30-9549-db6e8798328d",
+              "url": "https://arxiv.org/pdf/2412.06864",
+              "title": "Political-LLM: Large Language Models in Political Science"
+            },
+            {
+              "id": "21a9996c-dcf1-4b3c-beed-4884d911a28d",
+              "url": "https://arxiv.org/pdf/2404.01335",
+              "title": "Generative AI Models for Different Steps in Architectural Design: A Literature Review"
+            },
+            {
+              "id": "5b79cfe4-b63b-400d-9f4d-b54c83c33ead",
+              "url": "https://arxiv.org/pdf/2312.17482",
+              "title": "MosaicBERT: A Bidirectional Encoder Optimized for Fast Pretraining"
+            },
+            {
+              "id": "df9bd9e1-b726-4a4e-8998-088dc2194744",
+              "url": "https://arxiv.org/pdf/2307.00067",
+              "title": "Transformers in Healthcare: A Survey"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 50795,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 23838,
+        "output_tokens": 2364,
+        "cumulative_usd": 0.356916
+      }
+    },
+    {
+      "t_ms": 50795,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "30bc7ff5-6c1c-4e6a-a5ed-ffc1606e20da",
+        "tool_call": "web_search('self-attention mechanism transformer models how it works')"
+      }
+    },
+    {
+      "t_ms": 50795,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "30bc7ff5-6c1c-4e6a-a5ed-ffc1606e20da",
+        "tool_call": "web_search('self-attention importance language understanding transformers')"
+      }
+    },
+    {
+      "t_ms": 50795,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "30bc7ff5-6c1c-4e6a-a5ed-ffc1606e20da",
+        "tool_call": "web_search('query key value self-attention transformers')"
+      }
+    },
+    {
+      "t_ms": 50795,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "30bc7ff5-6c1c-4e6a-a5ed-ffc1606e20da",
+        "finding": {
+          "sub_query_id": "30bc7ff5-6c1c-4e6a-a5ed-ffc1606e20da",
+          "summary": "Self-attention is a mechanism that allows transformer models to weigh the importance of each word in a sequence relative to all other words simultaneously, enabling the model to capture contextual relationships and long-range dependencies. Each word is transformed into three vectors\u2014Query, Key, and Value\u2014which are used to compute attention scores that determine how much focus each word should place on others. This mechanism is crucial for language understanding because it enables models to process entire sequences in parallel, capture dependencies regardless of word distance, and develop nuanced contextual understanding that traditional sequential models cannot achieve.",
+          "key_facts": [
+            {
+              "statement": "Self-attention works by transforming each word in a sequence into three vectors called Query, Key, and Value, which are computed by multiplying the input embeddings by three different learnable weight matrices.",
+              "citation_ids": [
+                "5d181c4e-5212-4f5e-b84d-0303726d913d",
+                "44730700-7bee-41bf-98b2-09205122bad7",
+                "d405b96a-61d1-416d-9035-097339633bd8"
+              ]
+            },
+            {
+              "statement": "The mechanism calculates attention scores by computing the dot product between query and key vectors, then normalizes these scores using softmax to form probability weights, which are used to create weighted sums of the value vectors.",
+              "citation_ids": [
+                "08ce1b7d-62af-4726-86b6-eed1cbe8982c",
+                "c278b51d-2cf2-41a2-91f7-0f5b51dfe0bc",
+                "44cc8843-32e3-4315-9e3b-48f8938358d6"
+              ]
+            },
+            {
+              "statement": "Self-attention allows models to capture long-range dependencies by enabling every word to directly attend to every other word in the sequence regardless of distance, solving the information decay problem that plagued sequential models like RNNs.",
+              "citation_ids": [
+                "1b9b0d7d-0e74-40b5-b181-db8e482a5268",
+                "8bcbbd8c-526a-42c4-b7ae-5b9e47c698f0",
+                "47fcd9e4-d3f9-46b8-a743-2c833294d051"
+              ]
+            },
+            {
+              "statement": "The mechanism enables transformers to process entire sequences in parallel rather than sequentially, making them much faster and more efficient than recurrent neural networks, especially for large-scale language models.",
+              "citation_ids": [
+                "1b9b0d7d-0e74-40b5-b181-db8e482a5268",
+                "451270de-94bc-4dab-8286-03487a0bfc7c",
+                "35259296-c5ba-40d1-8ae5-55531b9269ad"
+              ]
+            },
+            {
+              "statement": "Self-attention is crucial for language understanding because it allows models to dynamically evaluate the importance of each word in the context of the entire input sequence, leading to more nuanced and contextually aware representations.",
+              "citation_ids": [
+                "5d181c4e-5212-4f5e-b84d-0303726d913d",
+                "425d9b0e-39db-492b-99f5-ab34026ce689",
+                "c11c8186-8d32-486d-a3c8-a42bb01fe35d"
+              ]
+            },
+            {
+              "statement": "The self-attention mechanism helps models resolve contextual ambiguities, such as determining what pronouns refer to in a sentence, by establishing connections between words based on their relationships rather than just their positions.",
+              "citation_ids": [
+                "922e4298-c278-48ef-9b66-f83a9b5d7f99",
+                "535c3b24-7d7b-4445-b37f-719253adfac7"
+              ]
+            },
+            {
+              "statement": "Self-attention is the core innovation that enables modern large language models like GPT, BERT, and T5 to achieve superior performance on natural language processing tasks compared to earlier architectures.",
+              "citation_ids": [
+                "5d181c4e-5212-4f5e-b84d-0303726d913d",
+                "425d9b0e-39db-492b-99f5-ab34026ce689",
+                "c11c8186-8d32-486d-a3c8-a42bb01fe35d"
+              ]
+            },
+            {
+              "statement": "The mechanism was introduced in the 2017 paper 'Attention Is All You Need' and represents the first model architecture to rely entirely on attention mechanisms without recurrence or convolution for both encoding and decoding.",
+              "citation_ids": [
+                "451270de-94bc-4dab-8286-03487a0bfc7c",
+                "4042b7cb-5b33-4c96-9a1f-023b8d810feb",
+                "8f2c34b5-abe6-46fb-b9d4-9665f7d6a547"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "44730700-7bee-41bf-98b2-09205122bad7",
+              "url": "https://www.thelasttech.com/ai/what-is-self-attention-mechanism-in-transformer-models",
+              "title": "What is Self Attention Mechanism in Transformer Models?"
+            },
+            {
+              "id": "5d181c4e-5212-4f5e-b84d-0303726d913d",
+              "url": "https://medium.com/analytics-vidhya/a-deep-dive-into-the-self-attention-mechanism-of-transformers-fe943c77e654",
+              "title": "A Deep Dive into the Self-Attention Mechanism of Transformers"
+            },
+            {
+              "id": "425d9b0e-39db-492b-99f5-ab34026ce689",
+              "url": "https://www.ibm.com/think/topics/self-attention",
+              "title": "What is self-attention? | IBM"
+            },
+            {
+              "id": "08ce1b7d-62af-4726-86b6-eed1cbe8982c",
+              "url": "https://arxiv.org/pdf/2410.10874",
+              "title": "Optimizing Transformer based on high-performance optimizer for predicting employment sentiment"
+            },
+            {
+              "id": "8bcbbd8c-526a-42c4-b7ae-5b9e47c698f0",
+              "url": "https://arxiv.org/pdf/2312.04234",
+              "title": "Graph Convolutions Enrich the Self-Attention in Transformers!"
+            },
+            {
+              "id": "44cc8843-32e3-4315-9e3b-48f8938358d6",
+              "url": "https://arxiv.org/pdf/2403.07542",
+              "title": "A Survey of Vision Transformers in Autonomous Driving"
+            },
+            {
+              "id": "1b9b0d7d-0e74-40b5-b181-db8e482a5268",
+              "url": "https://scienceinsights.org/what-is-self-attention-in-transformers-explained/",
+              "title": "What Is Self-Attention in Transformers, Explained?"
+            },
+            {
+              "id": "451270de-94bc-4dab-8286-03487a0bfc7c",
+              "url": "https://www.herwill.org/news-2/understanding-transformer-architecture:-how-self-attention-helps-llms-understand-context-",
+              "title": "Understanding Transformer Architecture: How Self-Attention Helps LLMs Understand Context"
+            },
+            {
+              "id": "35259296-c5ba-40d1-8ae5-55531b9269ad",
+              "url": "https://medium.com/@kalra.rakshit/introduction-to-transformers-and-attention-mechanisms-c29d252ea2c5",
+              "title": "Introduction to Transformers and Attention Mechanisms"
+            },
+            {
+              "id": "c11c8186-8d32-486d-a3c8-a42bb01fe35d",
+              "url": "https://medium.com/@kamalmeet/understanding-self-attention-f605491d152d",
+              "title": "Understanding Self Attention"
+            },
+            {
+              "id": "922e4298-c278-48ef-9b66-f83a9b5d7f99",
+              "url": "https://arxiv.org/pdf/2402.13352",
+              "title": "KetGPT - Dataset Augmentation of Quantum Circuits using Transformers"
+            },
+            {
+              "id": "535c3b24-7d7b-4445-b37f-719253adfac7",
+              "url": "https://arxiv.org/pdf/2403.02467",
+              "title": "Applied Causal Inference Powered by ML and AI"
+            },
+            {
+              "id": "4042b7cb-5b33-4c96-9a1f-023b8d810feb",
+              "url": "https://arxiv.org/pdf/1909.05246",
+              "title": "Self-Attentional Models Application in Task-Oriented Dialogue Generation Systems"
+            },
+            {
+              "id": "c278b51d-2cf2-41a2-91f7-0f5b51dfe0bc",
+              "url": "https://arxiv.org/pdf/2206.01136",
+              "title": "Transforming medical imaging with Transformers"
+            },
+            {
+              "id": "d405b96a-61d1-416d-9035-097339633bd8",
+              "url": "https://arxiv.org/pdf/2302.11867",
+              "title": "Transformers in Single Object Tracking: An Experimental Survey"
+            },
+            {
+              "id": "8f2c34b5-abe6-46fb-b9d4-9665f7d6a547",
+              "url": "https://medium.com/@wasowski.jarek/self-attention-query-key-value-transformer-b7266afbe730",
+              "title": "Self-Attention Explained: How Query Key Value Work in Transformers"
+            },
+            {
+              "id": "47fcd9e4-d3f9-46b8-a743-2c833294d051",
+              "url": "https://arxiv.org/pdf/2407.09777",
+              "title": "Graph Transformers: A Survey"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 54912,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 23614,
+        "output_tokens": 2512,
+        "cumulative_usd": 0.465438
+      }
+    },
+    {
+      "t_ms": 54912,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c596c267-7a18-44b8-aa61-6591f9c2d7b0",
+        "tool_call": "web_search('transformer architecture advantages limitations vs RNN LSTM')"
+      }
+    },
+    {
+      "t_ms": 54912,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c596c267-7a18-44b8-aa61-6591f9c2d7b0",
+        "tool_call": "web_search('transformers parallel processing attention mechanism benefits')"
+      }
+    },
+    {
+      "t_ms": 54912,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c596c267-7a18-44b8-aa61-6591f9c2d7b0",
+        "tool_call": "web_search('transformer disadvantages computational cost memory requirements')"
+      }
+    },
+    {
+      "t_ms": 54912,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c596c267-7a18-44b8-aa61-6591f9c2d7b0",
+        "tool_call": "web_search('RNN LSTM sequential processing limitations vanishing gradient')"
+      }
+    },
+    {
+      "t_ms": 54912,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "c596c267-7a18-44b8-aa61-6591f9c2d7b0",
+        "finding": {
+          "sub_query_id": "c596c267-7a18-44b8-aa61-6591f9c2d7b0",
+          "summary": "Transformer architectures offer significant advantages over RNNs and LSTMs, primarily through their self-attention mechanism that enables parallel processing and superior handling of long-range dependencies. However, transformers face critical limitations including quadratic computational complexity with sequence length, substantial memory requirements, and high training costs that make them resource-intensive compared to the linear complexity of recurrent models.",
+          "key_facts": [
+            {
+              "statement": "Transformers enable parallel processing of entire sequences simultaneously, unlike RNNs and LSTMs which must process data sequentially step-by-step, dramatically accelerating training times.",
+              "citation_ids": [
+                "21adabda-b61c-4158-ac85-eb2e14918b23",
+                "22f7788d-8a66-4e95-b030-d706d0f63564",
+                "126b8018-7c20-4a74-a551-aa2dfbc13f4c",
+                "815ecaa0-5ac7-4a97-b351-8cf17ce89394",
+                "461c1eeb-5a0b-4686-a7aa-97c5b9dcf26b"
+              ]
+            },
+            {
+              "statement": "Self-attention mechanisms in transformers handle long-range dependencies more effectively than LSTMs by allowing each token to directly attend to all other tokens in the sequence, whereas LSTMs struggle to retain information from distant positions in longer sequences.",
+              "citation_ids": [
+                "21adabda-b61c-4158-ac85-eb2e14918b23",
+                "51d1d0e5-6bc3-47d6-9ff8-7b32b5567822",
+                "22f7788d-8a66-4e95-b030-d706d0f63564",
+                "815ecaa0-5ac7-4a97-b351-8cf17ce89394"
+              ]
+            },
+            {
+              "statement": "RNNs and LSTMs suffer from vanishing and exploding gradient problems that limit their ability to learn long-term dependencies, and must use sequential backpropagation through time (BPTT) during training which greatly limits scalability.",
+              "citation_ids": [
+                "34b6c552-2399-449d-908d-c9d0346b8f47",
+                "9329edc9-273f-48a0-a3b5-a35164e6198a",
+                "ac624ca9-eb59-4e11-b1fd-7599c0247046"
+              ]
+            },
+            {
+              "statement": "Transformers have quadratic (O(n\u00b2)) time and memory complexity due to self-attention computing pairwise interactions between all tokens, making them impractical for very long sequences and typically restricting inputs to around 512 tokens.",
+              "citation_ids": [
+                "a7dbdd55-c617-4ef2-8b47-daba49c21966",
+                "51d1d0e5-6bc3-47d6-9ff8-7b32b5567822",
+                "22ba3a8d-b54b-47a4-89c6-5310ca1c6f41",
+                "b6c6391e-60ad-42a2-a038-74fd9214ef57",
+                "d17f78c3-a2f2-49ce-b89c-beaed24c8bc2"
+              ]
+            },
+            {
+              "statement": "Transformers require substantial memory to store embeddings and intermediate activations, and are computationally intensive with transformer models consuming at least 89.5 billion FLOPs compared to less than 0.01 billion FLOPs for LSTM-based models.",
+              "citation_ids": [
+                "22ba3a8d-b54b-47a4-89c6-5310ca1c6f41",
+                "5a312ea4-c20f-44cc-afff-5155f9f522b5",
+                "27053563-f845-410d-9388-cc4678cf80ea"
+              ]
+            },
+            {
+              "statement": "Training large transformers is prohibitively expensive, with models like RoBERTa requiring 1024 high-end V100 GPUs for approximately a day, and GPT-3 requiring an estimated 355 years on a single V100 GPU at a cost of around $4.6 million.",
+              "citation_ids": [
+                "27053563-f845-410d-9388-cc4678cf80ea"
+              ]
+            },
+            {
+              "statement": "While RNNs have linear computational complexity with sequence length, they can only be computed sequentially which prevents efficient parallelization on modern GPUs and TPUs, making transformers significantly faster despite higher theoretical complexity.",
+              "citation_ids": [
+                "b6c6391e-60ad-42a2-a038-74fd9214ef57",
+                "6adff160-817c-4b40-8d9d-0c7b333a7b08",
+                "7d53c612-d1a1-4512-9a48-3241ed4e9a47"
+              ]
+            },
+            {
+              "statement": "Transformers benefit from global computations and perfect memory that make them more suitable than RNNs for long sequences, as attention mechanisms can access all previous states and weigh them according to learned relevance.",
+              "citation_ids": [
+                "18e79bbd-647b-45ec-a201-eb92501eb0e8",
+                "461c1eeb-5a0b-4686-a7aa-97c5b9dcf26b"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "21adabda-b61c-4158-ac85-eb2e14918b23",
+              "url": "https://blog.finxter.com/transformer-vs-lstm/",
+              "title": "Transformer vs LSTM: A Helpful Illustrated Guide - Be on the Right Side of Change"
+            },
+            {
+              "id": "34b6c552-2399-449d-908d-c9d0346b8f47",
+              "url": "https://bdtechtalks.com/2024/10/28/minimized-rnn-vs-transformer/",
+              "title": "Minimized RNNs offer a fast and efficient alternative to Transformers"
+            },
+            {
+              "id": "a7dbdd55-c617-4ef2-8b47-daba49c21966",
+              "url": "https://arxiv.org/pdf/2506.07920",
+              "title": "W4S4: WaLRUS Meets S4 for Long-Range Sequence Modeling"
+            },
+            {
+              "id": "9329edc9-273f-48a0-a3b5-a35164e6198a",
+              "url": "https://www.geeksforgeeks.org/deep-learning/rnn-vs-lstm-vs-gru-vs-transformers/",
+              "title": "RNN vs LSTM vs GRU vs Transformers - GeeksforGeeks"
+            },
+            {
+              "id": "51d1d0e5-6bc3-47d6-9ff8-7b32b5567822",
+              "url": "https://arxiv.org/pdf/2303.03329",
+              "title": "End-to-End Speech Recognition: A Survey"
+            },
+            {
+              "id": "22f7788d-8a66-4e95-b030-d706d0f63564",
+              "url": "https://aman.ai/primers/ai/dl-comp/",
+              "title": "Aman's AI Journal \u2022 Deep Learning Architectures Comparative Analysis"
+            },
+            {
+              "id": "ac624ca9-eb59-4e11-b1fd-7599c0247046",
+              "url": "https://arxiv.org/pdf/2412.10599",
+              "title": "Advances in Transformers for Robotic Applications: A Review"
+            },
+            {
+              "id": "6adff160-817c-4b40-8d9d-0c7b333a7b08",
+              "url": "https://arxiv.org/pdf/2405.03904",
+              "title": "Transformer models as an efficient replacement for statistical test suites to evaluate the quality of random numbers"
+            },
+            {
+              "id": "7d53c612-d1a1-4512-9a48-3241ed4e9a47",
+              "url": "https://arxiv.org/pdf/2405.06981",
+              "title": "AraSpell: A Deep Learning Approach for Arabic Spelling Correction"
+            },
+            {
+              "id": "126b8018-7c20-4a74-a551-aa2dfbc13f4c",
+              "url": "https://blogs.mathworks.com/deep-learning/2024/10/31/transformer-models-from-hype-to-implementation/",
+              "title": "Transformer Models: From Hype to Implementation \u00bb Artificial Intelligence - MATLAB & Simulink"
+            },
+            {
+              "id": "18e79bbd-647b-45ec-a201-eb92501eb0e8",
+              "url": "https://arxiv.org/pdf/2005.12872",
+              "title": "End-to-End Object Detection with Transformers"
+            },
+            {
+              "id": "815ecaa0-5ac7-4a97-b351-8cf17ce89394",
+              "url": "https://arxiv.org/pdf/2602.20336",
+              "title": "Natural Language Processing Models for Robust Document Categorization"
+            },
+            {
+              "id": "22ba3a8d-b54b-47a4-89c6-5310ca1c6f41",
+              "url": "https://medium.com/@thirupathi.thangavel/limitations-of-transformer-architecture-4e6118cbf5a4",
+              "title": "Limitations of Transformer Architecture | by Thirupathi Thangavel | Medium"
+            },
+            {
+              "id": "b6c6391e-60ad-42a2-a038-74fd9214ef57",
+              "url": "https://aiml.com/what-are-the-drawbacks-of-transformer-models/",
+              "title": "What are the limitations of transformer models? - AIML.com"
+            },
+            {
+              "id": "d17f78c3-a2f2-49ce-b89c-beaed24c8bc2",
+              "url": "https://www.emergentmind.com/topics/transformer-architecture-constraints",
+              "title": "Transformer Architecture Constraints"
+            },
+            {
+              "id": "5a312ea4-c20f-44cc-afff-5155f9f522b5",
+              "url": "https://arxiv.org/pdf/2509.16542",
+              "title": "Mental Multi-class Classification on Social Media: Benchmarking Transformer Architectures against LSTM Models"
+            },
+            {
+              "id": "27053563-f845-410d-9388-cc4678cf80ea",
+              "url": "https://arxiv.org/pdf/2103.14636",
+              "title": "A Practical Survey on Faster and Lighter Transformers"
+            },
+            {
+              "id": "461c1eeb-5a0b-4686-a7aa-97c5b9dcf26b",
+              "url": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12554937",
+              "title": "Few shot incremental learning for named entity recognition"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 60567,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 22913,
+        "output_tokens": 2688,
+        "cumulative_usd": 0.574497
+      }
+    },
+    {
+      "t_ms": 60567,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+        "tool_call": "web_search('transformer LLM pre-training techniques methods')"
+      }
+    },
+    {
+      "t_ms": 60567,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+        "tool_call": "web_search('fine-tuning techniques large language models')"
+      }
+    },
+    {
+      "t_ms": 60567,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+        "tool_call": "web_search('LLM optimization methods training algorithms')"
+      }
+    },
+    {
+      "t_ms": 60567,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+        "tool_call": "web_search('RLHF reinforcement learning human feedback LLMs')"
+      }
+    },
+    {
+      "t_ms": 60567,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+        "tool_call": "web_search('LoRA PEFT parameter efficient fine-tuning 2024')"
+      }
+    },
+    {
+      "t_ms": 60568,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+        "finding": {
+          "sub_query_id": "377c5e05-6acd-4f53-a157-3ff0b46d31ea",
+          "summary": "Transformer-based LLMs are trained through multiple stages: pre-training using self-supervised learning on massive unlabeled text data with architectures like causal decoders (GPT) or encoder-decoders, followed by fine-tuning methods including full fine-tuning, parameter-efficient techniques (LoRA, adapters), instruction tuning, and alignment methods (RLHF, DPO). Optimization relies primarily on adaptive algorithms like AdamW and Adam, with efficiency techniques including mixed-precision training, gradient checkpointing, quantization-aware training, and parallelism strategies for large-scale training.",
+          "key_facts": [
+            {
+              "statement": "Pre-training of LLMs is a self-supervised learning approach that allows models to automatically extract linguistic patterns from massive unlabeled text data, primarily built on Transformer architecture with three main variants: causal decoder, encoder-decoder, and prefix decoder architectures.",
+              "citation_ids": [
+                "16d38fd5-4335-4e7c-a1c7-cce4faaf8034",
+                "e5aad61d-f639-47d2-8135-9d8ecb9fabde"
+              ]
+            },
+            {
+              "statement": "Autoregressive language modeling (e.g., GPT) is a classic pre-training paradigm that requires the model to predict the next token based on previous context, which fits text generation tasks perfectly.",
+              "citation_ids": [
+                "16d38fd5-4335-4e7c-a1c7-cce4faaf8034"
+              ]
+            },
+            {
+              "statement": "Fine-tuning adapts pretrained models to specific tasks through several methods: full fine-tuning updates all model parameters but is computationally expensive for large models, while parameter-efficient fine-tuning (PEFT) techniques like LoRA and adapters selectively update only a subset of parameters or introduce lightweight trainable modules, significantly reducing training overhead.",
+              "citation_ids": [
+                "7e2fe5a7-c6b2-4f4b-bc81-8e56bca6a1f7",
+                "1b240e7a-443d-4e1e-b895-e6ca696c99db",
+                "12709faa-371d-430a-9ff1-17a2c48197fe",
+                "eac220a2-a354-47f1-a79e-6c5e321908ec"
+              ]
+            },
+            {
+              "statement": "Instruction fine-tuning trains models on datasets of task-specific instructions paired with corresponding outputs to enhance the model's ability to generalize and follow user instructions.",
+              "citation_ids": [
+                "b3fba5c4-d43f-405b-9f1e-2586af71b44f",
+                "35814123-87d5-4f52-9c95-fe7dd4319640"
+              ]
+            },
+            {
+              "statement": "Supervised fine-tuning (SFT) and Direct Preference Optimization (DPO) are two common fine-tuning techniques, with SFT being sufficient for simple tasks while DPO after SFT improves performance on complex tasks like clinical reasoning and summarization by training with both positive and negative examples.",
+              "citation_ids": [
+                "178d1224-e1fa-4453-b49f-76860809c213",
+                "d6c74b8b-8efa-45de-93b7-1ffb3ad5052f"
+              ]
+            },
+            {
+              "statement": "Reinforcement Learning from Human Feedback (RLHF) involves training a reward model based on human feedback and then fine-tuning the LLM using reinforcement learning to maximize the reward, with Proximal Policy Optimization (PPO) being a prominent method.",
+              "citation_ids": [
+                "37107d50-3ba5-4b94-901a-e3060e108222",
+                "20c875f1-3160-4989-9487-19853e575c01"
+              ]
+            },
+            {
+              "statement": "LLM pre-training optimization employs AdamW and AdaFactor optimizers for large-scale training, with Adam and AdamW being the predominant optimization methods used in most LLM settings.",
+              "citation_ids": [
+                "16d38fd5-4335-4e7c-a1c7-cce4faaf8034",
+                "d76d0d83-5351-4528-bf9c-209658ad6a0b",
+                "ce4136f4-b495-4d36-9e94-0de26b333e29"
+              ]
+            },
+            {
+              "statement": "Training efficiency techniques include data parallelism, model parallelism, and pipeline parallelism to substantially improve training efficiency, while mixed-precision training and gradient checkpointing effectively reduce memory occupation.",
+              "citation_ids": [
+                "16d38fd5-4335-4e7c-a1c7-cce4faaf8034",
+                "dcf07a5c-8dbb-4163-b480-eff7cd6adc9a"
+              ]
+            },
+            {
+              "statement": "Quantization-aware training (QAT) takes into account the impact of quantization during the training process, reducing model memory footprint and computational requirements by representing parameters with fewer bits.",
+              "citation_ids": [
+                "89d66056-f4f9-4765-bcb2-c42d0d205542",
+                "37107d50-3ba5-4b94-901a-e3060e108222"
+              ]
+            },
+            {
+              "statement": "Knowledge distillation transfers knowledge from larger teacher models to smaller student models, allowing the student to achieve comparable performance with reduced size and computational requirements.",
+              "citation_ids": [
+                "37107d50-3ba5-4b94-901a-e3060e108222"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "16d38fd5-4335-4e7c-a1c7-cce4faaf8034",
+              "url": "https://arxiv.org/pdf/2510.23357",
+              "title": "Large language model-based task planning for service robots: A review"
+            },
+            {
+              "id": "e5aad61d-f639-47d2-8135-9d8ecb9fabde",
+              "url": "https://www.databricks.com/blog/llm-pre-training-and-custom-llms",
+              "title": "Understanding LLM Pre-Training and Custom LLMs | Databricks Blog"
+            },
+            {
+              "id": "b5dfa5c7-3137-4071-9e6e-adf4347896de",
+              "url": "https://arxiv.org/pdf/2407.14962",
+              "title": "Recent Advances in Generative AI and Large Language Models: Current Status, Challenges, and Perspectives"
+            },
+            {
+              "id": "7e2fe5a7-c6b2-4f4b-bc81-8e56bca6a1f7",
+              "url": "https://arxiv.org/pdf/2512.16292",
+              "title": "In-Context Probing for Membership Inference in Fine-Tuned Language Models"
+            },
+            {
+              "id": "1b240e7a-443d-4e1e-b895-e6ca696c99db",
+              "url": "https://arxiv.org/pdf/2604.06946",
+              "title": "An empirical study of LoRA-based fine-tuning of large language models for automated test case generation"
+            },
+            {
+              "id": "12709faa-371d-430a-9ff1-17a2c48197fe",
+              "url": "https://arxiv.org/pdf/2601.06875",
+              "title": "An Ubuntu-Guided Large Language Model Framework for Cognitive Behavioral Mental Health Dialogue"
+            },
+            {
+              "id": "eac220a2-a354-47f1-a79e-6c5e321908ec",
+              "url": "https://arxiv.org/pdf/2407.21330",
+              "title": "Performance of Recent Large Language Models for a Low-Resourced Language"
+            },
+            {
+              "id": "b3fba5c4-d43f-405b-9f1e-2586af71b44f",
+              "url": "https://wandb.ai/byyoung3/Generative-AI/reports/How-to-fine-tune-a-large-language-model-LLM---VmlldzoxMDU2NTg4Mw",
+              "title": "How to fine-tune a large language model (LLM) | Generative-AI \u2013 Weights & Biases"
+            },
+            {
+              "id": "35814123-87d5-4f52-9c95-fe7dd4319640",
+              "url": "https://arxiv.org/pdf/2405.17147",
+              "title": "Large Language Models (LLMs): Deployment, Tokenomics and Sustainability"
+            },
+            {
+              "id": "178d1224-e1fa-4453-b49f-76860809c213",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12457693/",
+              "title": "Fine-Tuning Methods for Large Language Models in Clinical Medicine by Supervised Fine-Tuning and Direct Preference Optimization: Comparative Evaluation"
+            },
+            {
+              "id": "37107d50-3ba5-4b94-901a-e3060e108222",
+              "url": "https://medium.com/@yugank.aman/llm-model-optimization-techniques-and-frameworks-e21d57744ca1",
+              "title": "LLM Model Optimization Techniques and Frameworks | by Yugank .Aman | Medium"
+            },
+            {
+              "id": "20c875f1-3160-4989-9487-19853e575c01",
+              "url": "https://arxiv.org/pdf/2602.08272",
+              "title": "When Do Multi-Agent Systems Outperform? Analysing the Learning Efficiency of Agentic Systems"
+            },
+            {
+              "id": "d6c74b8b-8efa-45de-93b7-1ffb3ad5052f",
+              "url": "https://www.agilelab.it/blog/6-llm-optimization-techniques-immediately-implementable",
+              "title": "6 Essential LLM Optimization Techniques for Immediate Business Implementation"
+            },
+            {
+              "id": "d76d0d83-5351-4528-bf9c-209658ad6a0b",
+              "url": "https://arxiv.org/pdf/2403.17919",
+              "title": "LISA: Layerwise Importance Sampling for Memory-Efficient Large Language Model Fine-Tuning"
+            },
+            {
+              "id": "ce4136f4-b495-4d36-9e94-0de26b333e29",
+              "url": "https://arxiv.org/pdf/2506.09034",
+              "title": "FZOO: Fast Zeroth-Order Optimizer for Fine-Tuning Large Language Models towards Adam-Scale Speed"
+            },
+            {
+              "id": "89d66056-f4f9-4765-bcb2-c42d0d205542",
+              "url": "https://developer.nvidia.com/blog/mastering-llm-techniques-training/",
+              "title": "Mastering LLM Techniques: Training | NVIDIA Technical Blog"
+            },
+            {
+              "id": "dcf07a5c-8dbb-4163-b480-eff7cd6adc9a",
+              "url": "https://www.iguazio.com/glossary/llm-optimization/",
+              "title": "What is LLM Optimization | Iguazio"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 62049,
+      "event": {
+        "type": "synthesis_token",
+        "token": "# Executive"
+      }
+    },
+    {
+      "t_ms": 62704,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Summary\n\nTransformer models represent a fundamental breakthrough in deep learning architecture that has revolutionized large language models ("
+      }
+    },
+    {
+      "t_ms": 63157,
+      "event": {
+        "type": "synthesis_token",
+        "token": "LLMs). Introduced by Vaswani et al. in 2017, transformers rely on self-attention mechanisms to process sequential data in parallel, fundamentally depar"
+      }
+    },
+    {
+      "t_ms": 63626,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ting from the sequential processing of earlier recurrent neural networks. The architecture consists"
+      }
+    },
+    {
+      "t_ms": 64033,
+      "event": {
+        "type": "synthesis_token",
+        "token": " of encoder-decoder structures with multi-head attention mechanisms that enable models to weigh the importance of different parts of input simultaneously, while"
+      }
+    },
+    {
+      "t_ms": 64497,
+      "event": {
+        "type": "synthesis_token",
+        "token": " positional encoding techniques inject sequence order information that transformers cannot"
+      }
+    },
+    {
+      "t_ms": 64966,
+      "event": {
+        "type": "synthesis_token",
+        "token": " inherently capture due to their parallel processing nature.\n\nThe transformer architecture enables modern"
+      }
+    },
+    {
+      "t_ms": 65479,
+      "event": {
+        "type": "synthesis_token",
+        "token": " LLMs like GPT and BERT through specific adaptations: GPT uses a decoder-only architecture for auto"
+      }
+    },
+    {
+      "t_ms": 65909,
+      "event": {
+        "type": "synthesis_token",
+        "token": "regressive text generation, while BERT employs an encoder-only bidirectional approach for contextual understanding. These models"
+      }
+    },
+    {
+      "t_ms": 66392,
+      "event": {
+        "type": "synthesis_token",
+        "token": " scale to hundreds of billions of parameters through a two-stage process of pre-training on"
+      }
+    },
+    {
+      "t_ms": 66893,
+      "event": {
+        "type": "synthesis_token",
+        "token": " massive text corpora followed by fine-tuning for specific tasks. While transformers offer dramatic advantages"
+      }
+    },
+    {
+      "t_ms": 67368,
+      "event": {
+        "type": "synthesis_token",
+        "token": " over recurrent models\u2014including parallel processing capabilities and superior handling of long-range dependencies\u2014they face significant limitations"
+      }
+    },
+    {
+      "t_ms": 67796,
+      "event": {
+        "type": "synthesis_token",
+        "token": " including quadratic computational complexity with sequence length and substantial memory requirements that make them resource-intensive for very long sequences.\n\n#"
+      }
+    },
+    {
+      "t_ms": 68579,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Transformer Architecture Fundamentals\n\nThe transformer is a neural network architecture introduced by Vaswani et al."
+      }
+    },
+    {
+      "t_ms": 69210,
+      "event": {
+        "type": "synthesis_token",
+        "token": " in 2017 that fundamentally changed how models process sequential data [1]. Unlike earlier recurrent approaches,"
+      }
+    },
+    {
+      "t_ms": 69210,
+      "event": {
+        "type": "synthesis_token",
+        "token": " transformers utilize self-attention mechanisms to process entire sequences in parallel rather than sequentially ["
+      }
+    },
+    {
+      "t_ms": 69749,
+      "event": {
+        "type": "synthesis_token",
+        "token": "1][19][20].\n\n## Core Architectural Components\n\nThe"
+      }
+    },
+    {
+      "t_ms": 70167,
+      "event": {
+        "type": "synthesis_token",
+        "token": " transformer consists of an encoder-decoder structure where the encoder processes input data and the decoder produces output"
+      }
+    },
+    {
+      "t_ms": 70697,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", with each consisting of multiple layers of attention mechanisms and neural networks [1][2"
+      }
+    },
+    {
+      "t_ms": 71423,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][3]. This modular design allows for flexible adaptation to different tasks, with modern"
+      }
+    },
+    {
+      "t_ms": 71693,
+      "event": {
+        "type": "synthesis_token",
+        "token": " LLMs often using only the encoder (BERT) or only the decoder (GPT) components [33"
+      }
+    },
+    {
+      "t_ms": 72084,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][35].\n\nThe architecture employs stacked layers that enable deep learning of"
+      }
+    },
+    {
+      "t_ms": 72867,
+      "event": {
+        "type": "synthesis_token",
+        "token": " linguistic patterns. BERT-Base uses 12 encoder layers while BERT-Large uses"
+      }
+    },
+    {
+      "t_ms": 73380,
+      "event": {
+        "type": "synthesis_token",
+        "token": " 24 layers, and modern LLMs can contain hundreds of billions of parameters trained on diverse"
+      }
+    },
+    {
+      "t_ms": 73698,
+      "event": {
+        "type": "synthesis_token",
+        "token": " datasets [31][36][41]. Each layer contains attention mechanisms, feedforward neural"
+      }
+    },
+    {
+      "t_ms": 74085,
+      "event": {
+        "type": "synthesis_token",
+        "token": " layers, and residual connections that enable effective gradient flow during training [32][34"
+      }
+    },
+    {
+      "t_ms": 74613,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][39].\n\n## Encoder-Decoder Cross-Attention\n\nEncoder-decoder cross-attention is incorporated"
+      }
+    },
+    {
+      "t_ms": 75282,
+      "event": {
+        "type": "synthesis_token",
+        "token": " within each decoder layer to enable the decoder to selectively focus on relevant parts"
+      }
+    },
+    {
+      "t_ms": 75585,
+      "event": {
+        "type": "synthesis_token",
+        "token": " of the encoded input sequence while generating output [8"
+      }
+    },
+    {
+      "t_ms": 76087,
+      "event": {
+        "type": "synthesis_token",
+        "token": "]. This mechanism bridges the encoder and decoder components, allowing the decoder to access the full context of the input when producing"
+      }
+    },
+    {
+      "t_ms": 76594,
+      "event": {
+        "type": "synthesis_token",
+        "token": " each output token.\n\n# Self-Attention Mechanism\n\nSelf-attention is the core innovation"
+      }
+    },
+    {
+      "t_ms": 77125,
+      "event": {
+        "type": "synthesis_token",
+        "token": " that enables modern large language models like GPT, BERT, and T5 to achieve superior performance on"
+      }
+    },
+    {
+      "t_ms": 77673,
+      "event": {
+        "type": "synthesis_token",
+        "token": " natural language processing tasks compared to earlier architectures [14][15][22]. The mechanism was introduced in"
+      }
+    },
+    {
+      "t_ms": 79129,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the 2017 paper \"Attention Is All You Need\" and represents the first model"
+      }
+    },
+    {
+      "t_ms": 79130,
+      "event": {
+        "type": "synthesis_token",
+        "token": " architecture to rely entirely on attention mechanisms without recurrence or convolution for"
+      }
+    },
+    {
+      "t_ms": 79130,
+      "event": {
+        "type": "synthesis_token",
+        "token": " both encoding and decoding [20][25][27].\n\n## Query-Key-Value Framework"
+      }
+    },
+    {
+      "t_ms": 80390,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nSelf-attention works by transforming each word in a sequence into three vectors called"
+      }
+    },
+    {
+      "t_ms": 80391,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Query, Key, and Value, which are computed by multiplying the input embeddings by three different"
+      }
+    },
+    {
+      "t_ms": 80391,
+      "event": {
+        "type": "synthesis_token",
+        "token": " learnable weight matrices [6][13][14]. This transformation allows the model to represent"
+      }
+    },
+    {
+      "t_ms": 80727,
+      "event": {
+        "type": "synthesis_token",
+        "token": " each token from three different perspectives: as something seeking"
+      }
+    },
+    {
+      "t_ms": 81201,
+      "event": {
+        "type": "synthesis_token",
+        "token": " information (Query), as something being searched against (Key), and as the actual information"
+      }
+    },
+    {
+      "t_ms": 81702,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to be retrieved (Value).\n\nThe mechanism calculates attention scores by computing the dot product between query and key vectors, then"
+      }
+    },
+    {
+      "t_ms": 82180,
+      "event": {
+        "type": "synthesis_token",
+        "token": " normalizes these scores using softmax to form probability weights, which are used"
+      }
+    },
+    {
+      "t_ms": 82640,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to create weighted sums of the value vectors [16][18][26"
+      }
+    },
+    {
+      "t_ms": 83184,
+      "event": {
+        "type": "synthesis_token",
+        "token": "]. This mathematical formulation enables the model to determine how much each token should attend to every other token in the sequence.\n\n## Multi-Head Attention\n\nMulti"
+      }
+    },
+    {
+      "t_ms": 83595,
+      "event": {
+        "type": "synthesis_token",
+        "token": "-head attention is a cornerstone of the transformer architecture that employs multiple attention heads, each learning to attend to different parts"
+      }
+    },
+    {
+      "t_ms": 84023,
+      "event": {
+        "type": "synthesis_token",
+        "token": " of the input simultaneously, allowing the model to capture different types of information or relationships within the input"
+      }
+    },
+    {
+      "t_ms": 84492,
+      "event": {
+        "type": "synthesis_token",
+        "token": " sequence [4][5]. The multi-head self-attention mechanism uses multiple sets"
+      }
+    },
+    {
+      "t_ms": 85036,
+      "event": {
+        "type": "synthesis_token",
+        "token": " of weight matrices to project input data into different subspaces, with outputs from all"
+      }
+    },
+    {
+      "t_ms": 85554,
+      "event": {
+        "type": "synthesis_token",
+        "token": " attention heads concatenated and projected to produce the final output [6][7]."
+      }
+    },
+    {
+      "t_ms": 85949,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nThis parallel processing of multiple attention perspectives enables models to simultaneously capture different"
+      }
+    },
+    {
+      "t_ms": 86420,
+      "event": {
+        "type": "synthesis_token",
+        "token": " linguistic phenomena such as syntactic dependencies, semantic relationships, and discourse structures within"
+      }
+    },
+    {
+      "t_ms": 86904,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the same layer.\n\n## Contextual Understanding Capabilities\n\nSelf"
+      }
+    },
+    {
+      "t_ms": 87486,
+      "event": {
+        "type": "synthesis_token",
+        "token": "-attention allows models to capture long-range dependencies by enabling every word to"
+      }
+    },
+    {
+      "t_ms": 87861,
+      "event": {
+        "type": "synthesis_token",
+        "token": " directly attend to every other word in the sequence regardless of distance, solving the information decay problem that plagued sequential"
+      }
+    },
+    {
+      "t_ms": 92533,
+      "event": {
+        "type": "synthesis_token",
+        "token": " models like RNNs [17][19][28]. The mechanism enables transformers to process"
+      }
+    },
+    {
+      "t_ms": 92571,
+      "event": {
+        "type": "synthesis_token",
+        "token": " entire sequences in parallel rather than sequentially, making them much faster and more efficient than"
+      }
+    },
+    {
+      "t_ms": 92571,
+      "event": {
+        "type": "synthesis_token",
+        "token": " recurrent neural networks, especially for large-scale language models"
+      }
+    },
+    {
+      "t_ms": 92572,
+      "event": {
+        "type": "synthesis_token",
+        "token": " [19][20][21].\n\nSelf-attention is crucial for language understanding because it allows"
+      }
+    },
+    {
+      "t_ms": 92573,
+      "event": {
+        "type": "synthesis_token",
+        "token": " models to dynamically evaluate the importance of each word in the context of the entire input sequence,"
+      }
+    },
+    {
+      "t_ms": 92573,
+      "event": {
+        "type": "synthesis_token",
+        "token": " leading to more nuanced and contextually aware representations [14][15][22]. The mechanism"
+      }
+    },
+    {
+      "t_ms": 92667,
+      "event": {
+        "type": "synthesis_token",
+        "token": " helps models resolve contextual ambiguities, such as determining what pronoun"
+      }
+    },
+    {
+      "t_ms": 92715,
+      "event": {
+        "type": "synthesis_token",
+        "token": "s refer to in a sentence, by establishing connections between words based on their relationships"
+      }
+    },
+    {
+      "t_ms": 92715,
+      "event": {
+        "type": "synthesis_token",
+        "token": " rather than just their positions [23][24].\n\n# Positional Encoding\n\nPositional encoding is a"
+      }
+    },
+    {
+      "t_ms": 92716,
+      "event": {
+        "type": "synthesis_token",
+        "token": " technique that injects information about the position of words in a sequence to transformer"
+      }
+    },
+    {
+      "t_ms": 93170,
+      "event": {
+        "type": "synthesis_token",
+        "token": " architectures, which is necessary because transformers process input sequences in parallel"
+      }
+    },
+    {
+      "t_ms": 93603,
+      "event": {
+        "type": "synthesis_token",
+        "token": " rather than sequentially and do not inherently capture the order of tokens [9][10]."
+      }
+    },
+    {
+      "t_ms": 94128,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Without positional information, transformers would treat sequences as unordered bags of words"
+      }
+    },
+    {
+      "t_ms": 94617,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", losing critical sequential dependencies essential for language understanding.\n\n## Sinusoidal Positional Encoding"
+      }
+    },
+    {
+      "t_ms": 94974,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nThe original transformer paper introduced sinusoidal positional encodings using a combination of sine and cosine functions at different frequencies to encode position,"
+      }
+    },
+    {
+      "t_ms": 95621,
+      "event": {
+        "type": "synthesis_token",
+        "token": " ensuring each position has a unique representation while capturing relative positions effectively"
+      }
+    },
+    {
+      "t_ms": 95993,
+      "event": {
+        "type": "synthesis_token",
+        "token": " [10][11][12]. This mathematical approach provides several advantages: it generates determin"
+      }
+    },
+    {
+      "t_ms": 96384,
+      "event": {
+        "type": "synthesis_token",
+        "token": "istic encodings without requiring training, can extrapolate to"
+      }
+    },
+    {
+      "t_ms": 96911,
+      "event": {
+        "type": "synthesis_token",
+        "token": " sequences longer than those seen during training, and allows the model to learn relative positions through simple linear transformations.\n\nThe"
+      }
+    },
+    {
+      "t_ms": 97315,
+      "event": {
+        "type": "synthesis_token",
+        "token": " sinusoidal functions use different frequencies for different dimensions of the embedding space, creating a unique \""
+      }
+    },
+    {
+      "t_ms": 97939,
+      "event": {
+        "type": "synthesis_token",
+        "token": "fingerprint\" for each position that the model can learn to interpret and utilize when determining relationships between tokens"
+      }
+    },
+    {
+      "t_ms": 98491,
+      "event": {
+        "type": "synthesis_token",
+        "token": ".\n\n# Adaptations for Large Language Models\n\nTransformer"
+      }
+    },
+    {
+      "t_ms": 98922,
+      "event": {
+        "type": "synthesis_token",
+        "token": " models are adapted for large language models through architectural modifications and scaling techniques that"
+      }
+    },
+    {
+      "t_ms": 99237,
+      "event": {
+        "type": "synthesis_token",
+        "token": " enable processing of natural language at unprecedented scale [31][32][34]."
+      }
+    },
+    {
+      "t_ms": 99672,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\n## GPT: Decoder-Only Architecture\n\nGPT models use a decoder-only architecture that strips away"
+      }
+    },
+    {
+      "t_ms": 100407,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the encoder component, employing stacked layers of masked multi"
+      }
+    },
+    {
+      "t_ms": 100630,
+      "event": {
+        "type": "synthesis_token",
+        "token": "-head attention to enable autoregressive prediction capabilities for text generation [33][37"
+      }
+    },
+    {
+      "t_ms": 101108,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][38]. This architecture focuses exclusively on predicting the next token based on previous context, making it naturally"
+      }
+    },
+    {
+      "t_ms": 101551,
+      "event": {
+        "type": "synthesis_token",
+        "token": " suited for generative tasks like text completion, creative writing, and conversational AI.\n\nThe decoder-only pattern has"
+      }
+    },
+    {
+      "t_ms": 102024,
+      "event": {
+        "type": "synthesis_token",
+        "token": " become the mainstream architecture for models with hundreds of billions of parameters, representing"
+      }
+    },
+    {
+      "t_ms": 102490,
+      "event": {
+        "type": "synthesis_token",
+        "token": " one of the two main technical routes for LLMs"
+      }
+    },
+    {
+      "t_ms": 103033,
+      "event": {
+        "type": "synthesis_token",
+        "token": " alongside BERT's encoder-only approach [29][30][33].\n\n## BERT: Encoder-Only Architecture"
+      }
+    },
+    {
+      "t_ms": 103578,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nBERT uses an encoder-only architecture with bidirectional transformers that read entire sequences simultaneously"
+      }
+    },
+    {
+      "t_ms": 104291,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", employing Masked Language Modeling (MLM) and Next Sentence Prediction (NSP) training strategies"
+      }
+    },
+    {
+      "t_ms": 104444,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to build deep contextual representations [33][35][42"
+      }
+    },
+    {
+      "t_ms": 104969,
+      "event": {
+        "type": "synthesis_token",
+        "token": "]. Unlike GPT's left-to-right processing, BERT can attend to context from both directions, making it particularly"
+      }
+    },
+    {
+      "t_ms": 105508,
+      "event": {
+        "type": "synthesis_token",
+        "token": " effective for understanding tasks like question answering, sentiment analysis, and named entity recognition.\n\nThe bidirectional approach allows"
+      }
+    },
+    {
+      "t_ms": 106024,
+      "event": {
+        "type": "synthesis_token",
+        "token": " BERT to develop richer contextual embeddings by considering both preceding and following context when encoding"
+      }
+    },
+    {
+      "t_ms": 106596,
+      "event": {
+        "type": "synthesis_token",
+        "token": " each token, though this design makes it less suitable for autoregressive generation tasks ["
+      }
+    },
+    {
+      "t_ms": 106857,
+      "event": {
+        "type": "synthesis_token",
+        "token": "35][36].\n\n## Scaling Techniques\n\nModern LLMs apply a two-stage learning process of"
+      }
+    },
+    {
+      "t_ms": 107287,
+      "event": {
+        "type": "synthesis_token",
+        "token": " pre-training on massive text corpora using unsupervised learning, followed by fine-tuning on specific tasks or domains to"
+      }
+    },
+    {
+      "t_ms": 107725,
+      "event": {
+        "type": "synthesis_token",
+        "token": " specialize model capabilities [32][34][40]. This approach allows models to first learn general language understanding from broad"
+      }
+    },
+    {
+      "t_ms": 108198,
+      "event": {
+        "type": "synthesis_token",
+        "token": " datasets, then adapt that knowledge to specific applications with relatively small amounts of task-specific data."
+      }
+    },
+    {
+      "t_ms": 108669,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nScaling laws demonstrate that as model size, data, and compute increase"
+      }
+    },
+    {
+      "t_ms": 109140,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", performance improves predictably, leading to emergent capabilities like zero-shot and"
+      }
+    },
+    {
+      "t_ms": 109608,
+      "event": {
+        "type": "synthesis_token",
+        "token": " few-shot learning in larger models [31][32]. Advanced scaling techniques include sparse attention mechanisms"
+      }
+    },
+    {
+      "t_ms": 110121,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to handle longer text sequences efficiently and mixture-"
+      }
+    },
+    {
+      "t_ms": 110554,
+      "event": {
+        "type": "synthesis_token",
+        "token": "of-experts (MoE) architectures where only specialized subnetworks are activated per token"
+      }
+    },
+    {
+      "t_ms": 111024,
+      "event": {
+        "type": "synthesis_token",
+        "token": " [33][34].\n\nThe transformer architecture enables parallel processing and scalability"
+      }
+    },
+    {
+      "t_ms": 111493,
+      "event": {
+        "type": "synthesis_token",
+        "token": " through multi-head attention mechanisms, feedforward neural layers, and residual connections, making it possible"
+      }
+    },
+    {
+      "t_ms": 111965,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to scale models efficiently from millions to hundreds of billions of parameters [32"
+      }
+    },
+    {
+      "t_ms": 112578,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][34][39].\n\n# Training and Optimization Methods\n\nTransformer-based LLMs are trained through multiple stages"
+      }
+    },
+    {
+      "t_ms": 113086,
+      "event": {
+        "type": "synthesis_token",
+        "token": " that transform raw models into specialized language understanding systems [43][44].\n\n## Pre-Training Approaches"
+      }
+    },
+    {
+      "t_ms": 113433,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nPre-training of LLMs is a self-supervised learning approach that allows models to automatically extract"
+      }
+    },
+    {
+      "t_ms": 114014,
+      "event": {
+        "type": "synthesis_token",
+        "token": " linguistic patterns from massive unlabeled text data, primarily built on"
+      }
+    },
+    {
+      "t_ms": 114419,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Transformer architecture with three main variants: causal decoder,"
+      }
+    },
+    {
+      "t_ms": 114971,
+      "event": {
+        "type": "synthesis_token",
+        "token": " encoder-decoder, and prefix decoder architectures [43][44]. Autoregressive language"
+      }
+    },
+    {
+      "t_ms": 115313,
+      "event": {
+        "type": "synthesis_token",
+        "token": " modeling (e.g., GPT) is a classic pre-training paradigm that requires"
+      }
+    },
+    {
+      "t_ms": 115860,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the model to predict the next token based on previous context, which fits text generation tasks perfectly [43"
+      }
+    },
+    {
+      "t_ms": 116367,
+      "event": {
+        "type": "synthesis_token",
+        "token": "].\n\nLLM pre-training optimization employs AdamW and AdaFactor optimizers for"
+      }
+    },
+    {
+      "t_ms": 116785,
+      "event": {
+        "type": "synthesis_token",
+        "token": " large-scale training, with Adam and AdamW being the predominant optimization methods used in most LLM settings [43][56][57"
+      }
+    },
+    {
+      "t_ms": 117195,
+      "event": {
+        "type": "synthesis_token",
+        "token": "]. These adaptive learning rate algorithms adjust the learning rate for"
+      }
+    },
+    {
+      "t_ms": 117667,
+      "event": {
+        "type": "synthesis_token",
+        "token": " each parameter based on gradient history, enabling more stable and efficient training of massive models."
+      }
+    },
+    {
+      "t_ms": 118145,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\n## Fine-Tuning Techniques\n\nFine-tuning adapts pretrained models to specific tasks through several methods"
+      }
+    },
+    {
+      "t_ms": 118660,
+      "event": {
+        "type": "synthesis_token",
+        "token": ": full fine-tuning updates all model parameters but is computationally expensive for large models, while"
+      }
+    },
+    {
+      "t_ms": 119153,
+      "event": {
+        "type": "synthesis_token",
+        "token": " parameter-efficient fine-tuning (PEFT) techniques like LoRA and adapters selectively update only a subset of parameters or introduce lightweight trainable modules"
+      }
+    },
+    {
+      "t_ms": 119549,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", significantly reducing training overhead [46][47][48][49].\n\nInstruction"
+      }
+    },
+    {
+      "t_ms": 120048,
+      "event": {
+        "type": "synthesis_token",
+        "token": " fine-tuning trains models on datasets of task-specific instructions paired with corresponding outputs to enhance the model's ability to generalize and follow user instructions [50][51]. Supervised fine-tuning (SFT"
+      }
+    },
+    {
+      "t_ms": 120491,
+      "event": {
+        "type": "synthesis_token",
+        "token": ") and Direct Preference Optimization (DPO) are two common fine-tuning techniques, with SFT being sufficient for simple tasks while DPO after SFT improves performance on complex tasks like clinical reasoning and summarization by training with both positive and negative examples [52"
+      }
+    },
+    {
+      "t_ms": 121073,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][55].\n\nReinforcement Learning from Human Feedback (RLHF) involves training a reward model based on human feedback and then fine-tuning the LLM using reinforcement learning to maximize the reward, with"
+      }
+    },
+    {
+      "t_ms": 121481,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Proximal Policy Optimization (PPO) being a prominent method [53][54]. This approach aligns model outputs"
+      }
+    },
+    {
+      "t_ms": 122123,
+      "event": {
+        "type": "synthesis_token",
+        "token": " with human preferences and values, improving model safety and usefulness.\n\n## Efficiency and Optimization"
+      }
+    },
+    {
+      "t_ms": 122475,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Techniques\n\nTraining efficiency techniques include data parallelism, model parallelism, and pipeline parallelism to substantially improve training efficiency, while mixed"
+      }
+    },
+    {
+      "t_ms": 122905,
+      "event": {
+        "type": "synthesis_token",
+        "token": "-precision training and gradient checkpointing effectively reduce memory occupation [43][59]. These parallelization strategies distribute computation"
+      }
+    },
+    {
+      "t_ms": 123430,
+      "event": {
+        "type": "synthesis_token",
+        "token": " across multiple GPUs or computing nodes, enabling training of models that exceed the memory capacity of individual devices"
+      }
+    },
+    {
+      "t_ms": 123948,
+      "event": {
+        "type": "synthesis_token",
+        "token": ".\n\nQuantization-aware training (QAT) takes into account the impact of quantization during the training process, reducing model memory footprint and computational requirements by representing parameters with fewer bits [53][58]. Knowledge"
+      }
+    },
+    {
+      "t_ms": 124321,
+      "event": {
+        "type": "synthesis_token",
+        "token": " distillation transfers knowledge from larger teacher models to smaller student models, allowing the student to achieve comparable performance with reduced size and computational requirements [53].\n\n# Advantages"
+      }
+    },
+    {
+      "t_ms": 124925,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Over Earlier Architectures\n\nTransformer architectures offer significant advantages over RNNs and LSTMs that have made"
+      }
+    },
+    {
+      "t_ms": 125312,
+      "event": {
+        "type": "synthesis_token",
+        "token": " them the dominant paradigm for language modeling [60][65][69"
+      }
+    },
+    {
+      "t_ms": 125755,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][71].\n\n## Parallel Processing Capabilities\n\nTransformers enable parallel processing of entire sequences simultaneously, unlike RNNs and LSTMs which must process data sequentially step-by-step, dramatically accelerating"
+      }
+    },
+    {
+      "t_ms": 126352,
+      "event": {
+        "type": "synthesis_token",
+        "token": " training times [60][65][69][71][77]. While RNNs have linear computational complexity with sequence length, they can only be computed sequentially which prevents efficient parallelization on modern GPUs"
+      }
+    },
+    {
+      "t_ms": 126678,
+      "event": {
+        "type": "synthesis_token",
+        "token": " and TPUs, making transformers significantly faster despite higher theoretical complexity [67][68][73].\n\nThis parallelization advantage"
+      }
+    },
+    {
+      "t_ms": 127153,
+      "event": {
+        "type": "synthesis_token",
+        "token": " becomes increasingly significant as sequence lengths and model sizes grow, allowing transformers to leverage modern hardware acceler"
+      }
+    },
+    {
+      "t_ms": 127614,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ators far more effectively than recurrent architectures.\n\n## Long-Range Dependency Handling\n\nSelf-attention mechanisms in transformers handle long-range dependencies more effectively than L"
+      }
+    },
+    {
+      "t_ms": 128110,
+      "event": {
+        "type": "synthesis_token",
+        "token": "STMs by allowing each token to directly attend to all other tokens in the sequence, whereas LSTMs struggle to retain information from distant positions in longer sequences [60][64][65][71]. R"
+      }
+    },
+    {
+      "t_ms": 128556,
+      "event": {
+        "type": "synthesis_token",
+        "token": "NNs and LSTMs suffer from vanishing and exploding gradient problems that limit their ability to learn long-term dependencies, and must use sequential backpropagation through time (BPTT) during training which greatly limits scalability ["
+      }
+    },
+    {
+      "t_ms": 129062,
+      "event": {
+        "type": "synthesis_token",
+        "token": "61][63][66].\n\nTransformers benefit from global computations and perfect memory that make them more suitable than RNNs for long sequences, as attention mechanisms can access all previous states and weigh them according to learned relevance [70][77]."
+      }
+    },
+    {
+      "t_ms": 129496,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\n# Limitations and Challenges\n\nDespite their remarkable success, transformer architectures face critical"
+      }
+    },
+    {
+      "t_ms": 130113,
+      "event": {
+        "type": "synthesis_token",
+        "token": " limitations that constrain their application and efficiency [72][73][74].\n\n## Computational Complexity"
+      }
+    },
+    {
+      "t_ms": 130439,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nTransformers have quadratic (O(n\u00b2)) time and memory complexity due to self-attention computing pairwise interactions between all tokens, making them impractical for very long sequences and typically"
+      }
+    },
+    {
+      "t_ms": 130910,
+      "event": {
+        "type": "synthesis_token",
+        "token": " restricting inputs to around 512 tokens [62][64][72][73][74]. This quadratic scaling means that"
+      }
+    },
+    {
+      "t_ms": 131384,
+      "event": {
+        "type": "synthesis_token",
+        "token": " doubling the sequence length quadruples the computational requirements, creating a fundamental bottleneck for processing long documents, books"
+      }
+    },
+    {
+      "t_ms": 131854,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", or extended conversational contexts.\n\n## Resource Requirements\n\nTransformers require substantial memory to store embeddings and intermediate activations, and are computationally intensive with transformer models"
+      }
+    },
+    {
+      "t_ms": 132970,
+      "event": {
+        "type": "synthesis_token",
+        "token": " consuming at least 89.5 billion FLOPs compared to less than 0.01 billion FLOPs for LSTM-based models [72][75][76]. Training large transformers is prohibitively expensive,"
+      }
+    },
+    {
+      "t_ms": 132971,
+      "event": {
+        "type": "synthesis_token",
+        "token": " with models like RoBERTa requiring 1024 high-end V100 GPUs for approximately a day, and GPT-3 requiring an estimated 355 years on a single V100 GPU at a cost of around $4.6 million ["
+      }
+    },
+    {
+      "t_ms": 133277,
+      "event": {
+        "type": "synthesis_token",
+        "token": "76].\n\nThese enormous resource requirements create barriers to entry for researchers and organizations without"
+      }
+    },
+    {
+      "t_ms": 133770,
+      "event": {
+        "type": "synthesis_token",
+        "token": " access to large-scale computing infrastructure, potentially concentrating AI development capabilities in well"
+      }
+    },
+    {
+      "t_ms": 134219,
+      "event": {
+        "type": "synthesis_token",
+        "token": "-resourced institutions and limiting broader participation in advancing the technology."
+      }
+    },
+    {
+      "t_ms": 134305,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 6324,
+        "output_tokens": 3331,
+        "cumulative_usd": 0.6434340000000001
+      }
+    },
+    {
+      "t_ms": 134306,
+      "event": {
+        "type": "report_complete",
+        "report": {
+          "report_id": "b128675b-e9ea-4e7e-ace4-73aa61954865",
+          "original_question": "How do transformer models work in large language models?",
+          "executive_summary": "Transformer models represent a fundamental breakthrough in deep learning architecture that has revolutionized large language models (LLMs). Introduced by Vaswani et al. in 2017, transformers rely on self-attention mechanisms to process sequential data in parallel, fundamentally departing from the sequential processing of earlier recurrent neural networks. The architecture consists of encoder-decoder structures with multi-head attention mechanisms that enable models to weigh the importance of different parts of input simultaneously, while positional encoding techniques inject sequence order information that transformers cannot inherently capture due to their parallel processing nature.\n\nThe transformer architecture enables modern LLMs like GPT and BERT through specific adaptations: GPT uses a decoder-only architecture for autoregressive text generation, while BERT employs an encoder-only bidirectional approach for contextual understanding. These models scale to hundreds of billions of parameters through a two-stage process of pre-training on massive text corpora followed by fine-tuning for specific tasks. While transformers offer dramatic advantages over recurrent models\u2014including parallel processing capabilities and superior handling of long-range dependencies\u2014they face significant limitations including quadratic computational complexity with sequence length and substantial memory requirements that make them resource-intensive for very long sequences.",
+          "sections": [
+            {
+              "heading": "Transformer Architecture Fundamentals",
+              "content": "The transformer is a neural network architecture introduced by Vaswani et al. in 2017 that fundamentally changed how models process sequential data [1]. Unlike earlier recurrent approaches, transformers utilize self-attention mechanisms to process entire sequences in parallel rather than sequentially [1][19][20].\n\n## Core Architectural Components\n\nThe transformer consists of an encoder-decoder structure where the encoder processes input data and the decoder produces output, with each consisting of multiple layers of attention mechanisms and neural networks [1][2][3]. This modular design allows for flexible adaptation to different tasks, with modern LLMs often using only the encoder (BERT) or only the decoder (GPT) components [33][35].\n\nThe architecture employs stacked layers that enable deep learning of linguistic patterns. BERT-Base uses 12 encoder layers while BERT-Large uses 24 layers, and modern LLMs can contain hundreds of billions of parameters trained on diverse datasets [31][36][41]. Each layer contains attention mechanisms, feedforward neural layers, and residual connections that enable effective gradient flow during training [32][34][39].\n\n## Encoder-Decoder Cross-Attention\n\nEncoder-decoder cross-attention is incorporated within each decoder layer to enable the decoder to selectively focus on relevant parts of the encoded input sequence while generating output [8]. This mechanism bridges the encoder and decoder components, allowing the decoder to access the full context of the input when producing each output token.",
+              "citation_ids": [
+                "682fa9ec-d739-478a-9e95-225560c86fac",
+                "1b9b0d7d-0e74-40b5-b181-db8e482a5268",
+                "451270de-94bc-4dab-8286-03487a0bfc7c",
+                "f628a2a3-b4da-4c6b-bea5-a8c803a38041",
+                "3942be0d-91c8-4c53-acea-556c12481804",
+                "9c38fe55-845b-4da8-a745-32a60548b93f",
+                "6914ea91-43ab-473d-84c2-150daece2857",
+                "93664baf-f58d-42ea-8ff1-fd85c24c2253",
+                "95e549d7-f641-4fd8-b8f3-b4e7a274186d",
+                "5b79cfe4-b63b-400d-9f4d-b54c83c33ead",
+                "2e1ad5e8-6e21-4146-9c79-b42b1d07a154",
+                "40822522-c256-4555-8de2-86ca0b625645",
+                "eb40f9de-294b-4d30-9549-db6e8798328d",
+                "f04fe419-b96e-4d86-aa80-e18877e1b9d2"
+              ]
+            },
+            {
+              "heading": "Self-Attention Mechanism",
+              "content": "Self-attention is the core innovation that enables modern large language models like GPT, BERT, and T5 to achieve superior performance on natural language processing tasks compared to earlier architectures [14][15][22]. The mechanism was introduced in the 2017 paper \"Attention Is All You Need\" and represents the first model architecture to rely entirely on attention mechanisms without recurrence or convolution for both encoding and decoding [20][25][27].\n\n## Query-Key-Value Framework\n\nSelf-attention works by transforming each word in a sequence into three vectors called Query, Key, and Value, which are computed by multiplying the input embeddings by three different learnable weight matrices [6][13][14]. This transformation allows the model to represent each token from three different perspectives: as something seeking information (Query), as something being searched against (Key), and as the actual information to be retrieved (Value).\n\nThe mechanism calculates attention scores by computing the dot product between query and key vectors, then normalizes these scores using softmax to form probability weights, which are used to create weighted sums of the value vectors [16][18][26]. This mathematical formulation enables the model to determine how much each token should attend to every other token in the sequence.\n\n## Multi-Head Attention\n\nMulti-head attention is a cornerstone of the transformer architecture that employs multiple attention heads, each learning to attend to different parts of the input simultaneously, allowing the model to capture different types of information or relationships within the input sequence [4][5]. The multi-head self-attention mechanism uses multiple sets of weight matrices to project input data into different subspaces, with outputs from all attention heads concatenated and projected to produce the final output [6][7].\n\nThis parallel processing of multiple attention perspectives enables models to simultaneously capture different linguistic phenomena such as syntactic dependencies, semantic relationships, and discourse structures within the same layer.\n\n## Contextual Understanding Capabilities\n\nSelf-attention allows models to capture long-range dependencies by enabling every word to directly attend to every other word in the sequence regardless of distance, solving the information decay problem that plagued sequential models like RNNs [17][19][28]. The mechanism enables transformers to process entire sequences in parallel rather than sequentially, making them much faster and more efficient than recurrent neural networks, especially for large-scale language models [19][20][21].\n\nSelf-attention is crucial for language understanding because it allows models to dynamically evaluate the importance of each word in the context of the entire input sequence, leading to more nuanced and contextually aware representations [14][15][22]. The mechanism helps models resolve contextual ambiguities, such as determining what pronouns refer to in a sentence, by establishing connections between words based on their relationships rather than just their positions [23][24].",
+              "citation_ids": [
+                "5d181c4e-5212-4f5e-b84d-0303726d913d",
+                "425d9b0e-39db-492b-99f5-ab34026ce689",
+                "c11c8186-8d32-486d-a3c8-a42bb01fe35d",
+                "451270de-94bc-4dab-8286-03487a0bfc7c",
+                "4042b7cb-5b33-4c96-9a1f-023b8d810feb",
+                "8f2c34b5-abe6-46fb-b9d4-9665f7d6a547",
+                "958980e4-3497-4bf7-a39e-496b0f4bb2a6",
+                "44730700-7bee-41bf-98b2-09205122bad7",
+                "08ce1b7d-62af-4726-86b6-eed1cbe8982c",
+                "44cc8843-32e3-4315-9e3b-48f8938358d6",
+                "c278b51d-2cf2-41a2-91f7-0f5b51dfe0bc",
+                "abe7c28a-b9bd-430e-b34c-2e0bb029ba6f",
+                "61c47129-a848-4a39-b9d1-0a422af966ab",
+                "9ba3d862-6049-4b4e-9573-6f8fac52b965",
+                "8bcbbd8c-526a-42c4-b7ae-5b9e47c698f0",
+                "1b9b0d7d-0e74-40b5-b181-db8e482a5268",
+                "47fcd9e4-d3f9-46b8-a743-2c833294d051",
+                "35259296-c5ba-40d1-8ae5-55531b9269ad",
+                "922e4298-c278-48ef-9b66-f83a9b5d7f99",
+                "535c3b24-7d7b-4445-b37f-719253adfac7"
+              ]
+            },
+            {
+              "heading": "Positional Encoding",
+              "content": "Positional encoding is a technique that injects information about the position of words in a sequence to transformer architectures, which is necessary because transformers process input sequences in parallel rather than sequentially and do not inherently capture the order of tokens [9][10]. Without positional information, transformers would treat sequences as unordered bags of words, losing critical sequential dependencies essential for language understanding.\n\n## Sinusoidal Positional Encoding\n\nThe original transformer paper introduced sinusoidal positional encodings using a combination of sine and cosine functions at different frequencies to encode position, ensuring each position has a unique representation while capturing relative positions effectively [10][11][12]. This mathematical approach provides several advantages: it generates deterministic encodings without requiring training, can extrapolate to sequences longer than those seen during training, and allows the model to learn relative positions through simple linear transformations.\n\nThe sinusoidal functions use different frequencies for different dimensions of the embedding space, creating a unique \"fingerprint\" for each position that the model can learn to interpret and utilize when determining relationships between tokens.",
+              "citation_ids": [
+                "602264ec-9704-49d1-9aa6-1dcb953dd8ea",
+                "93857838-ee6d-46cb-9f19-e4392057091f",
+                "f7f44743-4d86-4cb8-ae3f-3bef97ed3759",
+                "5d53853e-576e-4b23-aadb-8f57ab4dd798"
+              ]
+            },
+            {
+              "heading": "Adaptations for Large Language Models",
+              "content": "Transformer models are adapted for large language models through architectural modifications and scaling techniques that enable processing of natural language at unprecedented scale [31][32][34].\n\n## GPT: Decoder-Only Architecture\n\nGPT models use a decoder-only architecture that strips away the encoder component, employing stacked layers of masked multi-head attention to enable autoregressive prediction capabilities for text generation [33][37][38]. This architecture focuses exclusively on predicting the next token based on previous context, making it naturally suited for generative tasks like text completion, creative writing, and conversational AI.\n\nThe decoder-only pattern has become the mainstream architecture for models with hundreds of billions of parameters, representing one of the two main technical routes for LLMs alongside BERT's encoder-only approach [29][30][33].\n\n## BERT: Encoder-Only Architecture\n\nBERT uses an encoder-only architecture with bidirectional transformers that read entire sequences simultaneously, employing Masked Language Modeling (MLM) and Next Sentence Prediction (NSP) training strategies to build deep contextual representations [33][35][42]. Unlike GPT's left-to-right processing, BERT can attend to context from both directions, making it particularly effective for understanding tasks like question answering, sentiment analysis, and named entity recognition.\n\nThe bidirectional approach allows BERT to develop richer contextual embeddings by considering both preceding and following context when encoding each token, though this design makes it less suitable for autoregressive generation tasks [35][36].\n\n## Scaling Techniques\n\nModern LLMs apply a two-stage learning process of pre-training on massive text corpora using unsupervised learning, followed by fine-tuning on specific tasks or domains to specialize model capabilities [32][34][40]. This approach allows models to first learn general language understanding from broad datasets, then adapt that knowledge to specific applications with relatively small amounts of task-specific data.\n\nScaling laws demonstrate that as model size, data, and compute increase, performance improves predictably, leading to emergent capabilities like zero-shot and few-shot learning in larger models [31][32]. Advanced scaling techniques include sparse attention mechanisms to handle longer text sequences efficiently and mixture-of-experts (MoE) architectures where only specialized subnetworks are activated per token [33][34].\n\nThe transformer architecture enables parallel processing and scalability through multi-head attention mechanisms, feedforward neural layers, and residual connections, making it possible to scale models efficiently from millions to hundreds of billions of parameters [32][34][39].",
+              "citation_ids": [
+                "93664baf-f58d-42ea-8ff1-fd85c24c2253",
+                "2e1ad5e8-6e21-4146-9c79-b42b1d07a154",
+                "40822522-c256-4555-8de2-86ca0b625645",
+                "9c38fe55-845b-4da8-a745-32a60548b93f",
+                "6a562af6-0b66-43f3-a6b2-a3d8d1c21a59",
+                "f2460ef4-00e0-4815-bb85-ab4af707dbd9",
+                "eb04f2c9-431c-4037-9813-71f873e3c53f",
+                "1aa0211f-08e0-4e19-b72a-810e56d65555",
+                "6914ea91-43ab-473d-84c2-150daece2857",
+                "df9bd9e1-b726-4a4e-8998-088dc2194744",
+                "95e549d7-f641-4fd8-b8f3-b4e7a274186d",
+                "21a9996c-dcf1-4b3c-beed-4884d911a28d",
+                "eb40f9de-294b-4d30-9549-db6e8798328d"
+              ]
+            },
+            {
+              "heading": "Training and Optimization Methods",
+              "content": "Transformer-based LLMs are trained through multiple stages that transform raw models into specialized language understanding systems [43][44].\n\n## Pre-Training Approaches\n\nPre-training of LLMs is a self-supervised learning approach that allows models to automatically extract linguistic patterns from massive unlabeled text data, primarily built on Transformer architecture with three main variants: causal decoder, encoder-decoder, and prefix decoder architectures [43][44]. Autoregressive language modeling (e.g., GPT) is a classic pre-training paradigm that requires the model to predict the next token based on previous context, which fits text generation tasks perfectly [43].\n\nLLM pre-training optimization employs AdamW and AdaFactor optimizers for large-scale training, with Adam and AdamW being the predominant optimization methods used in most LLM settings [43][56][57]. These adaptive learning rate algorithms adjust the learning rate for each parameter based on gradient history, enabling more stable and efficient training of massive models.\n\n## Fine-Tuning Techniques\n\nFine-tuning adapts pretrained models to specific tasks through several methods: full fine-tuning updates all model parameters but is computationally expensive for large models, while parameter-efficient fine-tuning (PEFT) techniques like LoRA and adapters selectively update only a subset of parameters or introduce lightweight trainable modules, significantly reducing training overhead [46][47][48][49].\n\nInstruction fine-tuning trains models on datasets of task-specific instructions paired with corresponding outputs to enhance the model's ability to generalize and follow user instructions [50][51]. Supervised fine-tuning (SFT) and Direct Preference Optimization (DPO) are two common fine-tuning techniques, with SFT being sufficient for simple tasks while DPO after SFT improves performance on complex tasks like clinical reasoning and summarization by training with both positive and negative examples [52][55].\n\nReinforcement Learning from Human Feedback (RLHF) involves training a reward model based on human feedback and then fine-tuning the LLM using reinforcement learning to maximize the reward, with Proximal Policy Optimization (PPO) being a prominent method [53][54]. This approach aligns model outputs with human preferences and values, improving model safety and usefulness.\n\n## Efficiency and Optimization Techniques\n\nTraining efficiency techniques include data parallelism, model parallelism, and pipeline parallelism to substantially improve training efficiency, while mixed-precision training and gradient checkpointing effectively reduce memory occupation [43][59]. These parallelization strategies distribute computation across multiple GPUs or computing nodes, enabling training of models that exceed the memory capacity of individual devices.\n\nQuantization-aware training (QAT) takes into account the impact of quantization during the training process, reducing model memory footprint and computational requirements by representing parameters with fewer bits [53][58]. Knowledge distillation transfers knowledge from larger teacher models to smaller student models, allowing the student to achieve comparable performance with reduced size and computational requirements [53].",
+              "citation_ids": [
+                "16d38fd5-4335-4e7c-a1c7-cce4faaf8034",
+                "e5aad61d-f639-47d2-8135-9d8ecb9fabde",
+                "d76d0d83-5351-4528-bf9c-209658ad6a0b",
+                "ce4136f4-b495-4d36-9e94-0de26b333e29",
+                "7e2fe5a7-c6b2-4f4b-bc81-8e56bca6a1f7",
+                "1b240e7a-443d-4e1e-b895-e6ca696c99db",
+                "12709faa-371d-430a-9ff1-17a2c48197fe",
+                "eac220a2-a354-47f1-a79e-6c5e321908ec",
+                "b3fba5c4-d43f-405b-9f1e-2586af71b44f",
+                "35814123-87d5-4f52-9c95-fe7dd4319640",
+                "178d1224-e1fa-4453-b49f-76860809c213",
+                "d6c74b8b-8efa-45de-93b7-1ffb3ad5052f",
+                "37107d50-3ba5-4b94-901a-e3060e108222",
+                "20c875f1-3160-4989-9487-19853e575c01",
+                "dcf07a5c-8dbb-4163-b480-eff7cd6adc9a",
+                "89d66056-f4f9-4765-bcb2-c42d0d205542"
+              ]
+            },
+            {
+              "heading": "Advantages Over Earlier Architectures",
+              "content": "Transformer architectures offer significant advantages over RNNs and LSTMs that have made them the dominant paradigm for language modeling [60][65][69][71].\n\n## Parallel Processing Capabilities\n\nTransformers enable parallel processing of entire sequences simultaneously, unlike RNNs and LSTMs which must process data sequentially step-by-step, dramatically accelerating training times [60][65][69][71][77]. While RNNs have linear computational complexity with sequence length, they can only be computed sequentially which prevents efficient parallelization on modern GPUs and TPUs, making transformers significantly faster despite higher theoretical complexity [67][68][73].\n\nThis parallelization advantage becomes increasingly significant as sequence lengths and model sizes grow, allowing transformers to leverage modern hardware accelerators far more effectively than recurrent architectures.\n\n## Long-Range Dependency Handling\n\nSelf-attention mechanisms in transformers handle long-range dependencies more effectively than LSTMs by allowing each token to directly attend to all other tokens in the sequence, whereas LSTMs struggle to retain information from distant positions in longer sequences [60][64][65][71]. RNNs and LSTMs suffer from vanishing and exploding gradient problems that limit their ability to learn long-term dependencies, and must use sequential backpropagation through time (BPTT) during training which greatly limits scalability [61][63][66].\n\nTransformers benefit from global computations and perfect memory that make them more suitable than RNNs for long sequences, as attention mechanisms can access all previous states and weigh them according to learned relevance [70][77].",
+              "citation_ids": [
+                "21adabda-b61c-4158-ac85-eb2e14918b23",
+                "22f7788d-8a66-4e95-b030-d706d0f63564",
+                "126b8018-7c20-4a74-a551-aa2dfbc13f4c",
+                "815ecaa0-5ac7-4a97-b351-8cf17ce89394",
+                "461c1eeb-5a0b-4686-a7aa-97c5b9dcf26b",
+                "6adff160-817c-4b40-8d9d-0c7b333a7b08",
+                "7d53c612-d1a1-4512-9a48-3241ed4e9a47",
+                "b6c6391e-60ad-42a2-a038-74fd9214ef57",
+                "51d1d0e5-6bc3-47d6-9ff8-7b32b5567822",
+                "34b6c552-2399-449d-908d-c9d0346b8f47",
+                "9329edc9-273f-48a0-a3b5-a35164e6198a",
+                "ac624ca9-eb59-4e11-b1fd-7599c0247046",
+                "18e79bbd-647b-45ec-a201-eb92501eb0e8"
+              ]
+            },
+            {
+              "heading": "Limitations and Challenges",
+              "content": "Despite their remarkable success, transformer architectures face critical limitations that constrain their application and efficiency [72][73][74].\n\n## Computational Complexity\n\nTransformers have quadratic (O(n\u00b2)) time and memory complexity due to self-attention computing pairwise interactions between all tokens, making them impractical for very long sequences and typically restricting inputs to around 512 tokens [62][64][72][73][74]. This quadratic scaling means that doubling the sequence length quadruples the computational requirements, creating a fundamental bottleneck for processing long documents, books, or extended conversational contexts.\n\n## Resource Requirements\n\nTransformers require substantial memory to store embeddings and intermediate activations, and are computationally intensive with transformer models consuming at least 89.5 billion FLOPs compared to less than 0.01 billion FLOPs for LSTM-based models [72][75][76]. Training large transformers is prohibitively expensive, with models like RoBERTa requiring 1024 high-end V100 GPUs for approximately a day, and GPT-3 requiring an estimated 355 years on a single V100 GPU at a cost of around $4.6 million [76].\n\nThese enormous resource requirements create barriers to entry for researchers and organizations without access to large-scale computing infrastructure, potentially concentrating AI development capabilities in well-resourced institutions and limiting broader participation in advancing the technology.",
+              "citation_ids": [
+                "22ba3a8d-b54b-47a4-89c6-5310ca1c6f41",
+                "b6c6391e-60ad-42a2-a038-74fd9214ef57",
+                "d17f78c3-a2f2-49ce-b89c-beaed24c8bc2",
+                "a7dbdd55-c617-4ef2-8b47-daba49c21966",
+                "51d1d0e5-6bc3-47d6-9ff8-7b32b5567822",
+                "5a312ea4-c20f-44cc-afff-5155f9f522b5",
+                "27053563-f845-410d-9388-cc4678cf80ea"
+              ]
+            }
+          ],
+          "citations": [
+            {
+              "id": "682fa9ec-d739-478a-9e95-225560c86fac",
+              "url": "https://arxiv.org/pdf/2302.11089",
+              "title": "Recent Advancements in Deep Learning Applications and Methods for Autonomous Navigation: A Comprehensive Review"
+            },
+            {
+              "id": "f628a2a3-b4da-4c6b-bea5-a8c803a38041",
+              "url": "https://arxiv.org/pdf/2501.15411",
+              "title": "The Potential of Large Language Models in Supply Chain Management: Advancing Decision-Making, Efficiency, and Innovation"
+            },
+            {
+              "id": "3942be0d-91c8-4c53-acea-556c12481804",
+              "url": "https://arxiv.org/pdf/2508.10687",
+              "title": "Continuous Bangla Sign Language Translation: Mitigating the Expense of Gloss Annotation with the Assistance of Graph"
+            },
+            {
+              "id": "abe7c28a-b9bd-430e-b34c-2e0bb029ba6f",
+              "url": "https://arxiv.org/pdf/2410.16881",
+              "title": "Just In Time Transformers"
+            },
+            {
+              "id": "61c47129-a848-4a39-b9d1-0a422af966ab",
+              "url": "https://arxiv.org/pdf/2312.01232",
+              "title": "A Comprehensive Study of Vision Transformers in Image Classification Tasks"
+            },
+            {
+              "id": "958980e4-3497-4bf7-a39e-496b0f4bb2a6",
+              "url": "https://arxiv.org/pdf/2302.11867",
+              "title": "Transformers in Single Object Tracking: An Experimental Survey"
+            },
+            {
+              "id": "9ba3d862-6049-4b4e-9573-6f8fac52b965",
+              "url": "https://arxiv.org/pdf/2510.16575",
+              "title": "ViT-Transformer: Self-attention mechanism based constitutive modeling for nonlinear heterogeneous materials"
+            },
+            {
+              "id": "f04fe419-b96e-4d86-aa80-e18877e1b9d2",
+              "url": "https://apxml.com/courses/foundations-transformers-architecture/chapter-5-encoder-decoder-stacks/encoder-decoder-cross-attention",
+              "title": "Encoder-Decoder Cross-Attention Mechanism"
+            },
+            {
+              "id": "602264ec-9704-49d1-9aa6-1dcb953dd8ea",
+              "url": "https://www.ibm.com/think/topics/positional-encoding",
+              "title": "What is Positional Encoding? | IBM"
+            },
+            {
+              "id": "93857838-ee6d-46cb-9f19-e4392057091f",
+              "url": "https://medium.com/@lixue421/understanding-positional-encoding-in-transformers-2c7336728be5",
+              "title": "Understanding Positional Encoding in Transformers and Beyond with Code"
+            },
+            {
+              "id": "f7f44743-4d86-4cb8-ae3f-3bef97ed3759",
+              "url": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12153884",
+              "title": "Advanced transformer architecture with epistemic embedding for enhanced natural language processing"
+            },
+            {
+              "id": "5d53853e-576e-4b23-aadb-8f57ab4dd798",
+              "url": "https://medium.com/thedeephub/positional-encoding-explained-a-deep-dive-into-transformer-pe-65cfe8cfe10b",
+              "title": "Positional Encoding Explained: A Deep Dive into Transformer PE"
+            },
+            {
+              "id": "44730700-7bee-41bf-98b2-09205122bad7",
+              "url": "https://www.thelasttech.com/ai/what-is-self-attention-mechanism-in-transformer-models",
+              "title": "What is Self Attention Mechanism in Transformer Models?"
+            },
+            {
+              "id": "5d181c4e-5212-4f5e-b84d-0303726d913d",
+              "url": "https://medium.com/analytics-vidhya/a-deep-dive-into-the-self-attention-mechanism-of-transformers-fe943c77e654",
+              "title": "A Deep Dive into the Self-Attention Mechanism of Transformers"
+            },
+            {
+              "id": "425d9b0e-39db-492b-99f5-ab34026ce689",
+              "url": "https://www.ibm.com/think/topics/self-attention",
+              "title": "What is self-attention? | IBM"
+            },
+            {
+              "id": "08ce1b7d-62af-4726-86b6-eed1cbe8982c",
+              "url": "https://arxiv.org/pdf/2410.10874",
+              "title": "Optimizing Transformer based on high-performance optimizer for predicting employment sentiment"
+            },
+            {
+              "id": "8bcbbd8c-526a-42c4-b7ae-5b9e47c698f0",
+              "url": "https://arxiv.org/pdf/2312.04234",
+              "title": "Graph Convolutions Enrich the Self-Attention in Transformers!"
+            },
+            {
+              "id": "44cc8843-32e3-4315-9e3b-48f8938358d6",
+              "url": "https://arxiv.org/pdf/2403.07542",
+              "title": "A Survey of Vision Transformers in Autonomous Driving"
+            },
+            {
+              "id": "1b9b0d7d-0e74-40b5-b181-db8e482a5268",
+              "url": "https://scienceinsights.org/what-is-self-attention-in-transformers-explained/",
+              "title": "What Is Self-Attention in Transformers, Explained?"
+            },
+            {
+              "id": "451270de-94bc-4dab-8286-03487a0bfc7c",
+              "url": "https://www.herwill.org/news-2/understanding-transformer-architecture:-how-self-attention-helps-llms-understand-context-",
+              "title": "Understanding Transformer Architecture: How Self-Attention Helps LLMs Understand Context"
+            },
+            {
+              "id": "35259296-c5ba-40d1-8ae5-55531b9269ad",
+              "url": "https://medium.com/@kalra.rakshit/introduction-to-transformers-and-attention-mechanisms-c29d252ea2c5",
+              "title": "Introduction to Transformers and Attention Mechanisms"
+            },
+            {
+              "id": "c11c8186-8d32-486d-a3c8-a42bb01fe35d",
+              "url": "https://medium.com/@kamalmeet/understanding-self-attention-f605491d152d",
+              "title": "Understanding Self Attention"
+            },
+            {
+              "id": "922e4298-c278-48ef-9b66-f83a9b5d7f99",
+              "url": "https://arxiv.org/pdf/2402.13352",
+              "title": "KetGPT - Dataset Augmentation of Quantum Circuits using Transformers"
+            },
+            {
+              "id": "535c3b24-7d7b-4445-b37f-719253adfac7",
+              "url": "https://arxiv.org/pdf/2403.02467",
+              "title": "Applied Causal Inference Powered by ML and AI"
+            },
+            {
+              "id": "4042b7cb-5b33-4c96-9a1f-023b8d810feb",
+              "url": "https://arxiv.org/pdf/1909.05246",
+              "title": "Self-Attentional Models Application in Task-Oriented Dialogue Generation Systems"
+            },
+            {
+              "id": "c278b51d-2cf2-41a2-91f7-0f5b51dfe0bc",
+              "url": "https://arxiv.org/pdf/2206.01136",
+              "title": "Transforming medical imaging with Transformers"
+            },
+            {
+              "id": "8f2c34b5-abe6-46fb-b9d4-9665f7d6a547",
+              "url": "https://medium.com/@wasowski.jarek/self-attention-query-key-value-transformer-b7266afbe730",
+              "title": "Self-Attention Explained: How Query Key Value Work in Transformers"
+            },
+            {
+              "id": "47fcd9e4-d3f9-46b8-a743-2c833294d051",
+              "url": "https://arxiv.org/pdf/2407.09777",
+              "title": "Graph Transformers: A Survey"
+            },
+            {
+              "id": "eb04f2c9-431c-4037-9813-71f873e3c53f",
+              "url": "https://arxiv.org/pdf/2409.00089",
+              "title": "Watermarking Techniques for Large Language Models: A Survey"
+            },
+            {
+              "id": "1aa0211f-08e0-4e19-b72a-810e56d65555",
+              "url": "https://arxiv.org/pdf/2312.15388",
+              "title": "DEAP: Design Space Exploration for DNN Accelerator Parallelism"
+            },
+            {
+              "id": "93664baf-f58d-42ea-8ff1-fd85c24c2253",
+              "url": "https://medium.com/tutai-ai/transformers-and-llms-the-architecture-behind-the-ai-revolution-93ba27b4646e",
+              "title": "Transformers and LLMs: The Architecture Behind the AI Revolution"
+            },
+            {
+              "id": "2e1ad5e8-6e21-4146-9c79-b42b1d07a154",
+              "url": "https://www.fabricatedknowledge.com/p/ai-foundations-part-1-transformers",
+              "title": "AI Foundations Part 1: Transformers, Pre-Training and Fine-Tuning, and Scaling"
+            },
+            {
+              "id": "9c38fe55-845b-4da8-a745-32a60548b93f",
+              "url": "https://medium.com/@mustafa.gencc94/transformers-llms-part-9-the-transformer-family-a-deep-dive-into-bert-10ce242b144d",
+              "title": "Transformers & LLMs \u2014 Part 9: The Transformer Family & A Deep Dive into BERT"
+            },
+            {
+              "id": "40822522-c256-4555-8de2-86ca0b625645",
+              "url": "https://sam-solutions.com/blog/llm-transformer-architecture/",
+              "title": "LLM Transformer Architecture Explained: How AI Processes Language"
+            },
+            {
+              "id": "6914ea91-43ab-473d-84c2-150daece2857",
+              "url": "https://www.sciencedirect.com/topics/computer-science/bidirectional-encoder-representations-from-transformers",
+              "title": "Bidirectional Encoder Representations From Transformers - an overview"
+            },
+            {
+              "id": "95e549d7-f641-4fd8-b8f3-b4e7a274186d",
+              "url": "https://medium.com/@pickleprat/encoder-only-architecture-bert-4b27f9c76860",
+              "title": "Encoder Only Architecture: BERT"
+            },
+            {
+              "id": "6a562af6-0b66-43f3-a6b2-a3d8d1c21a59",
+              "url": "https://arxiv.org/pdf/2510.16044",
+              "title": "A Novel GPT-Based Framework for Anomaly Detection in System Logs"
+            },
+            {
+              "id": "f2460ef4-00e0-4815-bb85-ab4af707dbd9",
+              "url": "https://arxiv.org/pdf/2305.10435",
+              "title": "Generative Pre-trained Transformer: A Comprehensive Review on Enabling Technologies, Potential Applications, Emerging Challenges, and Future Directions"
+            },
+            {
+              "id": "eb40f9de-294b-4d30-9549-db6e8798328d",
+              "url": "https://arxiv.org/pdf/2412.06864",
+              "title": "Political-LLM: Large Language Models in Political Science"
+            },
+            {
+              "id": "21a9996c-dcf1-4b3c-beed-4884d911a28d",
+              "url": "https://arxiv.org/pdf/2404.01335",
+              "title": "Generative AI Models for Different Steps in Architectural Design: A Literature Review"
+            },
+            {
+              "id": "5b79cfe4-b63b-400d-9f4d-b54c83c33ead",
+              "url": "https://arxiv.org/pdf/2312.17482",
+              "title": "MosaicBERT: A Bidirectional Encoder Optimized for Fast Pretraining"
+            },
+            {
+              "id": "df9bd9e1-b726-4a4e-8998-088dc2194744",
+              "url": "https://arxiv.org/pdf/2307.00067",
+              "title": "Transformers in Healthcare: A Survey"
+            },
+            {
+              "id": "16d38fd5-4335-4e7c-a1c7-cce4faaf8034",
+              "url": "https://arxiv.org/pdf/2510.23357",
+              "title": "Large language model-based task planning for service robots: A review"
+            },
+            {
+              "id": "e5aad61d-f639-47d2-8135-9d8ecb9fabde",
+              "url": "https://www.databricks.com/blog/llm-pre-training-and-custom-llms",
+              "title": "Understanding LLM Pre-Training and Custom LLMs | Databricks Blog"
+            },
+            {
+              "id": "b5dfa5c7-3137-4071-9e6e-adf4347896de",
+              "url": "https://arxiv.org/pdf/2407.14962",
+              "title": "Recent Advances in Generative AI and Large Language Models: Current Status, Challenges, and Perspectives"
+            },
+            {
+              "id": "7e2fe5a7-c6b2-4f4b-bc81-8e56bca6a1f7",
+              "url": "https://arxiv.org/pdf/2512.16292",
+              "title": "In-Context Probing for Membership Inference in Fine-Tuned Language Models"
+            },
+            {
+              "id": "1b240e7a-443d-4e1e-b895-e6ca696c99db",
+              "url": "https://arxiv.org/pdf/2604.06946",
+              "title": "An empirical study of LoRA-based fine-tuning of large language models for automated test case generation"
+            },
+            {
+              "id": "12709faa-371d-430a-9ff1-17a2c48197fe",
+              "url": "https://arxiv.org/pdf/2601.06875",
+              "title": "An Ubuntu-Guided Large Language Model Framework for Cognitive Behavioral Mental Health Dialogue"
+            },
+            {
+              "id": "eac220a2-a354-47f1-a79e-6c5e321908ec",
+              "url": "https://arxiv.org/pdf/2407.21330",
+              "title": "Performance of Recent Large Language Models for a Low-Resourced Language"
+            },
+            {
+              "id": "b3fba5c4-d43f-405b-9f1e-2586af71b44f",
+              "url": "https://wandb.ai/byyoung3/Generative-AI/reports/How-to-fine-tune-a-large-language-model-LLM---VmlldzoxMDU2NTg4Mw",
+              "title": "How to fine-tune a large language model (LLM) | Generative-AI \u2013 Weights & Biases"
+            },
+            {
+              "id": "35814123-87d5-4f52-9c95-fe7dd4319640",
+              "url": "https://arxiv.org/pdf/2405.17147",
+              "title": "Large Language Models (LLMs): Deployment, Tokenomics and Sustainability"
+            },
+            {
+              "id": "178d1224-e1fa-4453-b49f-76860809c213",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12457693/",
+              "title": "Fine-Tuning Methods for Large Language Models in Clinical Medicine by Supervised Fine-Tuning and Direct Preference Optimization: Comparative Evaluation"
+            },
+            {
+              "id": "37107d50-3ba5-4b94-901a-e3060e108222",
+              "url": "https://medium.com/@yugank.aman/llm-model-optimization-techniques-and-frameworks-e21d57744ca1",
+              "title": "LLM Model Optimization Techniques and Frameworks | by Yugank .Aman | Medium"
+            },
+            {
+              "id": "20c875f1-3160-4989-9487-19853e575c01",
+              "url": "https://arxiv.org/pdf/2602.08272",
+              "title": "When Do Multi-Agent Systems Outperform? Analysing the Learning Efficiency of Agentic Systems"
+            },
+            {
+              "id": "d6c74b8b-8efa-45de-93b7-1ffb3ad5052f",
+              "url": "https://www.agilelab.it/blog/6-llm-optimization-techniques-immediately-implementable",
+              "title": "6 Essential LLM Optimization Techniques for Immediate Business Implementation"
+            },
+            {
+              "id": "d76d0d83-5351-4528-bf9c-209658ad6a0b",
+              "url": "https://arxiv.org/pdf/2403.17919",
+              "title": "LISA: Layerwise Importance Sampling for Memory-Efficient Large Language Model Fine-Tuning"
+            },
+            {
+              "id": "ce4136f4-b495-4d36-9e94-0de26b333e29",
+              "url": "https://arxiv.org/pdf/2506.09034",
+              "title": "FZOO: Fast Zeroth-Order Optimizer for Fine-Tuning Large Language Models towards Adam-Scale Speed"
+            },
+            {
+              "id": "89d66056-f4f9-4765-bcb2-c42d0d205542",
+              "url": "https://developer.nvidia.com/blog/mastering-llm-techniques-training/",
+              "title": "Mastering LLM Techniques: Training | NVIDIA Technical Blog"
+            },
+            {
+              "id": "dcf07a5c-8dbb-4163-b480-eff7cd6adc9a",
+              "url": "https://www.iguazio.com/glossary/llm-optimization/",
+              "title": "What is LLM Optimization | Iguazio"
+            },
+            {
+              "id": "21adabda-b61c-4158-ac85-eb2e14918b23",
+              "url": "https://blog.finxter.com/transformer-vs-lstm/",
+              "title": "Transformer vs LSTM: A Helpful Illustrated Guide - Be on the Right Side of Change"
+            },
+            {
+              "id": "34b6c552-2399-449d-908d-c9d0346b8f47",
+              "url": "https://bdtechtalks.com/2024/10/28/minimized-rnn-vs-transformer/",
+              "title": "Minimized RNNs offer a fast and efficient alternative to Transformers"
+            },
+            {
+              "id": "a7dbdd55-c617-4ef2-8b47-daba49c21966",
+              "url": "https://arxiv.org/pdf/2506.07920",
+              "title": "W4S4: WaLRUS Meets S4 for Long-Range Sequence Modeling"
+            },
+            {
+              "id": "9329edc9-273f-48a0-a3b5-a35164e6198a",
+              "url": "https://www.geeksforgeeks.org/deep-learning/rnn-vs-lstm-vs-gru-vs-transformers/",
+              "title": "RNN vs LSTM vs GRU vs Transformers - GeeksforGeeks"
+            },
+            {
+              "id": "51d1d0e5-6bc3-47d6-9ff8-7b32b5567822",
+              "url": "https://arxiv.org/pdf/2303.03329",
+              "title": "End-to-End Speech Recognition: A Survey"
+            },
+            {
+              "id": "22f7788d-8a66-4e95-b030-d706d0f63564",
+              "url": "https://aman.ai/primers/ai/dl-comp/",
+              "title": "Aman's AI Journal \u2022 Deep Learning Architectures Comparative Analysis"
+            },
+            {
+              "id": "ac624ca9-eb59-4e11-b1fd-7599c0247046",
+              "url": "https://arxiv.org/pdf/2412.10599",
+              "title": "Advances in Transformers for Robotic Applications: A Review"
+            },
+            {
+              "id": "6adff160-817c-4b40-8d9d-0c7b333a7b08",
+              "url": "https://arxiv.org/pdf/2405.03904",
+              "title": "Transformer models as an efficient replacement for statistical test suites to evaluate the quality of random numbers"
+            },
+            {
+              "id": "7d53c612-d1a1-4512-9a48-3241ed4e9a47",
+              "url": "https://arxiv.org/pdf/2405.06981",
+              "title": "AraSpell: A Deep Learning Approach for Arabic Spelling Correction"
+            },
+            {
+              "id": "126b8018-7c20-4a74-a551-aa2dfbc13f4c",
+              "url": "https://blogs.mathworks.com/deep-learning/2024/10/31/transformer-models-from-hype-to-implementation/",
+              "title": "Transformer Models: From Hype to Implementation \u00bb Artificial Intelligence - MATLAB & Simulink"
+            },
+            {
+              "id": "18e79bbd-647b-45ec-a201-eb92501eb0e8",
+              "url": "https://arxiv.org/pdf/2005.12872",
+              "title": "End-to-End Object Detection with Transformers"
+            },
+            {
+              "id": "815ecaa0-5ac7-4a97-b351-8cf17ce89394",
+              "url": "https://arxiv.org/pdf/2602.20336",
+              "title": "Natural Language Processing Models for Robust Document Categorization"
+            },
+            {
+              "id": "22ba3a8d-b54b-47a4-89c6-5310ca1c6f41",
+              "url": "https://medium.com/@thirupathi.thangavel/limitations-of-transformer-architecture-4e6118cbf5a4",
+              "title": "Limitations of Transformer Architecture | by Thirupathi Thangavel | Medium"
+            },
+            {
+              "id": "b6c6391e-60ad-42a2-a038-74fd9214ef57",
+              "url": "https://aiml.com/what-are-the-drawbacks-of-transformer-models/",
+              "title": "What are the limitations of transformer models? - AIML.com"
+            },
+            {
+              "id": "d17f78c3-a2f2-49ce-b89c-beaed24c8bc2",
+              "url": "https://www.emergentmind.com/topics/transformer-architecture-constraints",
+              "title": "Transformer Architecture Constraints"
+            },
+            {
+              "id": "5a312ea4-c20f-44cc-afff-5155f9f522b5",
+              "url": "https://arxiv.org/pdf/2509.16542",
+              "title": "Mental Multi-class Classification on Social Media: Benchmarking Transformer Architectures against LSTM Models"
+            },
+            {
+              "id": "27053563-f845-410d-9388-cc4678cf80ea",
+              "url": "https://arxiv.org/pdf/2103.14636",
+              "title": "A Practical Survey on Faster and Lighter Transformers"
+            },
+            {
+              "id": "461c1eeb-5a0b-4686-a7aa-97c5b9dcf26b",
+              "url": "https://image-ppubs.uspto.gov/dirsearch-public/print/downloadPdf/12554937",
+              "title": "Few shot incremental learning for named entity recognition"
+            }
+          ],
+          "web_search_enabled": true
+        }
+      }
+    }
+  ]
+}
