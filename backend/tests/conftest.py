@@ -93,3 +93,21 @@ def _has_db() -> bool:
 
 
 requires_db = pytest.mark.skipif(not _has_db(), reason="SUPABASE_DB_URL not set")
+
+
+# --- Shared asyncpg pool fixture (lifted here so multiple test files can use it)
+
+
+@pytest.fixture
+async def db_pool() -> AsyncIterator[object]:
+    if not _has_db():
+        pytest.skip("SUPABASE_DB_URL not set")
+    import asyncpg as _asyncpg
+
+    pool = await _asyncpg.create_pool(
+        os.environ["SUPABASE_DB_URL"], min_size=1, max_size=2
+    )
+    try:
+        yield pool
+    finally:
+        await pool.close()
