@@ -1,0 +1,2125 @@
+{
+  "slug": "quantum-supremacy",
+  "title": "What is quantum supremacy?",
+  "question": "What is quantum supremacy?",
+  "model": "claude-sonnet-4-5",
+  "created_at": "2026-06-29T02:58:34.675552+00:00",
+  "events": [
+    {
+      "t_ms": 10137,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 1052,
+        "output_tokens": 464,
+        "cumulative_usd": 0.010116
+      }
+    },
+    {
+      "t_ms": 10137,
+      "event": {
+        "type": "plan_ready",
+        "plan": {
+          "original_question": "What is quantum supremacy?",
+          "sub_queries": [
+            {
+              "id": "720e2165-102d-4a5f-88f7-6420a0758390",
+              "question": "What is the definition of quantum supremacy and what are the theoretical foundations behind this concept?",
+              "rationale": "Establishing a clear definition and theoretical basis is essential for understanding what quantum supremacy means, why it matters, and the scientific principles that make it possible. This forms the foundation for all other aspects of the research.",
+              "priority": 3
+            },
+            {
+              "id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+              "question": "What are the major quantum supremacy achievements and experiments demonstrated by Google, IBM, and other organizations?",
+              "rationale": "Concrete examples of actual quantum supremacy demonstrations provide real-world context and show how the theoretical concept has been implemented in practice. This helps illustrate the current state of the field.",
+              "priority": 3
+            },
+            {
+              "id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+              "question": "How does quantum supremacy differ from quantum advantage and quantum utility, and what are the practical applications?",
+              "rationale": "Understanding the distinctions between related terms clarifies what quantum supremacy actually demonstrates versus practical usefulness. This prevents confusion and shows the limitations and next steps beyond supremacy.",
+              "priority": 2
+            },
+            {
+              "id": "f257228f-3b62-4955-bb71-9e5bf2022274",
+              "question": "What are the main criticisms, challenges, and controversies surrounding quantum supremacy claims?",
+              "rationale": "Critical perspectives reveal limitations of quantum supremacy claims, technical challenges in verification, and debates within the scientific community. This provides a balanced view and highlights what remains contested or uncertain.",
+              "priority": 2
+            },
+            {
+              "id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+              "question": "What technical requirements and quantum computing architectures are needed to achieve quantum supremacy?",
+              "rationale": "Understanding the technical specifications (qubit counts, error rates, coherence times) and different approaches (superconducting qubits, trapped ions, photonics) provides deeper insight into how quantum supremacy is achieved and the engineering challenges involved.",
+              "priority": 1
+            }
+          ],
+          "web_search_enabled": true
+        }
+      }
+    },
+    {
+      "t_ms": 10138,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "720e2165-102d-4a5f-88f7-6420a0758390",
+        "question": "What is the definition of quantum supremacy and what are the theoretical foundations behind this concept?"
+      }
+    },
+    {
+      "t_ms": 10140,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+        "question": "What are the major quantum supremacy achievements and experiments demonstrated by Google, IBM, and other organizations?"
+      }
+    },
+    {
+      "t_ms": 10141,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+        "question": "How does quantum supremacy differ from quantum advantage and quantum utility, and what are the practical applications?"
+      }
+    },
+    {
+      "t_ms": 10142,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "f257228f-3b62-4955-bb71-9e5bf2022274",
+        "question": "What are the main criticisms, challenges, and controversies surrounding quantum supremacy claims?"
+      }
+    },
+    {
+      "t_ms": 10143,
+      "event": {
+        "type": "researcher_started",
+        "sub_query_id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+        "question": "What technical requirements and quantum computing architectures are needed to achieve quantum supremacy?"
+      }
+    },
+    {
+      "t_ms": 42967,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 24177,
+        "output_tokens": 1947,
+        "cumulative_usd": 0.111852
+      }
+    },
+    {
+      "t_ms": 42967,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "720e2165-102d-4a5f-88f7-6420a0758390",
+        "tool_call": "web_search('quantum supremacy definition theoretical foundations')"
+      }
+    },
+    {
+      "t_ms": 42967,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "720e2165-102d-4a5f-88f7-6420a0758390",
+        "tool_call": "web_search('quantum supremacy complexity theory polynomial hierarchy Porter-Thomas distribution')"
+      }
+    },
+    {
+      "t_ms": 42969,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "720e2165-102d-4a5f-88f7-6420a0758390",
+        "finding": {
+          "sub_query_id": "720e2165-102d-4a5f-88f7-6420a0758390",
+          "summary": "Quantum supremacy refers to the demonstration where a quantum computer performs a computational task that is practically impossible for classical computers to solve in a reasonable timeframe. The term was coined by physicist John Preskill in 2012 and requires demonstrating a superpolynomial speedup over all classical approaches. The theoretical foundations rest on complexity theory, particularly conjectures that classical simulation would collapse the polynomial hierarchy, and on quantum mechanics principles including superposition, entanglement, and quantum chaos characterized by the Porter-Thomas distribution.",
+          "key_facts": [
+            {
+              "statement": "Quantum supremacy, a term coined by John Preskill in 2012, refers to the threshold where quantum computers outperform classical computers in tasks that would be practically impossible for classical machines due to the amount of time or resources required.",
+              "citation_ids": [
+                "c8537cd6-b94b-495b-89ad-730fd1350b36",
+                "ca17c268-6da2-4c26-8ca8-67e50e4f9882"
+              ]
+            },
+            {
+              "statement": "To satisfy quantum supremacy, there must be a demonstration of superpolynomial speedup over all possible classical approaches to solving the problem.",
+              "citation_ids": [
+                "ca17c268-6da2-4c26-8ca8-67e50e4f9882"
+              ]
+            },
+            {
+              "statement": "The theoretical hardness of quantum supremacy is grounded in complexity-theoretic conjectures, such as the non-collapse of the polynomial hierarchy, rather than a proof that classical algorithms cannot ultimately match performance.",
+              "citation_ids": [
+                "abdfacad-be6a-4fb0-a0ac-9c12c305ec64",
+                "18a98bf7-bb33-4d41-b428-032f4cbb658e"
+              ]
+            },
+            {
+              "statement": "Quantum supremacy experiments aim to challenge the Extended Church-Turing Thesis, which asserts that every physical process can be simulated by a classical Turing machine with at most polynomial overhead.",
+              "citation_ids": [
+                "49b2ea6e-db33-4e26-aa7a-a81da1a4aa9a"
+              ]
+            },
+            {
+              "statement": "The theoretical foundations rely on fundamental quantum mechanics principles including superposition (qubits existing in multiple states simultaneously) and entanglement (where qubits are correlated such that the state of one influences others).",
+              "citation_ids": [
+                "37a836af-e48f-4369-a358-9a6aacfd7938"
+              ]
+            },
+            {
+              "statement": "Quantum supremacy demonstrations typically involve random circuit sampling that produces output distributions characterized by the Porter-Thomas distribution, a signature of quantum chaotic systems with high entanglement and anti-concentration properties.",
+              "citation_ids": [
+                "5cd6af7e-c169-4068-a065-2d4a6c62b805",
+                "0f70efc1-69da-4e4c-b7e2-89ba82169f55",
+                "dd43eb8d-6981-4439-853f-690a9665abb0"
+              ]
+            },
+            {
+              "statement": "Early quantum supremacy demonstrations focused on random circuit sampling, where the task involves generating bit-string outputs from randomly chosen quantum circuits believed to be hard to simulate classically.",
+              "citation_ids": [
+                "abdfacad-be6a-4fb0-a0ac-9c12c305ec64",
+                "dd43eb8d-6981-4439-853f-690a9665abb0"
+              ]
+            },
+            {
+              "statement": "Google's 2019 quantum supremacy claim with the Sycamore processor demonstrated a 53-qubit quantum computer performing a calculation in approximately 200 seconds that would take a classical supercomputer an estimated 10,000 years.",
+              "citation_ids": [
+                "c8537cd6-b94b-495b-89ad-730fd1350b36",
+                "abdfacad-be6a-4fb0-a0ac-9c12c305ec64",
+                "37a836af-e48f-4369-a358-9a6aacfd7938"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "ca17c268-6da2-4c26-8ca8-67e50e4f9882",
+              "url": "https://www.quera.com/glossary/quantum-supremacy",
+              "title": "What is Quantum Supremacy - QuEra Computing"
+            },
+            {
+              "id": "c8537cd6-b94b-495b-89ad-730fd1350b36",
+              "url": "https://medium.com/@ashfaqe.sa12/quantum-supremacy-unpacking-its-meaning-and-significance-part-2-dcdbe9aed3f2",
+              "title": "Quantum Supremacy: Unpacking Its Meaning and Significance \u2014 Part 2"
+            },
+            {
+              "id": "5cd6af7e-c169-4068-a065-2d4a6c62b805",
+              "url": "https://www.emergentmind.com/topics/quantum-supremacy",
+              "title": "Quantum Supremacy: Theory and Experiment"
+            },
+            {
+              "id": "abdfacad-be6a-4fb0-a0ac-9c12c305ec64",
+              "url": "https://arxiv.org/pdf/2310.10315",
+              "title": "A Survey on Quantum Machine Learning: Current Trends, Challenges, Opportunities, and the Road Ahead"
+            },
+            {
+              "id": "37a836af-e48f-4369-a358-9a6aacfd7938",
+              "url": "https://milvus.io/ai-quick-reference/what-is-the-concept-of-quantum-supremacy",
+              "title": "What is the concept of quantum supremacy?"
+            },
+            {
+              "id": "49b2ea6e-db33-4e26-aa7a-a81da1a4aa9a",
+              "url": "https://arxiv.org/pdf/1612.05903",
+              "title": "Complexity-Theoretic Foundations of Quantum Supremacy Experiments"
+            },
+            {
+              "id": "0f70efc1-69da-4e4c-b7e2-89ba82169f55",
+              "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8291594/",
+              "title": "Quantum supremacy: some fundamental concepts - PMC"
+            },
+            {
+              "id": "dd43eb8d-6981-4439-853f-690a9665abb0",
+              "url": "https://eitca.org/artificial-intelligence/eitc-ai-tfqml-tensorflow-quantum-machine-learning/quantum-supremacy/estimation-of-statistical-significance-of-quantum-supremacy/examination-review-estimation-of-statistical-significance-of-quantum-supremacy/how-does-the-porter-thomas-distribution-relate-to-the-sampling-strategies-used-in-the-quantum-supremacy-experiment/",
+              "title": "How does the Porter-Thomas distribution relate to the sampling strategies used in the quantum supremacy experiment?"
+            },
+            {
+              "id": "18a98bf7-bb33-4d41-b428-032f4cbb658e",
+              "url": "https://www.nature.com/articles/s41534-017-0018-2",
+              "title": "Quantum sampling problems, BosonSampling and quantum supremacy"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 49559,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 24806,
+        "output_tokens": 2238,
+        "cumulative_usd": 0.21984
+      }
+    },
+    {
+      "t_ms": 49559,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+        "tool_call": "web_search('Google quantum supremacy achievement Sycamore')"
+      }
+    },
+    {
+      "t_ms": 49559,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+        "tool_call": "web_search('IBM quantum advantage experiments')"
+      }
+    },
+    {
+      "t_ms": 49559,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+        "tool_call": "web_search('quantum supremacy demonstrations 2023 2024 2025')"
+      }
+    },
+    {
+      "t_ms": 49559,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+        "tool_call": "web_search('Chinese quantum supremacy Jiuzhang Zuchongzhi')"
+      }
+    },
+    {
+      "t_ms": 49559,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+        "tool_call": "web_search('Google Willow quantum chip 2024')"
+      }
+    },
+    {
+      "t_ms": 49559,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+        "finding": {
+          "sub_query_id": "c69ff6f4-4f18-4908-9bd7-db3335e82ec5",
+          "summary": "Google achieved the first widely-recognized quantum supremacy demonstration in 2019 with its 53-qubit Sycamore processor, completing a calculation in 200 seconds that would take classical supercomputers approximately 10,000 years. Since then, multiple organizations have demonstrated quantum supremacy or advantage claims, including Chinese researchers with photonic and superconducting systems (Jiuzhang and Zuchongzhi), Xanadu with photonic quantum computing in 2022, and Google's continued advances with a 70-qubit processor in 2023 and the Willow chip in 2024. IBM has focused on developing quantum advantage through practical applications rather than benchmark demonstrations, with predictions that verified quantum advantage will be achieved by the end of 2026.",
+          "key_facts": [
+            {
+              "statement": "Google's Sycamore processor with 53 operational qubits achieved quantum supremacy in 2019 by completing a random circuit sampling calculation in 200 seconds that would take a state-of-the-art classical supercomputer approximately 10,000 years",
+              "citation_ids": [
+                "95e79397-3b0d-4fc5-bb37-b22febcb55b6",
+                "95dcd989-fed2-4640-80e3-659d3076a74c",
+                "b86135d8-5e31-4def-ba83-1ae0c36ee644"
+              ]
+            },
+            {
+              "statement": "Google upgraded Sycamore to 70 qubits by July 2023, and in a recent experiment this processor completed a computational task in under five minutes that would take classical supercomputers nearly 47 years",
+              "citation_ids": [
+                "64b002ad-0214-49b8-a215-58b1be4a8a49"
+              ]
+            },
+            {
+              "statement": "Google demonstrated the Willow quantum chip in 2024, representing a more dramatic quantum supremacy demonstration beyond the 2019 Sycamore achievement",
+              "citation_ids": [
+                "9016eae4-4f34-4486-aa1b-5e7761cea3a5"
+              ]
+            },
+            {
+              "statement": "Chinese researchers at USTC led by Pan Jianwei achieved quantum supremacy in December 2020 using Gaussian boson sampling with photonic quantum systems",
+              "citation_ids": [
+                "1f5d61b2-b8a2-46c5-857c-949777d132b3"
+              ]
+            },
+            {
+              "statement": "Xanadu announced quantum advantage achievement in 2022, solving a math problem in two minutes that would have taken a classical computer seven million years",
+              "citation_ids": [
+                "8415fb5e-409b-4dcc-a70e-2f7f8e26c9b3"
+              ]
+            },
+            {
+              "statement": "Quantinuum claimed to have crossed the quantum supremacy milestone in 2024 with its 56-qubit H2-1 quantum computer",
+              "citation_ids": [
+                "5fbcff49-1a92-4bdf-b8f0-c9b4cc50dd9f"
+              ]
+            },
+            {
+              "statement": "D-Wave Systems reported a quantum supremacy experiment in March 2024 using quantum annealing to simulate non-equilibrium dynamics of a magnetic spin system, though this claim was later challenged by classical tensor network simulations",
+              "citation_ids": [
+                "1f5d61b2-b8a2-46c5-857c-949777d132b3",
+                "e432c559-a381-40d1-83da-4bdfd6afdc4d"
+              ]
+            },
+            {
+              "statement": "IBM has focused on quantum advantage through practical applications rather than supremacy demonstrations, with IBM anticipating that the first cases of verified quantum advantage will be confirmed by the wider community by the end of 2026",
+              "citation_ids": [
+                "4182e3f6-1b48-4241-aa9d-7666fb219253",
+                "575c0b3e-9648-42c5-b9a2-9623cdeb384e"
+              ]
+            },
+            {
+              "statement": "IBM and partners established an open Quantum Advantage Tracker in 2025-2026 with over 30 submissions from leading institutions to systematically monitor and verify emerging demonstrations of quantum advantage across observable estimation, variational problems, and problems with efficient classical verification",
+              "citation_ids": [
+                "59bafd17-3abe-4a34-af75-81629aa090c2",
+                "4182e3f6-1b48-4241-aa9d-7666fb219253"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "95e79397-3b0d-4fc5-bb37-b22febcb55b6",
+              "url": "https://www.nature.com/articles/s41586-019-1666-5",
+              "title": "Quantum supremacy using a programmable superconducting processor | Nature"
+            },
+            {
+              "id": "95dcd989-fed2-4640-80e3-659d3076a74c",
+              "url": "https://www.techexplorist.com/google-achieved-quantum-supremacy-sycamore/27275/",
+              "title": "Google achieved the 'quantum supremacy' with its Sycamore"
+            },
+            {
+              "id": "b86135d8-5e31-4def-ba83-1ae0c36ee644",
+              "url": "https://en.wikipedia.org/wiki/Sycamore_(processor)",
+              "title": "Sycamore (processor) - Wikipedia"
+            },
+            {
+              "id": "64b002ad-0214-49b8-a215-58b1be4a8a49",
+              "url": "https://www.bluequbit.io/blog/google-quantum-computer",
+              "title": "Google Quantum Computer: Shaping Tomorrow's Technology"
+            },
+            {
+              "id": "9016eae4-4f34-4486-aa1b-5e7761cea3a5",
+              "url": "https://redstaglabs.com/pages/latest-breakthroughs-in-quantum-computing/",
+              "title": "Latest Breakthroughs in Quantum Computing (2024, 2025 & 2026)"
+            },
+            {
+              "id": "1f5d61b2-b8a2-46c5-857c-949777d132b3",
+              "url": "https://en.wikipedia.org/wiki/Quantum_supremacy",
+              "title": "Quantum supremacy - Wikipedia"
+            },
+            {
+              "id": "8415fb5e-409b-4dcc-a70e-2f7f8e26c9b3",
+              "url": "https://cacm.acm.org/news/how-far-away-is-quantum-supremacy/",
+              "title": "How Far Away Is Quantum Supremacy? \u2013 Communications of the ACM"
+            },
+            {
+              "id": "5fbcff49-1a92-4bdf-b8f0-c9b4cc50dd9f",
+              "url": "https://www.livescience.com/technology/computing/what-is-quantum-supremacy",
+              "title": "What is quantum supremacy? | Live Science"
+            },
+            {
+              "id": "e432c559-a381-40d1-83da-4bdfd6afdc4d",
+              "url": "https://www.dwavequantum.com/company/newsroom/press-release/beyond-classical-d-wave-first-to-demonstrate-quantum-supremacy-on-useful-real-world-problem/",
+              "title": "Beyond Classical: D-Wave First to Demonstrate Quantum Supremacy on Useful, Real-World Problem"
+            },
+            {
+              "id": "4182e3f6-1b48-4241-aa9d-7666fb219253",
+              "url": "https://newsroom.ibm.com/2025-11-12-ibm-delivers-new-quantum-processors,-software,-and-algorithm-breakthroughs-on-path-to-advantage-and-fault-tolerance",
+              "title": "IBM Delivers New Quantum Processors, Software, and Algorithm Breakthroughs on Path to Advantage and Fault Tolerance"
+            },
+            {
+              "id": "59bafd17-3abe-4a34-af75-81629aa090c2",
+              "url": "https://www.ibm.com/quantum/blog/quantum-advantage-tracker",
+              "title": "Quantum Advantage Tracker: the race to advantage | IBM Quantum Computing Blog"
+            },
+            {
+              "id": "575c0b3e-9648-42c5-b9a2-9623cdeb384e",
+              "url": "https://www.ibm.com/quantum/blog/quantum-advantage-era",
+              "title": "The dawn of quantum advantage | IBM Quantum Computing Blog"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 50019,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 21945,
+        "output_tokens": 2101,
+        "cumulative_usd": 0.31719
+      }
+    },
+    {
+      "t_ms": 50019,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+        "tool_call": "web_search('quantum supremacy vs quantum advantage vs quantum utility differences')"
+      }
+    },
+    {
+      "t_ms": 50019,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+        "tool_call": "web_search('quantum advantage practical applications')"
+      }
+    },
+    {
+      "t_ms": 50019,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+        "tool_call": "web_search('quantum utility IBM definition examples')"
+      }
+    },
+    {
+      "t_ms": 50019,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+        "tool_call": "web_search('quantum supremacy definition Google 2019')"
+      }
+    },
+    {
+      "t_ms": 50019,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+        "tool_call": "web_search('quantum computing practical applications 2026')"
+      }
+    },
+    {
+      "t_ms": 50021,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+        "finding": {
+          "sub_query_id": "b1a24708-3392-47fe-8a2d-8c80075554a3",
+          "summary": "Quantum supremacy, quantum advantage, and quantum utility represent distinct milestones in quantum computing development. Quantum supremacy demonstrates a quantum computer solving any problem faster than classical computers, regardless of practical usefulness. Quantum advantage requires outperforming classical computers on meaningful, real-world problems with tangible benefits. Quantum utility, a concept introduced by IBM in 2023, focuses on performing reliable computations at scales beyond brute-force classical simulation, offering practical value even without proven speedups over all classical methods.",
+          "key_facts": [
+            {
+              "statement": "Quantum supremacy refers to quantum computers solving tasks that are impossible for classical computers in any reasonable time, regardless of practical usefulness, as demonstrated by Google in 2019 with their 53-qubit Sycamore processor.",
+              "citation_ids": [
+                "b14628ca-47d9-41a3-9ce5-6a1455b9274f",
+                "865e57c8-5de2-4782-82e7-3299a8270f11",
+                "1d17368e-f196-4ac1-b9c7-fca7f5a330e2"
+              ]
+            },
+            {
+              "statement": "Quantum advantage requires solving real-world problems of genuine practical value faster, more accurately, or more cheaply than any classical computer, focusing on meaningful applications rather than artificial benchmarks.",
+              "citation_ids": [
+                "6017021c-129e-4b82-97db-8b6b5a6eef02",
+                "865e57c8-5de2-4782-82e7-3299a8270f11",
+                "ec1ef4f4-c9d2-451f-af25-333ea6ffe4e7"
+              ]
+            },
+            {
+              "statement": "Quantum utility, introduced by IBM in 2023, refers to quantum computers performing reliable computations at scales beyond brute-force classical simulation methods, without requiring proven speedups over all classical approximation methods.",
+              "citation_ids": [
+                "23a8ee4c-1214-421f-afbc-0829c97ffd10",
+                "c54f411b-e0c3-4537-a4eb-6db430d5feb2",
+                "c09459f5-16c5-48ea-8587-b3890c82826b"
+              ]
+            },
+            {
+              "statement": "Quantum supremacy focuses on academic demonstrations and artificial problems, while quantum advantage prioritizes computational complexity limitations in real applications that deliver tangible benefits to industries and research.",
+              "citation_ids": [
+                "9e4b5772-1d3d-456a-82d1-6accb5ad6822",
+                "ec1ef4f4-c9d2-451f-af25-333ea6ffe4e7"
+              ]
+            },
+            {
+              "statement": "Quantum utility can be achieved when quantum computers outperform classical competitors of the same device specifications in terms of size, weight, power consumption, and cost, making it valuable for applications with strict physical constraints.",
+              "citation_ids": [
+                "c09459f5-16c5-48ea-8587-b3890c82826b",
+                "c54f411b-e0c3-4537-a4eb-6db430d5feb2"
+              ]
+            },
+            {
+              "statement": "Practical applications of quantum advantage include quantum simulation for materials science (batteries, industrial catalysis, nitrogen fixing), drug discovery, molecular simulations, optimization problems, and cryptography.",
+              "citation_ids": [
+                "8e5c525e-f34c-44c5-881d-5048db2e26c3",
+                "1d17368e-f196-4ac1-b9c7-fca7f5a330e2",
+                "edd2bf5e-ff91-42d4-962a-755cb115cd75"
+              ]
+            },
+            {
+              "statement": "In 2026, a practical quantum advantage was demonstrated where quantum computers augmented with error mitigation software solved real-world problems over 3,000 times faster than classical alternatives.",
+              "citation_ids": [
+                "55982ac9-a014-4ab4-8731-e2f58c376b3a"
+              ]
+            },
+            {
+              "statement": "Additional practical applications being explored include quantum machine learning for healthcare diagnostics and financial modeling, quantum key distribution for secure communications, and optimization for supply chains and logistics.",
+              "citation_ids": [
+                "a8d17a41-beb5-43d2-aeb1-7b86347fdf97",
+                "1d17368e-f196-4ac1-b9c7-fca7f5a330e2",
+                "73ce5822-9e42-445e-9830-e32a31355fed"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "b14628ca-47d9-41a3-9ce5-6a1455b9274f",
+              "url": "https://quanscient.com/blog/quantum-advantage-or-quantum-supremacy-what-is-the-difference",
+              "title": "Quantum Advantage vs. Quantum Supremacy | Quanscient"
+            },
+            {
+              "id": "865e57c8-5de2-4782-82e7-3299a8270f11",
+              "url": "https://www.quera.com/glossary/advantage",
+              "title": "What is Quantum Advantage"
+            },
+            {
+              "id": "1d17368e-f196-4ac1-b9c7-fca7f5a330e2",
+              "url": "https://postquantum.com/quantum-computing/quantum-supremacy-advantage/",
+              "title": "Quantum Supremacy vs. Quantum Advantage"
+            },
+            {
+              "id": "6017021c-129e-4b82-97db-8b6b5a6eef02",
+              "url": "https://entangledfuture.com/guides/quantum-advantage-explained/",
+              "title": "Quantum Advantage Explained: Supremacy, Utility & Impact"
+            },
+            {
+              "id": "ec1ef4f4-c9d2-451f-af25-333ea6ffe4e7",
+              "url": "https://servantarinze.com/quantum-supremacy-vs-quantum-advantage/",
+              "title": "Quantum Supremacy vs Quantum Advantage: 5 Key Differences Explained (2026)"
+            },
+            {
+              "id": "9e4b5772-1d3d-456a-82d1-6accb5ad6822",
+              "url": "https://www.quantumbytz.com/articles/quantum-supremacy-vs-quantum-advantage",
+              "title": "Quantum Supremacy vs. Quantum Advantage | QuantumBytz"
+            },
+            {
+              "id": "23a8ee4c-1214-421f-afbc-0829c97ffd10",
+              "url": "https://www.ibm.com/quantum/blog/what-is-quantum-utlity",
+              "title": "What is quantum utility? | IBM Quantum Computing Blog"
+            },
+            {
+              "id": "c54f411b-e0c3-4537-a4eb-6db430d5feb2",
+              "url": "https://www.ibm.com/think/topics/quantum-computing",
+              "title": "What Is Quantum Computing? | IBM"
+            },
+            {
+              "id": "c09459f5-16c5-48ea-8587-b3890c82826b",
+              "url": "https://arxiv.org/pdf/2303.02138",
+              "title": "Quantum utility -- definition and assessment of a practical quantum advantage"
+            },
+            {
+              "id": "8e5c525e-f34c-44c5-881d-5048db2e26c3",
+              "url": "https://www.nature.com/articles/s41586-022-04940-6",
+              "title": "Practical quantum advantage in quantum simulation | Nature"
+            },
+            {
+              "id": "55982ac9-a014-4ab4-8731-e2f58c376b3a",
+              "url": "https://q-ctrl.com/blog/practical-quantum-advantage-signals-a-new-commercial-era-for-quantum-computing",
+              "title": "Practical quantum advantage signals a new commercial era for quantum computing | Q-CTRL"
+            },
+            {
+              "id": "a8d17a41-beb5-43d2-aeb1-7b86347fdf97",
+              "url": "https://www.bluequbit.io/blog/quantum-computing-use-cases",
+              "title": "14 Quantum Computing Use Cases Reshaping the Future"
+            },
+            {
+              "id": "73ce5822-9e42-445e-9830-e32a31355fed",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9709576/",
+              "title": "Biology and medicine in the landscape of quantum advantages"
+            },
+            {
+              "id": "edd2bf5e-ff91-42d4-962a-755cb115cd75",
+              "url": "https://arxiv.org/pdf/2203.17181",
+              "title": "Quantum computing at the quantum advantage threshold: a down-to-business review"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 52822,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 28932,
+        "output_tokens": 2410,
+        "cumulative_usd": 0.440136
+      }
+    },
+    {
+      "t_ms": 52822,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "f257228f-3b62-4955-bb71-9e5bf2022274",
+        "tool_call": "web_search('quantum supremacy criticisms challenges controversies')"
+      }
+    },
+    {
+      "t_ms": 52822,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "f257228f-3b62-4955-bb71-9e5bf2022274",
+        "tool_call": "web_search('Google quantum supremacy disputed criticism')"
+      }
+    },
+    {
+      "t_ms": 52822,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "f257228f-3b62-4955-bb71-9e5bf2022274",
+        "tool_call": "web_search('quantum advantage verification problems challenges')"
+      }
+    },
+    {
+      "t_ms": 52822,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "f257228f-3b62-4955-bb71-9e5bf2022274",
+        "tool_call": "web_search('IBM challenges quantum supremacy claims 2024 2025')"
+      }
+    },
+    {
+      "t_ms": 52822,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "f257228f-3b62-4955-bb71-9e5bf2022274",
+        "finding": {
+          "sub_query_id": "f257228f-3b62-4955-bb71-9e5bf2022274",
+          "summary": "Quantum supremacy claims face several major criticisms and controversies. Key challenges include: disputes over classical computer performance comparisons (IBM argued Google's task could be done in 2.5 days, not 10,000 years), questions about the practical usefulness of random circuit sampling tasks, verification difficulties since quantum advantage cannot be efficiently verified classically, concerns about quantum noise limiting scalability, and even controversy over the term \"supremacy\" itself. Additionally, improved classical simulation algorithms have repeatedly reduced estimated classical runtimes, and critics argue the tasks chosen are deliberately selected to favor quantum computers over unoptimized classical approaches.",
+          "key_facts": [
+            {
+              "statement": "IBM challenged Google's 2019 quantum supremacy claim by arguing that a classical supercomputer could perform the same task in 2.5 days rather than the 10,000 years Google claimed, using optimized algorithms and better storage management.",
+              "citation_ids": [
+                "763b0308-f663-4ee4-ba75-8b8cade4b381",
+                "db7a4011-5c3d-4fb6-b014-0832b52e2abe",
+                "d0b67cb2-9097-4f78-8e8c-ee5a8898e47d"
+              ]
+            },
+            {
+              "statement": "Critics argue that random circuit sampling tasks used to demonstrate quantum supremacy lack practical usefulness and do not represent real computation, as there is no meaningful input-output relationship or problem being solved in the conventional sense.",
+              "citation_ids": [
+                "ce2ff25e-c64c-4fcf-a791-06f3e50094a8",
+                "f2008141-973c-4e87-a779-09d55d17337a",
+                "de9db341-27bf-44c6-b6eb-78151fafa3d2"
+              ]
+            },
+            {
+              "statement": "Verification of quantum supremacy claims is fundamentally difficult because quantum advantage cannot be verified by brute-force classical computation, and existing verification tools like linear cross-entropy benchmarking (XEB) require classical simulation that becomes infeasible at scale.",
+              "citation_ids": [
+                "ce2ff25e-c64c-4fcf-a791-06f3e50094a8",
+                "8f0d737b-7a4d-48e0-80d6-a7e50059a8fd",
+                "31846cd2-59b0-4a15-acfa-84f110c1defa"
+              ]
+            },
+            {
+              "statement": "Advances in classical simulation algorithms, including tensor network contraction optimizations and improved sampling methods, have dramatically reduced estimated classical runtimes for quantum supremacy benchmarks, with some researchers producing classical algorithms that are ten orders of magnitude faster than those used in Google's original comparison.",
+              "citation_ids": [
+                "6ce1c87f-8f3b-41ef-a713-fafc205a93fc",
+                "4a92e34e-9a8c-4cc3-896e-4064b0af2269",
+                "ddfc2513-b9f9-473f-aa0a-f7273d2bcf2b"
+              ]
+            },
+            {
+              "statement": "The term 'quantum supremacy' itself has become controversial, with some researchers arguing it evokes distasteful comparisons to white supremacy and that it exacerbates overhyped reporting on quantum technology status, leading many to prefer the alternative term 'quantum advantage.'",
+              "citation_ids": [
+                "763b0308-f663-4ee4-ba75-8b8cade4b381",
+                "ddfc2513-b9f9-473f-aa0a-f7273d2bcf2b",
+                "c334b12f-aa12-47f6-b387-ad4e495d9cab"
+              ]
+            },
+            {
+              "statement": "Quantum noise and error rates remain formidable barriers to scalability, with some skeptics suggesting quantum supremacy may be truly impossible due to inherent noise in quantum computing, though others view it primarily as an engineering challenge.",
+              "citation_ids": [
+                "7ad510b4-7646-423c-97a7-4a5cced2dfd1",
+                "d0b67cb2-9097-4f78-8e8c-ee5a8898e47d"
+              ]
+            },
+            {
+              "statement": "Critics argue that quantum supremacy demonstrations deliberately choose problems that are not classically important so that classical algorithms competing against them are not optimized, making for an easy win rather than a fair comparison.",
+              "citation_ids": [
+                "c334b12f-aa12-47f6-b387-ad4e495d9cab"
+              ]
+            },
+            {
+              "statement": "Statistical analysis of Google's quantum supremacy data raised concerns that the empirical distribution of samples produced by the quantum computer differed significantly from Google's noise model and did not provide an adequate description of the experimental results.",
+              "citation_ids": [
+                "4a92e34e-9a8c-4cc3-896e-4064b0af2269",
+                "c334b12f-aa12-47f6-b387-ad4e495d9cab"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "763b0308-f663-4ee4-ba75-8b8cade4b381",
+              "url": "https://www.ibm.com/quantum/blog/on-quantum-supremacy",
+              "title": "On 'quantum supremacy' | IBM Quantum Computing Blog"
+            },
+            {
+              "id": "db7a4011-5c3d-4fb6-b014-0832b52e2abe",
+              "url": "https://www.science.org/content/article/ibm-casts-doubt-googles-claims-quantum-supremacy",
+              "title": "IBM casts doubt on Google's claims of quantum supremacy | Science | AAAS"
+            },
+            {
+              "id": "d0b67cb2-9097-4f78-8e8c-ee5a8898e47d",
+              "url": "https://www.sciencenews.org/article/google-quantum-supremacy-claim-controversy-top-science-stories-2019-yir",
+              "title": "Google claimed quantum supremacy in 2019 \u2014 and sparked controversy"
+            },
+            {
+              "id": "ce2ff25e-c64c-4fcf-a791-06f3e50094a8",
+              "url": "https://thequantuminsider.com/2026/01/12/quantum-advantage-has-likely-been-achieved-the-debate-is-over-what-counts/",
+              "title": "Quantum Advantage Has Likely Been Achieved \u2014 The Debate Is Over What Counts"
+            },
+            {
+              "id": "f2008141-973c-4e87-a779-09d55d17337a",
+              "url": "https://www.pbs.org/wgbh/nova/article/google-quantum-supremacy/",
+              "title": "Google says it just achieved 'quantum supremacy.' Is it true? | NOVA | PBS"
+            },
+            {
+              "id": "de9db341-27bf-44c6-b6eb-78151fafa3d2",
+              "url": "https://www.cbsnews.com/news/google-quantum-computing-quantum-supremacy-claim-by-google-disputed-by-ibm/",
+              "title": "Google quantum computing: 'Quantum supremacy' claim by Google disputed by IBM - CBS News"
+            },
+            {
+              "id": "8f0d737b-7a4d-48e0-80d6-a7e50059a8fd",
+              "url": "https://www.nature.com/articles/s41467-024-55342-3",
+              "title": "Verifiable measurement-based quantum random sampling with trapped ions | Nature Communications"
+            },
+            {
+              "id": "31846cd2-59b0-4a15-acfa-84f110c1defa",
+              "url": "https://arxiv.org/html/2506.20658v1",
+              "title": "A Framework for Quantum Advantage"
+            },
+            {
+              "id": "6ce1c87f-8f3b-41ef-a713-fafc205a93fc",
+              "url": "https://arxiv.org/pdf/2310.10315",
+              "title": "A Survey on Quantum Machine Learning: Current Trends, Challenges, Opportunities, and the Road Ahead"
+            },
+            {
+              "id": "4a92e34e-9a8c-4cc3-896e-4064b0af2269",
+              "url": "https://arxiv.org/pdf/2305.01064",
+              "title": "Questions and Concerns About Google's Quantum Supremacy Claim"
+            },
+            {
+              "id": "ddfc2513-b9f9-473f-aa0a-f7273d2bcf2b",
+              "url": "https://en.wikipedia.org/wiki/Quantum_supremacy",
+              "title": "Quantum supremacy - Wikipedia"
+            },
+            {
+              "id": "c334b12f-aa12-47f6-b387-ad4e495d9cab",
+              "url": "https://statmodeling.stat.columbia.edu/2025/03/14/debate-about-quantum-supremacy-whatever-that-is/",
+              "title": "Debate about 'quantum supremacy' . . . whatever that is! | Statistical Modeling, Causal Inference, and Social Science"
+            },
+            {
+              "id": "7ad510b4-7646-423c-97a7-4a5cced2dfd1",
+              "url": "https://arxiv.org/pdf/1905.07240",
+              "title": "Quantum Computing: An Overview Across the System Stack"
+            },
+            {
+              "id": "0a83ce20-e0a6-4c9f-b910-af6b97c3e2fb",
+              "url": "https://www.technologyreview.com/2020/02/26/905777/google-ibm-quantum-supremacy-computing-feud/",
+              "title": "The Google-IBM 'quantum supremacy' feud | MIT Technology Review"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 56013,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 22122,
+        "output_tokens": 2722,
+        "cumulative_usd": 0.547332
+      }
+    },
+    {
+      "t_ms": 56013,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+        "tool_call": "web_search('quantum supremacy technical requirements architectures')"
+      }
+    },
+    {
+      "t_ms": 56013,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+        "tool_call": "web_search('quantum supremacy qubit requirements error rates')"
+      }
+    },
+    {
+      "t_ms": 56013,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+        "tool_call": "web_search('quantum computing architectures superconducting ion trap photonic')"
+      }
+    },
+    {
+      "t_ms": 56013,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+        "tool_call": "web_search('quantum supremacy demonstrations Google IBM 2023 2024')"
+      }
+    },
+    {
+      "t_ms": 56013,
+      "event": {
+        "type": "researcher_progress",
+        "sub_query_id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+        "tool_call": "web_search('quantum advantage coherence time gate fidelity requirements')"
+      }
+    },
+    {
+      "t_ms": 56013,
+      "event": {
+        "type": "researcher_complete",
+        "sub_query_id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+        "finding": {
+          "sub_query_id": "695a4843-4d59-4fb1-b4c4-83945623afe4",
+          "summary": "Achieving quantum supremacy requires quantum computers with approximately 50-100 qubits, circuit depths around 10 gates, and two-qubit gate error rates below 0.5-1%. The primary quantum computing architectures capable of demonstrating supremacy include superconducting qubits (used by Google's Sycamore processor), trapped ion systems, photonic platforms, and neutral atoms, each offering distinct trade-offs in speed, coherence time, gate fidelity, and scalability.",
+          "key_facts": [
+            {
+              "statement": "Quantum supremacy demonstrations require approximately 50-100 qubits with circuit depths around 10 gates to outperform classical supercomputers on specific tasks like random circuit sampling.",
+              "citation_ids": [
+                "cd52aac8-93c5-4945-b481-33c926d97abb",
+                "3a037e91-4d05-4c86-bf7f-d509e4516cb2"
+              ]
+            },
+            {
+              "statement": "Two-qubit gate error rates must be reduced to approximately 0.1-0.5% to achieve quantum supremacy, compared to current systems operating at 0.5-1% error rates, while maintaining gate fidelities sufficient to prevent quantum advantage loss.",
+              "citation_ids": [
+                "cd52aac8-93c5-4945-b481-33c926d97abb",
+                "74c5ea9b-8d1c-4589-85bb-b0c407f4b787",
+                "4d71f1c2-7a3e-4f66-9a8a-54872c08a342"
+              ]
+            },
+            {
+              "statement": "Google's Sycamore processor with 53 superconducting qubits achieved quantum supremacy in 2019 by completing a task in seconds that would take classical supercomputers millennia, demonstrating the viability of superconducting qubit architectures.",
+              "citation_ids": [
+                "8f72140d-0b0f-4f1d-a831-0b41eea9273b",
+                "74c5ea9b-8d1c-4589-85bb-b0c407f4b787",
+                "acae81be-e281-41c6-99f9-c30a82181170"
+              ]
+            },
+            {
+              "statement": "Superconducting qubits, trapped ions, and photonic systems represent the primary hardware platforms for quantum supremacy demonstrations, with superconducting systems offering faster gate speeds, trapped ions providing longer coherence times and higher gate fidelities, and photonic systems suited for specific sampling tasks.",
+              "citation_ids": [
+                "fe9cfbce-a679-441d-9d23-9dc0c4587775",
+                "acae81be-e281-41c6-99f9-c30a82181170",
+                "16a06b79-64c6-486a-b0a7-aced33dee899",
+                "4810c90a-f7d2-4a2e-a6b0-32d79bbbbabe"
+              ]
+            },
+            {
+              "statement": "Decoherence remains the primary technical challenge limiting quantum supremacy, as quantum states decay rapidly due to environmental interference, restricting computation time and complexity in NISQ-era devices.",
+              "citation_ids": [
+                "fe9cfbce-a679-441d-9d23-9dc0c4587775",
+                "4d71f1c2-7a3e-4f66-9a8a-54872c08a342"
+              ]
+            },
+            {
+              "statement": "Superconducting quantum computers require cryogenic dilution refrigerators operating at millikelvin temperatures and sophisticated microwave control electronics, while trapped ion systems use laser-cooled ions confined in electromagnetic traps with laser manipulation.",
+              "citation_ids": [
+                "85f74ab0-96e4-48e2-99e8-189b10bc36cb",
+                "5d05c44d-b47d-46ba-a917-694aaac15cba",
+                "acae81be-e281-41c6-99f9-c30a82181170"
+              ]
+            },
+            {
+              "statement": "Scalable quantum architectures require quantum error correction capabilities, with surface code implementations needing at least 17-49 qubits to achieve meaningful error rate improvements for practical quantum supremacy applications.",
+              "citation_ids": [
+                "037ed73f-7dcd-4665-a209-87456e646e69",
+                "615dbbf3-c120-4959-b0b6-82bd731a716d",
+                "d2ead426-743c-4692-b3f6-0cf190aae4e2"
+              ]
+            },
+            {
+              "statement": "Google's 2024 Willow processor demonstrated enhanced qubit coherence and gate fidelity with 105 qubits, achieving error correction rates 20 times better than Sycamore and demonstrating exponential error reduction as the code distance increases.",
+              "citation_ids": [
+                "8f72140d-0b0f-4f1d-a831-0b41eea9273b",
+                "888ec385-d190-4dd5-a9e1-c7757dc15963"
+              ]
+            }
+          ],
+          "sources": [
+            {
+              "id": "8f72140d-0b0f-4f1d-a831-0b41eea9273b",
+              "url": "https://onlinelibrary.wiley.com/doi/10.1002/eng2.70337",
+              "title": "Quantum Computing: Foundations, Architecture and Applications - Columbus Chinnappan - 2025 - Engineering Reports - Wiley Online Library"
+            },
+            {
+              "id": "fe9cfbce-a679-441d-9d23-9dc0c4587775",
+              "url": "https://www.quantumbytz.com/articles/quantum-supremacy-vs-quantum-advantage",
+              "title": "Quantum Supremacy vs. Quantum Advantage | QuantumBytz"
+            },
+            {
+              "id": "acae81be-e281-41c6-99f9-c30a82181170",
+              "url": "https://thequantuminsider.com/2026/02/23/understanding-the-quantum-computing-hardware-landscape/",
+              "title": "Understanding the Quantum Computing Hardware Landscape"
+            },
+            {
+              "id": "615dbbf3-c120-4959-b0b6-82bd731a716d",
+              "url": "https://www.vaia.com/en-us/explanations/engineering/artificial-intelligence-engineering/quantum-supremacy/",
+              "title": "Quantum Supremacy: Explained & Definition | Vaia"
+            },
+            {
+              "id": "cd52aac8-93c5-4945-b481-33c926d97abb",
+              "url": "https://www.quantamagazine.org/quantum-supremacy-is-coming-heres-what-you-should-know-20190718/",
+              "title": "Quantum Supremacy Is Coming: Here's What You Should Know | Quanta Magazine"
+            },
+            {
+              "id": "74c5ea9b-8d1c-4589-85bb-b0c407f4b787",
+              "url": "https://arxiv.org/pdf/2001.00791",
+              "title": "On the meaning of quantum supremacy experiments"
+            },
+            {
+              "id": "037ed73f-7dcd-4665-a209-87456e646e69",
+              "url": "https://www.sciencenews.org/article/quantum-computers-hype-supremacy-error-correction-problems",
+              "title": "Quantum computers must repair error problems to live up to the hype | Science News"
+            },
+            {
+              "id": "a9dd4131-f487-4d82-9362-ea843812de33",
+              "url": "https://www.nature.com/articles/s41534-023-00703-x",
+              "title": "Boundaries of quantum supremacy via random circuit sampling | npj Quantum Information"
+            },
+            {
+              "id": "d2ead426-743c-4692-b3f6-0cf190aae4e2",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9946823/",
+              "title": "Suppressing quantum errors by scaling a surface code logical qubit"
+            },
+            {
+              "id": "4d71f1c2-7a3e-4f66-9a8a-54872c08a342",
+              "url": "https://thequantuminsider.com/2026/03/16/understanding-quantum-error-correction/",
+              "title": "What Is Quantum Error Correction & How Does It Work"
+            },
+            {
+              "id": "85f74ab0-96e4-48e2-99e8-189b10bc36cb",
+              "url": "https://www.spinquanta.com/news-detail/quantum-computing-computers-the-next-leap-in-computing-architecture",
+              "title": "Quantum Computing Computers: The Next Leap in Computing Architecture | SpinQ"
+            },
+            {
+              "id": "5d05c44d-b47d-46ba-a917-694aaac15cba",
+              "url": "https://arxiv.org/pdf/2102.00371",
+              "title": "Comparison of Cloud-Based Ion Trap and Superconducting Quantum Computer Architectures"
+            },
+            {
+              "id": "888ec385-d190-4dd5-a9e1-c7757dc15963",
+              "url": "https://ts2.tech/en/quantum-showdown-superconducting-vs-trapped-ion-vs-photonic-who-will-rule-quantum-computing/",
+              "title": "Quantum Showdown: Superconducting vs Trapped Ion vs Photonic \u2013 Who Will Rule Quantum Computing?"
+            },
+            {
+              "id": "16a06b79-64c6-486a-b0a7-aced33dee899",
+              "url": "https://www.pnas.org/doi/10.1073/pnas.1618020114",
+              "title": "Experimental comparison of two quantum computing architectures | PNAS"
+            },
+            {
+              "id": "4810c90a-f7d2-4a2e-a6b0-32d79bbbbabe",
+              "url": "https://www.nature.com/articles/s41586-024-08406-9",
+              "title": "Scaling and networking a modular photonic quantum computer | Nature"
+            },
+            {
+              "id": "3a037e91-4d05-4c86-bf7f-d509e4516cb2",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8279951/",
+              "title": "Exponential suppression of bit or phase errors with cyclic error correction"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "t_ms": 59454,
+      "event": {
+        "type": "synthesis_token",
+        "token": "#"
+      }
+    },
+    {
+      "t_ms": 60117,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Executive Summary\n\nQuantum supremacy represents a watershed milestone in computing where a quantum computer performs"
+      }
+    },
+    {
+      "t_ms": 60484,
+      "event": {
+        "type": "synthesis_token",
+        "token": " a computational task that is practically impossible for classical computers to complete in any reasonable timeframe. First coined by physicist John Preskill in 2012, the concept requires demonstrating a superpolynomial"
+      }
+    },
+    {
+      "t_ms": 65115,
+      "event": {
+        "type": "synthesis_token",
+        "token": " speedup over all possible classical approaches to solving a problem [1]. The theoretical foundations rest on complexity-theoretic conjectures and quantum mechanical principles including superposition and"
+      }
+    },
+    {
+      "t_ms": 65221,
+      "event": {
+        "type": "synthesis_token",
+        "token": " entanglement, with random circuit sampling serving as the primary demonstration vehicle [4][6].\n\nGoogle achieved the first widely-recognized quantum supremacy demonstration in October"
+      }
+    },
+    {
+      "t_ms": 65625,
+      "event": {
+        "type": "synthesis_token",
+        "token": " 2019 with its 53-qubit Sycamore processor, completing a calculation in approximately 200 seconds that would take classical supercomputers an estimated 10,000 years [10][11]."
+      }
+    },
+    {
+      "t_ms": 65735,
+      "event": {
+        "type": "synthesis_token",
+        "token": " However, this milestone has generated substantial controversy, with IBM and other researchers"
+      }
+    },
+    {
+      "t_ms": 66222,
+      "event": {
+        "type": "synthesis_token",
+        "token": " challenging the classical performance comparisons and questioning the practical usefulness of the tasks performed [37"
+      }
+    },
+    {
+      "t_ms": 66251,
+      "event": {
+        "type": "synthesis_token",
+        "token": "][38]. The field has since evolved toward concepts of \"quantum advantage\" and \"quantum utility,\" which"
+      }
+    },
+    {
+      "t_ms": 66360,
+      "event": {
+        "type": "synthesis_token",
+        "token": " emphasize practical applications over abstract benchmarks, reflecting a maturation in how"
+      }
+    },
+    {
+      "t_ms": 66633,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the community evaluates quantum computing progress [23][28].\n\n# Theoretical"
+      }
+    },
+    {
+      "t_ms": 66840,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Foundations and Definition\n\nQuantum supremacy refers to the threshold where quantum computers demonstrably outperform classical computers on tasks that would be practically impossible for classical machines due to the computational"
+      }
+    },
+    {
+      "t_ms": 67011,
+      "event": {
+        "type": "synthesis_token",
+        "token": " time or resources required [1][2]. To satisfy the formal definition of quantum supremacy, there must be a demonstration of superpolynomial speed"
+      }
+    },
+    {
+      "t_ms": 67390,
+      "event": {
+        "type": "synthesis_token",
+        "token": "up over all possible classical approaches to solving the problem, not merely an improvement over existing classical"
+      }
+    },
+    {
+      "t_ms": 67555,
+      "event": {
+        "type": "synthesis_token",
+        "token": " algorithms [1].\n\nThe theoretical basis for quantum supremacy rests on complexity-theoretic conjectures rather than mathematical proofs. Specifically"
+      }
+    },
+    {
+      "t_ms": 67838,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", the hardness of classically simulating quantum computations is grounded in conjectures such as the non-collapse of the polynomial hierarchy [4][9]. These demonstrations aim"
+      }
+    },
+    {
+      "t_ms": 68112,
+      "event": {
+        "type": "synthesis_token",
+        "token": " to challenge the Extended Church-Turing Thesis, which asserts that every physical process can be simulated by a classical Turing machine with at most polynomial overhead [6].\n\n## Quantum Mechanical Principles\n\nThe"
+      }
+    },
+    {
+      "t_ms": 68353,
+      "event": {
+        "type": "synthesis_token",
+        "token": " foundations of quantum supremacy rely on fundamental quantum mechanics principles including superposition, where qubits exist in multiple states simultaneously, and entanglement, where qubits are correlated such that the"
+      }
+    },
+    {
+      "t_ms": 68735,
+      "event": {
+        "type": "synthesis_token",
+        "token": " state of one influences others [5]. Quantum supremacy demonstrations typically involve random circuit sampling that produces output distributions characterized by the Porter-Thomas distribution, a signature of quantum chaotic systems with high entanglement and anti-concentration properties [3][7][8].\n\nEarly"
+      }
+    },
+    {
+      "t_ms": 68996,
+      "event": {
+        "type": "synthesis_token",
+        "token": " quantum supremacy demonstrations focused specifically on random circuit sampling, where the task involves generating bit-string outputs from randomly chosen quantum circuits believed to be hard to simulate classically [4][8]. This approach was selected"
+      }
+    },
+    {
+      "t_ms": 69310,
+      "event": {
+        "type": "synthesis_token",
+        "token": " because the theoretical hardness could be supported by complexity-theoretic arguments,"
+      }
+    },
+    {
+      "t_ms": 69417,
+      "event": {
+        "type": "synthesis_token",
+        "token": " even though the tasks themselves lack obvious practical applications.\n\n#"
+      }
+    },
+    {
+      "t_ms": 69848,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Major Demonstrations and Milestones\n\nGoogle's Sycamore processor with 53 operational qubits achieved the first widely-recognized quantum supremacy demonstration"
+      }
+    },
+    {
+      "t_ms": 70434,
+      "event": {
+        "type": "synthesis_token",
+        "token": " in October 2019, completing a random circuit sampling calculation in 200 seconds that would take a state-of-the-art classical supercomputer approximately 10,000 years [10][11][12]. This landmark"
+      }
+    },
+    {
+      "t_ms": 70950,
+      "event": {
+        "type": "synthesis_token",
+        "token": " achievement represented the first experimental validation of quantum supremacy predictions that had been theorized"
+      }
+    },
+    {
+      "t_ms": 71489,
+      "event": {
+        "type": "synthesis_token",
+        "token": " for years.\n\n## Subsequent Achievements\n\nFollowing Google's initial"
+      }
+    },
+    {
+      "t_ms": 71835,
+      "event": {
+        "type": "synthesis_token",
+        "token": " demonstration, multiple organizations have achieved quantum supremacy or advantage claims across different hardware platforms. Chinese researchers at USTC led by Pan Jianwei achieved quantum supremacy in December 2020 using Gaussian boson sampling with photonic quantum systems [15]."
+      }
+    },
+    {
+      "t_ms": 72376,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Xanadu announced quantum advantage achievement in 2022, solving a mathematical problem in two minutes that would have taken a classical computer seven million years [16].\n\nGoogle continued advancing its capabilities"
+      }
+    },
+    {
+      "t_ms": 73063,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", upgrading Sycamore to 70 qubits by July 2023, with a processor that completed a computational task in under five minutes"
+      }
+    },
+    {
+      "t_ms": 73275,
+      "event": {
+        "type": "synthesis_token",
+        "token": " that would take classical supercomputers nearly 47 years [13]. Google demonstrated the Willow quantum chip in 2024, representing a more dramatic quantum supremacy demonstration with 105 qubits and enhanced error"
+      }
+    },
+    {
+      "t_ms": 73821,
+      "event": {
+        "type": "synthesis_token",
+        "token": " correction capabilities [14][48].\n\nQuantinuum claimed to have crossed the quantum supremacy milestone in 2024 with its 56-qubit H2-1 quantum computer [17]. D"
+      }
+    },
+    {
+      "t_ms": 74159,
+      "event": {
+        "type": "synthesis_token",
+        "token": "-Wave Systems reported a quantum supremacy experiment in March 2024 using quantum annealing to simulate non-equilibrium dynamics of a magnetic spin system, though this claim was later challenged by classical tensor network simulations [15][18].\n\n##"
+      }
+    },
+    {
+      "t_ms": 74834,
+      "event": {
+        "type": "synthesis_token",
+        "token": " IBM's Alternative Approach\n\nIBM has focused on quantum advantage through practical applications rather than supremacy demonstrations, emphasizing real-world problem-solving over benchmark"
+      }
+    },
+    {
+      "t_ms": 75087,
+      "event": {
+        "type": "synthesis_token",
+        "token": " competitions [19][21]. IBM and partners established an open Quantum Advantage Tracker in 2025-2026 with over 30 submissions from leading institutions to systematically monitor and verify emerging demonstrations of quantum advantage across observable"
+      }
+    },
+    {
+      "t_ms": 75622,
+      "event": {
+        "type": "synthesis_token",
+        "token": " estimation, variational problems, and problems with efficient classical verification [19][20]. IBM anticipates that the first cases of verified quantum advantage will be confirmed by the wider community by the end of 2026 "
+      }
+    },
+    {
+      "t_ms": 76097,
+      "event": {
+        "type": "synthesis_token",
+        "token": "[21].\n\n# Evolution of Terminology: Supremacy, Advantage, and Utility\n\nThe quantum computing community has developed"
+      }
+    },
+    {
+      "t_ms": 76527,
+      "event": {
+        "type": "synthesis_token",
+        "token": " increasingly nuanced terminology to describe different milestones in quantum computing development, reflecting both technical sophistication and practical considerations"
+      }
+    },
+    {
+      "t_ms": 77008,
+      "event": {
+        "type": "synthesis_token",
+        "token": ".\n\n## Quantum Supremacy\n\nQuantum supremacy refers to quantum computers solving tasks that are impossible for classical computers in any reasonable time, regardless of whether those tasks have"
+      }
+    },
+    {
+      "t_ms": 77432,
+      "event": {
+        "type": "synthesis_token",
+        "token": " practical usefulness [22][24]. This concept focuses on academic demonstrations and artificial problems designed to showcase the raw"
+      }
+    },
+    {
+      "t_ms": 77899,
+      "event": {
+        "type": "synthesis_token",
+        "token": " computational power of quantum systems [26][27].\n\n## Quantum Advantage\n\nQuantum advantage represents a more stringent and"
+      }
+    },
+    {
+      "t_ms": 78362,
+      "event": {
+        "type": "synthesis_token",
+        "token": " practically-oriented milestone, requiring quantum computers to solve real-world problems of genuine practical value faster, more accurately, or more cheaply than any classical computer [23]["
+      }
+    },
+    {
+      "t_ms": 78946,
+      "event": {
+        "type": "synthesis_token",
+        "token": "25][26]. This concept prioritizes meaningful applications rather than artificial benchmarks, focusing on computational complexity limitations in real applications that deliver tangible benefits to industries and research [26][27].\n\nPractical"
+      }
+    },
+    {
+      "t_ms": 79338,
+      "event": {
+        "type": "synthesis_token",
+        "token": " applications of quantum advantage include quantum simulation for materials science (batteries, industrial catalysis, nitrogen fixing), drug discovery, molecular simulations, optimization problems, and cryptography [24][31][35]. In 2026, a practical quantum advantage was demonstrated where quantum computers augmented with"
+      }
+    },
+    {
+      "t_ms": 79821,
+      "event": {
+        "type": "synthesis_token",
+        "token": " error mitigation software solved real-world problems over 3,000 times faster than classical alternatives [32].\n\n## Quantum Utility\n\nQuantum utility, introduced by IBM in 2023, refers to quantum computers performing reliable computations at scales beyond brute-force classical simulation methods, without requiring proven"
+      }
+    },
+    {
+      "t_ms": 80308,
+      "event": {
+        "type": "synthesis_token",
+        "token": " speedups over all classical approximation methods [28][29][30]. This concept recognizes that quantum computers can provide value even when they do not definit"
+      }
+    },
+    {
+      "t_ms": 80870,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ively outperform all possible classical approaches.\n\nQuantum utility can be achieved when quantum computers outperform classical competitors of the same device specifications in terms of size, weight, power consumption, and cost, making it"
+      }
+    },
+    {
+      "t_ms": 81274,
+      "event": {
+        "type": "synthesis_token",
+        "token": " valuable for applications with strict physical constraints [29][30]. This framework acknowledges that practical value can emerge before"
+      }
+    },
+    {
+      "t_ms": 81823,
+      "event": {
+        "type": "synthesis_token",
+        "token": " achieving unambiguous quantum advantage across all metrics.\n\n# Controvers"
+      }
+    },
+    {
+      "t_ms": 82504,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ies and Criticisms\n\nQuantum supremacy claims face substantial criticism across multiple dimensions, from technical disputes"
+      }
+    },
+    {
+      "t_ms": 82802,
+      "event": {
+        "type": "synthesis_token",
+        "token": " about classical performance comparisons to fundamental questions about verification and practical relevance.\n\n## Classical Computing"
+      }
+    },
+    {
+      "t_ms": 83152,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Performance Disputes\n\nIBM challenged Google's 2019 quantum supremacy claim by arguing that a classical supercomputer could perform the same task in 2.5 days rather than"
+      }
+    },
+    {
+      "t_ms": 83597,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the 10,000 years Google claimed, using optimized algorithms and better storage management [36][37][38]. This dispute highlighted the difficulty of fairly comparing quantum"
+      }
+    },
+    {
+      "t_ms": 84150,
+      "event": {
+        "type": "synthesis_token",
+        "token": " and classical systems, as classical algorithm improvements can dramatically reduce estimated runtimes.\n\nAdvances in classical simulation algorithms, including tensor network"
+      }
+    },
+    {
+      "t_ms": 84634,
+      "event": {
+        "type": "synthesis_token",
+        "token": " contraction optimizations and improved sampling methods, have dramatically reduced estimated classical runtimes for quantum supremacy benchmarks, with some researchers producing classical algorithms that are ten orders of magnitude faster than those used in Google's original comparison [4][15][44].\n\n## Practical"
+      }
+    },
+    {
+      "t_ms": 85074,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Usefulness Questions\n\nCritics argue that random circuit sampling tasks used to demonstrate quantum supremacy lack practical usefulness and do not represent real computation, as there is no meaningful input-output relationship or problem being solved in the conventional sense [39][40][41]. Some"
+      }
+    },
+    {
+      "t_ms": 85575,
+      "event": {
+        "type": "synthesis_token",
+        "token": " researchers contend that quantum supremacy demonstrations deliberately choose problems that are not classically important so that classical algorithms competing against them are not optimized, making for an easy win rather than a fair comparison [45].\n\n## Verification"
+      }
+    },
+    {
+      "t_ms": 86009,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Challenges\n\nVerification of quantum supremacy claims is fundamentally difficult because quantum advantage cannot be verified by brute-force classical computation, and existing verification tools like linear cross-entropy benchmarking (XEB) require classical simulation that becomes infeasible at scale [39][42][43"
+      }
+    },
+    {
+      "t_ms": 86478,
+      "event": {
+        "type": "synthesis_token",
+        "token": "]. Statistical analysis of Google's quantum supremacy data raised concerns that the empirical distribution of samples produced by the quantum computer differed significantly from Google's noise model and did not provide an adequate description of the experimental results [44][45].\n\n## Terminology"
+      }
+    },
+    {
+      "t_ms": 87051,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Debates\n\nThe term \"quantum supremacy\" itself has become controversial, with some researchers arguing it evokes distasteful comparisons to white supremacy and that it exacerbates overhyped reporting on quantum technology status, leading many to prefer the alternative term \"quantum advantage\""
+      }
+    },
+    {
+      "t_ms": 87727,
+      "event": {
+        "type": "synthesis_token",
+        "token": " [15][36][45]. This linguistic debate reflects broader concerns about how quantum computing achievements"
+      }
+    },
+    {
+      "t_ms": 87888,
+      "event": {
+        "type": "synthesis_token",
+        "token": " are communicated to the public and policymakers.\n\n## Technical Limitations\n\nQuantum noise and error rates remain formidable barriers to scalability, with some skeptics suggesting quantum"
+      }
+    },
+    {
+      "t_ms": 88360,
+      "event": {
+        "type": "synthesis_token",
+        "token": " supremacy may be truly impossible due to inherent noise in quantum computing, though others view it primarily as an engineering challenge [38][46]. These technical limitations raise questions about whether quantum supremacy demonstrations translate into"
+      }
+    },
+    {
+      "t_ms": 88829,
+      "event": {
+        "type": "synthesis_token",
+        "token": " sustained computational advantages for practical problems.\n\n# Technical Requirements and Hardware Platforms"
+      }
+    },
+    {
+      "t_ms": 89382,
+      "event": {
+        "type": "synthesis_token",
+        "token": "\n\nAchieving quantum supremacy requires specific technical thresholds across multiple parameters, with different hardware platforms offering distinct trade-offs in pursuing these"
+      }
+    },
+    {
+      "t_ms": 89843,
+      "event": {
+        "type": "synthesis_token",
+        "token": " milestones.\n\n## Qubit and Gate Requirements\n\nQuantum supremacy demonstrations require approximately 50-100 qubits with circuit depths around"
+      }
+    },
+    {
+      "t_ms": 90301,
+      "event": {
+        "type": "synthesis_token",
+        "token": " 10 gates to outperform classical supercomputers on specific tasks like random circuit sampling [51][62]. Two-qubit gate error rates must be reduced to approximately 0.1-0.5% to achieve quantum supremacy, compared to current systems operating at"
+      }
+    },
+    {
+      "t_ms": 90831,
+      "event": {
+        "type": "synthesis_token",
+        "token": " 0.5-1% error rates, while maintaining gate fidelities sufficient to prevent quantum advantage loss [51][52][56].\n\nScalable quantum architectures require quantum error correction capabilities, with surface code implementations needing at"
+      }
+    },
+    {
+      "t_ms": 91310,
+      "event": {
+        "type": "synthesis_token",
+        "token": " least 17-49 qubits to achieve meaningful error rate improvements for practical quantum supremacy applications [50][53][55]. Google's 2024 Willow processor demonstrated enhanced qubit coherence and gate fidelity with 105 qubits, achieving error correction rates 20 "
+      }
+    },
+    {
+      "t_ms": 91712,
+      "event": {
+        "type": "synthesis_token",
+        "token": "times better than Sycamore and demonstrating exponential error reduction as the code distance increases [48][59].\n\n## Hardware Platforms\n\nGoogle's Sycamore processor with 53 superconducting qubits achieved quantum supremacy in "
+      }
+    },
+    {
+      "t_ms": 92238,
+      "event": {
+        "type": "synthesis_token",
+        "token": "2019, demonstrating the viability of superconducting qubit architectures [48][49][52]. Superconducting qubits, trapped ions, and photonic systems represent the primary hardware platforms for quantum supremacy demonstrations"
+      }
+    },
+    {
+      "t_ms": 92743,
+      "event": {
+        "type": "synthesis_token",
+        "token": ", with superconducting systems offering faster gate speeds, trapped ions providing longer coherence times and higher gate fidelities, and photonic systems suited for specific sampling tasks [27][49][60][61].\n\nSuperconducting quantum computers require cry"
+      }
+    },
+    {
+      "t_ms": 93152,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ogenic dilution refrigerators operating at millikelvin temperatures and sophisticated microwave control electronics, while trapped ion systems use laser-cooled ions confined in electromagnetic traps with laser manipulation [49][57][58]. Each platform presents unique engineering"
+      }
+    },
+    {
+      "t_ms": 93769,
+      "event": {
+        "type": "synthesis_token",
+        "token": " challenges and advantages for scaling toward robust quantum supremacy.\n\n## De"
+      }
+    },
+    {
+      "t_ms": 94103,
+      "event": {
+        "type": "synthesis_token",
+        "token": "coherence Challenges\n\nDecoherence remains the primary technical challenge limiting quantum supremacy, as quantum states decay rapidly due to environmental interference, restricting computation time and complexity in NISQ-era (Noisy Intermediate-Scale Quantum) devices [27][56]."
+      }
+    },
+    {
+      "t_ms": 94679,
+      "event": {
+        "type": "synthesis_token",
+        "token": " Managing decoherence while maintaining sufficient qubit counts and gate fidelities represents the central"
+      }
+    },
+    {
+      "t_ms": 95051,
+      "event": {
+        "type": "synthesis_token",
+        "token": " engineering challenge for achieving and sustaining quantum supremacy demonstrations.\n\n# Current Status and Future Outlook\n\nThe quantum computing"
+      }
+    },
+    {
+      "t_ms": 95477,
+      "event": {
+        "type": "synthesis_token",
+        "token": " field has progressed significantly since Google's 2019 quantum supremacy demonstration, with multiple organizations achieving similar or enhanced"
+      }
+    },
+    {
+      "t_ms": 96056,
+      "event": {
+        "type": "synthesis_token",
+        "token": " milestones across different hardware platforms [13][14][16][17]. The community has increasingly shifted focus"
+      }
+    },
+    {
+      "t_ms": 96434,
+      "event": {
+        "type": "synthesis_token",
+        "token": " from abstract supremacy demonstrations toward quantum advantage and utility, emphasizing practical applications that"
+      }
+    },
+    {
+      "t_ms": 96888,
+      "event": {
+        "type": "synthesis_token",
+        "token": " deliver tangible value [21][28].\n\nIBM's Quantum Advantage Tracker, established in 2025-"
+      }
+    },
+    {
+      "t_ms": 97399,
+      "event": {
+        "type": "synthesis_token",
+        "token": "2026 with over 30 submissions from leading institutions, represents a systematic approach to monitoring and verifying quantum advantage claims across multiple problem"
+      }
+    },
+    {
+      "t_ms": 97877,
+      "event": {
+        "type": "synthesis_token",
+        "token": " domains [19][20]. This collaborative infrastructure reflects growing maturity in how"
+      }
+    },
+    {
+      "t_ms": 98477,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the field evaluates and validates quantum computing progress, moving beyond isolated supremacy claims"
+      }
+    },
+    {
+      "t_ms": 98786,
+      "event": {
+        "type": "synthesis_token",
+        "token": " toward rigorous community-wide verification.\n\nPractical quantum advantage demonstrations in 2026 showed quantum computers solving"
+      }
+    },
+    {
+      "t_ms": 99264,
+      "event": {
+        "type": "synthesis_token",
+        "token": " real-world problems over 3,000 times faster than classical alternatives when augmented with error mitigation software [32]. These achievements suggest the field is transit"
+      }
+    },
+    {
+      "t_ms": 99712,
+      "event": {
+        "type": "synthesis_token",
+        "token": "ioning from proof-of-concept demonstrations toward commercially relevant applications in materials science, drug discovery, optimization, and other domains ["
+      }
+    },
+    {
+      "t_ms": 100322,
+      "event": {
+        "type": "synthesis_token",
+        "token": "24][31][33][34].\n\nHowever, significant technical challenges remain, particularly"
+      }
+    },
+    {
+      "t_ms": 100704,
+      "event": {
+        "type": "synthesis_token",
+        "token": " around quantum error correction, scalability, and reducing noise levels to enable reliable long-duration"
+      }
+    },
+    {
+      "t_ms": 101124,
+      "event": {
+        "type": "synthesis_token",
+        "token": " computations [38][46][56]. The ongoing improvements in classical simulation algorithms also highlight that"
+      }
+    },
+    {
+      "t_ms": 101593,
+      "event": {
+        "type": "synthesis_token",
+        "token": " the quantum-classical boundary is dynamic rather than fixed, requiring continuous advancement in quantum hardware"
+      }
+    },
+    {
+      "t_ms": 102066,
+      "event": {
+        "type": "synthesis_token",
+        "token": " capabilities [4][44].\n\nThe field appears poised for continued progress, with major institutions"
+      }
+    },
+    {
+      "t_ms": 102534,
+      "event": {
+        "type": "synthesis_token",
+        "token": " predicting verified quantum advantage in multiple domains by the end of 2026 [21"
+      }
+    },
+    {
+      "t_ms": 103421,
+      "event": {
+        "type": "synthesis_token",
+        "token": "]. Whether quantum supremacy evolves into sustained computational advantages for societally important problems remains an active area of research,"
+      }
+    },
+    {
+      "t_ms": 103461,
+      "event": {
+        "type": "synthesis_token",
+        "token": " development, and debate."
+      }
+    },
+    {
+      "t_ms": 103596,
+      "event": {
+        "type": "cost_update",
+        "model": "claude-sonnet-4-5",
+        "input_tokens": 5952,
+        "output_tokens": 3073,
+        "cumulative_usd": 0.611283
+      }
+    },
+    {
+      "t_ms": 103596,
+      "event": {
+        "type": "report_complete",
+        "report": {
+          "report_id": "0086d1ae-5587-4f94-abcb-a208b6d901d8",
+          "original_question": "What is quantum supremacy?",
+          "executive_summary": "Quantum supremacy represents a watershed milestone in computing where a quantum computer performs a computational task that is practically impossible for classical computers to complete in any reasonable timeframe. First coined by physicist John Preskill in 2012, the concept requires demonstrating a superpolynomial speedup over all possible classical approaches to solving a problem [1]. The theoretical foundations rest on complexity-theoretic conjectures and quantum mechanical principles including superposition and entanglement, with random circuit sampling serving as the primary demonstration vehicle [4][6].\n\nGoogle achieved the first widely-recognized quantum supremacy demonstration in October 2019 with its 53-qubit Sycamore processor, completing a calculation in approximately 200 seconds that would take classical supercomputers an estimated 10,000 years [10][11]. However, this milestone has generated substantial controversy, with IBM and other researchers challenging the classical performance comparisons and questioning the practical usefulness of the tasks performed [37][38]. The field has since evolved toward concepts of \"quantum advantage\" and \"quantum utility,\" which emphasize practical applications over abstract benchmarks, reflecting a maturation in how the community evaluates quantum computing progress [23][28].",
+          "sections": [
+            {
+              "heading": "Theoretical Foundations and Definition",
+              "content": "Quantum supremacy refers to the threshold where quantum computers demonstrably outperform classical computers on tasks that would be practically impossible for classical machines due to the computational time or resources required [1][2]. To satisfy the formal definition of quantum supremacy, there must be a demonstration of superpolynomial speedup over all possible classical approaches to solving the problem, not merely an improvement over existing classical algorithms [1].\n\nThe theoretical basis for quantum supremacy rests on complexity-theoretic conjectures rather than mathematical proofs. Specifically, the hardness of classically simulating quantum computations is grounded in conjectures such as the non-collapse of the polynomial hierarchy [4][9]. These demonstrations aim to challenge the Extended Church-Turing Thesis, which asserts that every physical process can be simulated by a classical Turing machine with at most polynomial overhead [6].\n\n## Quantum Mechanical Principles\n\nThe foundations of quantum supremacy rely on fundamental quantum mechanics principles including superposition, where qubits exist in multiple states simultaneously, and entanglement, where qubits are correlated such that the state of one influences others [5]. Quantum supremacy demonstrations typically involve random circuit sampling that produces output distributions characterized by the Porter-Thomas distribution, a signature of quantum chaotic systems with high entanglement and anti-concentration properties [3][7][8].\n\nEarly quantum supremacy demonstrations focused specifically on random circuit sampling, where the task involves generating bit-string outputs from randomly chosen quantum circuits believed to be hard to simulate classically [4][8]. This approach was selected because the theoretical hardness could be supported by complexity-theoretic arguments, even though the tasks themselves lack obvious practical applications.",
+              "citation_ids": [
+                "ca17c268-6da2-4c26-8ca8-67e50e4f9882",
+                "c8537cd6-b94b-495b-89ad-730fd1350b36",
+                "abdfacad-be6a-4fb0-a0ac-9c12c305ec64",
+                "18a98bf7-bb33-4d41-b428-032f4cbb658e",
+                "49b2ea6e-db33-4e26-aa7a-a81da1a4aa9a",
+                "37a836af-e48f-4369-a358-9a6aacfd7938",
+                "5cd6af7e-c169-4068-a065-2d4a6c62b805",
+                "0f70efc1-69da-4e4c-b7e2-89ba82169f55",
+                "dd43eb8d-6981-4439-853f-690a9665abb0"
+              ]
+            },
+            {
+              "heading": "Major Demonstrations and Milestones",
+              "content": "Google's Sycamore processor with 53 operational qubits achieved the first widely-recognized quantum supremacy demonstration in October 2019, completing a random circuit sampling calculation in 200 seconds that would take a state-of-the-art classical supercomputer approximately 10,000 years [10][11][12]. This landmark achievement represented the first experimental validation of quantum supremacy predictions that had been theorized for years.\n\n## Subsequent Achievements\n\nFollowing Google's initial demonstration, multiple organizations have achieved quantum supremacy or advantage claims across different hardware platforms. Chinese researchers at USTC led by Pan Jianwei achieved quantum supremacy in December 2020 using Gaussian boson sampling with photonic quantum systems [15]. Xanadu announced quantum advantage achievement in 2022, solving a mathematical problem in two minutes that would have taken a classical computer seven million years [16].\n\nGoogle continued advancing its capabilities, upgrading Sycamore to 70 qubits by July 2023, with a processor that completed a computational task in under five minutes that would take classical supercomputers nearly 47 years [13]. Google demonstrated the Willow quantum chip in 2024, representing a more dramatic quantum supremacy demonstration with 105 qubits and enhanced error correction capabilities [14][48].\n\nQuantinuum claimed to have crossed the quantum supremacy milestone in 2024 with its 56-qubit H2-1 quantum computer [17]. D-Wave Systems reported a quantum supremacy experiment in March 2024 using quantum annealing to simulate non-equilibrium dynamics of a magnetic spin system, though this claim was later challenged by classical tensor network simulations [15][18].\n\n## IBM's Alternative Approach\n\nIBM has focused on quantum advantage through practical applications rather than supremacy demonstrations, emphasizing real-world problem-solving over benchmark competitions [19][21]. IBM and partners established an open Quantum Advantage Tracker in 2025-2026 with over 30 submissions from leading institutions to systematically monitor and verify emerging demonstrations of quantum advantage across observable estimation, variational problems, and problems with efficient classical verification [19][20]. IBM anticipates that the first cases of verified quantum advantage will be confirmed by the wider community by the end of 2026 [21].",
+              "citation_ids": [
+                "95e79397-3b0d-4fc5-bb37-b22febcb55b6",
+                "95dcd989-fed2-4640-80e3-659d3076a74c",
+                "b86135d8-5e31-4def-ba83-1ae0c36ee644",
+                "1f5d61b2-b8a2-46c5-857c-949777d132b3",
+                "8415fb5e-409b-4dcc-a70e-2f7f8e26c9b3",
+                "64b002ad-0214-49b8-a215-58b1be4a8a49",
+                "9016eae4-4f34-4486-aa1b-5e7761cea3a5",
+                "8f72140d-0b0f-4f1d-a831-0b41eea9273b",
+                "5fbcff49-1a92-4bdf-b8f0-c9b4cc50dd9f",
+                "e432c559-a381-40d1-83da-4bdfd6afdc4d",
+                "4182e3f6-1b48-4241-aa9d-7666fb219253",
+                "575c0b3e-9648-42c5-b9a2-9623cdeb384e",
+                "59bafd17-3abe-4a34-af75-81629aa090c2"
+              ]
+            },
+            {
+              "heading": "Evolution of Terminology: Supremacy, Advantage, and Utility",
+              "content": "The quantum computing community has developed increasingly nuanced terminology to describe different milestones in quantum computing development, reflecting both technical sophistication and practical considerations.\n\n## Quantum Supremacy\n\nQuantum supremacy refers to quantum computers solving tasks that are impossible for classical computers in any reasonable time, regardless of whether those tasks have practical usefulness [22][24]. This concept focuses on academic demonstrations and artificial problems designed to showcase the raw computational power of quantum systems [26][27].\n\n## Quantum Advantage\n\nQuantum advantage represents a more stringent and practically-oriented milestone, requiring quantum computers to solve real-world problems of genuine practical value faster, more accurately, or more cheaply than any classical computer [23][25][26]. This concept prioritizes meaningful applications rather than artificial benchmarks, focusing on computational complexity limitations in real applications that deliver tangible benefits to industries and research [26][27].\n\nPractical applications of quantum advantage include quantum simulation for materials science (batteries, industrial catalysis, nitrogen fixing), drug discovery, molecular simulations, optimization problems, and cryptography [24][31][35]. In 2026, a practical quantum advantage was demonstrated where quantum computers augmented with error mitigation software solved real-world problems over 3,000 times faster than classical alternatives [32].\n\n## Quantum Utility\n\nQuantum utility, introduced by IBM in 2023, refers to quantum computers performing reliable computations at scales beyond brute-force classical simulation methods, without requiring proven speedups over all classical approximation methods [28][29][30]. This concept recognizes that quantum computers can provide value even when they do not definitively outperform all possible classical approaches.\n\nQuantum utility can be achieved when quantum computers outperform classical competitors of the same device specifications in terms of size, weight, power consumption, and cost, making it valuable for applications with strict physical constraints [29][30]. This framework acknowledges that practical value can emerge before achieving unambiguous quantum advantage across all metrics.",
+              "citation_ids": [
+                "b14628ca-47d9-41a3-9ce5-6a1455b9274f",
+                "1d17368e-f196-4ac1-b9c7-fca7f5a330e2",
+                "ec1ef4f4-c9d2-451f-af25-333ea6ffe4e7",
+                "9e4b5772-1d3d-456a-82d1-6accb5ad6822",
+                "865e57c8-5de2-4782-82e7-3299a8270f11",
+                "6017021c-129e-4b82-97db-8b6b5a6eef02",
+                "8e5c525e-f34c-44c5-881d-5048db2e26c3",
+                "edd2bf5e-ff91-42d4-962a-755cb115cd75",
+                "55982ac9-a014-4ab4-8731-e2f58c376b3a",
+                "23a8ee4c-1214-421f-afbc-0829c97ffd10",
+                "c54f411b-e0c3-4537-a4eb-6db430d5feb2",
+                "c09459f5-16c5-48ea-8587-b3890c82826b"
+              ]
+            },
+            {
+              "heading": "Controversies and Criticisms",
+              "content": "Quantum supremacy claims face substantial criticism across multiple dimensions, from technical disputes about classical performance comparisons to fundamental questions about verification and practical relevance.\n\n## Classical Computing Performance Disputes\n\nIBM challenged Google's 2019 quantum supremacy claim by arguing that a classical supercomputer could perform the same task in 2.5 days rather than the 10,000 years Google claimed, using optimized algorithms and better storage management [36][37][38]. This dispute highlighted the difficulty of fairly comparing quantum and classical systems, as classical algorithm improvements can dramatically reduce estimated runtimes.\n\nAdvances in classical simulation algorithms, including tensor network contraction optimizations and improved sampling methods, have dramatically reduced estimated classical runtimes for quantum supremacy benchmarks, with some researchers producing classical algorithms that are ten orders of magnitude faster than those used in Google's original comparison [4][15][44].\n\n## Practical Usefulness Questions\n\nCritics argue that random circuit sampling tasks used to demonstrate quantum supremacy lack practical usefulness and do not represent real computation, as there is no meaningful input-output relationship or problem being solved in the conventional sense [39][40][41]. Some researchers contend that quantum supremacy demonstrations deliberately choose problems that are not classically important so that classical algorithms competing against them are not optimized, making for an easy win rather than a fair comparison [45].\n\n## Verification Challenges\n\nVerification of quantum supremacy claims is fundamentally difficult because quantum advantage cannot be verified by brute-force classical computation, and existing verification tools like linear cross-entropy benchmarking (XEB) require classical simulation that becomes infeasible at scale [39][42][43]. Statistical analysis of Google's quantum supremacy data raised concerns that the empirical distribution of samples produced by the quantum computer differed significantly from Google's noise model and did not provide an adequate description of the experimental results [44][45].\n\n## Terminology Debates\n\nThe term \"quantum supremacy\" itself has become controversial, with some researchers arguing it evokes distasteful comparisons to white supremacy and that it exacerbates overhyped reporting on quantum technology status, leading many to prefer the alternative term \"quantum advantage\" [15][36][45]. This linguistic debate reflects broader concerns about how quantum computing achievements are communicated to the public and policymakers.\n\n## Technical Limitations\n\nQuantum noise and error rates remain formidable barriers to scalability, with some skeptics suggesting quantum supremacy may be truly impossible due to inherent noise in quantum computing, though others view it primarily as an engineering challenge [38][46]. These technical limitations raise questions about whether quantum supremacy demonstrations translate into sustained computational advantages for practical problems.",
+              "citation_ids": [
+                "763b0308-f663-4ee4-ba75-8b8cade4b381",
+                "db7a4011-5c3d-4fb6-b014-0832b52e2abe",
+                "d0b67cb2-9097-4f78-8e8c-ee5a8898e47d",
+                "abdfacad-be6a-4fb0-a0ac-9c12c305ec64",
+                "1f5d61b2-b8a2-46c5-857c-949777d132b3",
+                "4a92e34e-9a8c-4cc3-896e-4064b0af2269",
+                "ce2ff25e-c64c-4fcf-a791-06f3e50094a8",
+                "f2008141-973c-4e87-a779-09d55d17337a",
+                "de9db341-27bf-44c6-b6eb-78151fafa3d2",
+                "c334b12f-aa12-47f6-b387-ad4e495d9cab",
+                "8f0d737b-7a4d-48e0-80d6-a7e50059a8fd",
+                "31846cd2-59b0-4a15-acfa-84f110c1defa",
+                "7ad510b4-7646-423c-97a7-4a5cced2dfd1"
+              ]
+            },
+            {
+              "heading": "Technical Requirements and Hardware Platforms",
+              "content": "Achieving quantum supremacy requires specific technical thresholds across multiple parameters, with different hardware platforms offering distinct trade-offs in pursuing these milestones.\n\n## Qubit and Gate Requirements\n\nQuantum supremacy demonstrations require approximately 50-100 qubits with circuit depths around 10 gates to outperform classical supercomputers on specific tasks like random circuit sampling [51][62]. Two-qubit gate error rates must be reduced to approximately 0.1-0.5% to achieve quantum supremacy, compared to current systems operating at 0.5-1% error rates, while maintaining gate fidelities sufficient to prevent quantum advantage loss [51][52][56].\n\nScalable quantum architectures require quantum error correction capabilities, with surface code implementations needing at least 17-49 qubits to achieve meaningful error rate improvements for practical quantum supremacy applications [50][53][55]. Google's 2024 Willow processor demonstrated enhanced qubit coherence and gate fidelity with 105 qubits, achieving error correction rates 20 times better than Sycamore and demonstrating exponential error reduction as the code distance increases [48][59].\n\n## Hardware Platforms\n\nGoogle's Sycamore processor with 53 superconducting qubits achieved quantum supremacy in 2019, demonstrating the viability of superconducting qubit architectures [48][49][52]. Superconducting qubits, trapped ions, and photonic systems represent the primary hardware platforms for quantum supremacy demonstrations, with superconducting systems offering faster gate speeds, trapped ions providing longer coherence times and higher gate fidelities, and photonic systems suited for specific sampling tasks [27][49][60][61].\n\nSuperconducting quantum computers require cryogenic dilution refrigerators operating at millikelvin temperatures and sophisticated microwave control electronics, while trapped ion systems use laser-cooled ions confined in electromagnetic traps with laser manipulation [49][57][58]. Each platform presents unique engineering challenges and advantages for scaling toward robust quantum supremacy.\n\n## Decoherence Challenges\n\nDecoherence remains the primary technical challenge limiting quantum supremacy, as quantum states decay rapidly due to environmental interference, restricting computation time and complexity in NISQ-era (Noisy Intermediate-Scale Quantum) devices [27][56]. Managing decoherence while maintaining sufficient qubit counts and gate fidelities represents the central engineering challenge for achieving and sustaining quantum supremacy demonstrations.",
+              "citation_ids": [
+                "cd52aac8-93c5-4945-b481-33c926d97abb",
+                "3a037e91-4d05-4c86-bf7f-d509e4516cb2",
+                "74c5ea9b-8d1c-4589-85bb-b0c407f4b787",
+                "4d71f1c2-7a3e-4f66-9a8a-54872c08a342",
+                "615dbbf3-c120-4959-b0b6-82bd731a716d",
+                "037ed73f-7dcd-4665-a209-87456e646e69",
+                "d2ead426-743c-4692-b3f6-0cf190aae4e2",
+                "8f72140d-0b0f-4f1d-a831-0b41eea9273b",
+                "888ec385-d190-4dd5-a9e1-c7757dc15963",
+                "acae81be-e281-41c6-99f9-c30a82181170",
+                "9e4b5772-1d3d-456a-82d1-6accb5ad6822",
+                "16a06b79-64c6-486a-b0a7-aced33dee899",
+                "4810c90a-f7d2-4a2e-a6b0-32d79bbbbabe",
+                "85f74ab0-96e4-48e2-99e8-189b10bc36cb",
+                "5d05c44d-b47d-46ba-a917-694aaac15cba"
+              ]
+            },
+            {
+              "heading": "Current Status and Future Outlook",
+              "content": "The quantum computing field has progressed significantly since Google's 2019 quantum supremacy demonstration, with multiple organizations achieving similar or enhanced milestones across different hardware platforms [13][14][16][17]. The community has increasingly shifted focus from abstract supremacy demonstrations toward quantum advantage and utility, emphasizing practical applications that deliver tangible value [21][28].\n\nIBM's Quantum Advantage Tracker, established in 2025-2026 with over 30 submissions from leading institutions, represents a systematic approach to monitoring and verifying quantum advantage claims across multiple problem domains [19][20]. This collaborative infrastructure reflects growing maturity in how the field evaluates and validates quantum computing progress, moving beyond isolated supremacy claims toward rigorous community-wide verification.\n\nPractical quantum advantage demonstrations in 2026 showed quantum computers solving real-world problems over 3,000 times faster than classical alternatives when augmented with error mitigation software [32]. These achievements suggest the field is transitioning from proof-of-concept demonstrations toward commercially relevant applications in materials science, drug discovery, optimization, and other domains [24][31][33][34].\n\nHowever, significant technical challenges remain, particularly around quantum error correction, scalability, and reducing noise levels to enable reliable long-duration computations [38][46][56]. The ongoing improvements in classical simulation algorithms also highlight that the quantum-classical boundary is dynamic rather than fixed, requiring continuous advancement in quantum hardware capabilities [4][44].\n\nThe field appears poised for continued progress, with major institutions predicting verified quantum advantage in multiple domains by the end of 2026 [21]. Whether quantum supremacy evolves into sustained computational advantages for societally important problems remains an active area of research, development, and debate.",
+              "citation_ids": [
+                "64b002ad-0214-49b8-a215-58b1be4a8a49",
+                "9016eae4-4f34-4486-aa1b-5e7761cea3a5",
+                "8415fb5e-409b-4dcc-a70e-2f7f8e26c9b3",
+                "5fbcff49-1a92-4bdf-b8f0-c9b4cc50dd9f",
+                "575c0b3e-9648-42c5-b9a2-9623cdeb384e",
+                "23a8ee4c-1214-421f-afbc-0829c97ffd10",
+                "4182e3f6-1b48-4241-aa9d-7666fb219253",
+                "59bafd17-3abe-4a34-af75-81629aa090c2",
+                "55982ac9-a014-4ab4-8731-e2f58c376b3a",
+                "1d17368e-f196-4ac1-b9c7-fca7f5a330e2",
+                "8e5c525e-f34c-44c5-881d-5048db2e26c3",
+                "a8d17a41-beb5-43d2-aeb1-7b86347fdf97",
+                "73ce5822-9e42-445e-9830-e32a31355fed",
+                "d0b67cb2-9097-4f78-8e8c-ee5a8898e47d",
+                "7ad510b4-7646-423c-97a7-4a5cced2dfd1",
+                "4d71f1c2-7a3e-4f66-9a8a-54872c08a342",
+                "abdfacad-be6a-4fb0-a0ac-9c12c305ec64",
+                "4a92e34e-9a8c-4cc3-896e-4064b0af2269"
+              ]
+            }
+          ],
+          "citations": [
+            {
+              "id": "ca17c268-6da2-4c26-8ca8-67e50e4f9882",
+              "url": "https://www.quera.com/glossary/quantum-supremacy",
+              "title": "What is Quantum Supremacy - QuEra Computing"
+            },
+            {
+              "id": "c8537cd6-b94b-495b-89ad-730fd1350b36",
+              "url": "https://medium.com/@ashfaqe.sa12/quantum-supremacy-unpacking-its-meaning-and-significance-part-2-dcdbe9aed3f2",
+              "title": "Quantum Supremacy: Unpacking Its Meaning and Significance \u2014 Part 2"
+            },
+            {
+              "id": "5cd6af7e-c169-4068-a065-2d4a6c62b805",
+              "url": "https://www.emergentmind.com/topics/quantum-supremacy",
+              "title": "Quantum Supremacy: Theory and Experiment"
+            },
+            {
+              "id": "abdfacad-be6a-4fb0-a0ac-9c12c305ec64",
+              "url": "https://arxiv.org/pdf/2310.10315",
+              "title": "A Survey on Quantum Machine Learning: Current Trends, Challenges, Opportunities, and the Road Ahead"
+            },
+            {
+              "id": "37a836af-e48f-4369-a358-9a6aacfd7938",
+              "url": "https://milvus.io/ai-quick-reference/what-is-the-concept-of-quantum-supremacy",
+              "title": "What is the concept of quantum supremacy?"
+            },
+            {
+              "id": "49b2ea6e-db33-4e26-aa7a-a81da1a4aa9a",
+              "url": "https://arxiv.org/pdf/1612.05903",
+              "title": "Complexity-Theoretic Foundations of Quantum Supremacy Experiments"
+            },
+            {
+              "id": "0f70efc1-69da-4e4c-b7e2-89ba82169f55",
+              "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8291594/",
+              "title": "Quantum supremacy: some fundamental concepts - PMC"
+            },
+            {
+              "id": "dd43eb8d-6981-4439-853f-690a9665abb0",
+              "url": "https://eitca.org/artificial-intelligence/eitc-ai-tfqml-tensorflow-quantum-machine-learning/quantum-supremacy/estimation-of-statistical-significance-of-quantum-supremacy/examination-review-estimation-of-statistical-significance-of-quantum-supremacy/how-does-the-porter-thomas-distribution-relate-to-the-sampling-strategies-used-in-the-quantum-supremacy-experiment/",
+              "title": "How does the Porter-Thomas distribution relate to the sampling strategies used in the quantum supremacy experiment?"
+            },
+            {
+              "id": "18a98bf7-bb33-4d41-b428-032f4cbb658e",
+              "url": "https://www.nature.com/articles/s41534-017-0018-2",
+              "title": "Quantum sampling problems, BosonSampling and quantum supremacy"
+            },
+            {
+              "id": "95e79397-3b0d-4fc5-bb37-b22febcb55b6",
+              "url": "https://www.nature.com/articles/s41586-019-1666-5",
+              "title": "Quantum supremacy using a programmable superconducting processor | Nature"
+            },
+            {
+              "id": "95dcd989-fed2-4640-80e3-659d3076a74c",
+              "url": "https://www.techexplorist.com/google-achieved-quantum-supremacy-sycamore/27275/",
+              "title": "Google achieved the 'quantum supremacy' with its Sycamore"
+            },
+            {
+              "id": "b86135d8-5e31-4def-ba83-1ae0c36ee644",
+              "url": "https://en.wikipedia.org/wiki/Sycamore_(processor)",
+              "title": "Sycamore (processor) - Wikipedia"
+            },
+            {
+              "id": "64b002ad-0214-49b8-a215-58b1be4a8a49",
+              "url": "https://www.bluequbit.io/blog/google-quantum-computer",
+              "title": "Google Quantum Computer: Shaping Tomorrow's Technology"
+            },
+            {
+              "id": "9016eae4-4f34-4486-aa1b-5e7761cea3a5",
+              "url": "https://redstaglabs.com/pages/latest-breakthroughs-in-quantum-computing/",
+              "title": "Latest Breakthroughs in Quantum Computing (2024, 2025 & 2026)"
+            },
+            {
+              "id": "1f5d61b2-b8a2-46c5-857c-949777d132b3",
+              "url": "https://en.wikipedia.org/wiki/Quantum_supremacy",
+              "title": "Quantum supremacy - Wikipedia"
+            },
+            {
+              "id": "8415fb5e-409b-4dcc-a70e-2f7f8e26c9b3",
+              "url": "https://cacm.acm.org/news/how-far-away-is-quantum-supremacy/",
+              "title": "How Far Away Is Quantum Supremacy? \u2013 Communications of the ACM"
+            },
+            {
+              "id": "5fbcff49-1a92-4bdf-b8f0-c9b4cc50dd9f",
+              "url": "https://www.livescience.com/technology/computing/what-is-quantum-supremacy",
+              "title": "What is quantum supremacy? | Live Science"
+            },
+            {
+              "id": "e432c559-a381-40d1-83da-4bdfd6afdc4d",
+              "url": "https://www.dwavequantum.com/company/newsroom/press-release/beyond-classical-d-wave-first-to-demonstrate-quantum-supremacy-on-useful-real-world-problem/",
+              "title": "Beyond Classical: D-Wave First to Demonstrate Quantum Supremacy on Useful, Real-World Problem"
+            },
+            {
+              "id": "4182e3f6-1b48-4241-aa9d-7666fb219253",
+              "url": "https://newsroom.ibm.com/2025-11-12-ibm-delivers-new-quantum-processors,-software,-and-algorithm-breakthroughs-on-path-to-advantage-and-fault-tolerance",
+              "title": "IBM Delivers New Quantum Processors, Software, and Algorithm Breakthroughs on Path to Advantage and Fault Tolerance"
+            },
+            {
+              "id": "59bafd17-3abe-4a34-af75-81629aa090c2",
+              "url": "https://www.ibm.com/quantum/blog/quantum-advantage-tracker",
+              "title": "Quantum Advantage Tracker: the race to advantage | IBM Quantum Computing Blog"
+            },
+            {
+              "id": "575c0b3e-9648-42c5-b9a2-9623cdeb384e",
+              "url": "https://www.ibm.com/quantum/blog/quantum-advantage-era",
+              "title": "The dawn of quantum advantage | IBM Quantum Computing Blog"
+            },
+            {
+              "id": "b14628ca-47d9-41a3-9ce5-6a1455b9274f",
+              "url": "https://quanscient.com/blog/quantum-advantage-or-quantum-supremacy-what-is-the-difference",
+              "title": "Quantum Advantage vs. Quantum Supremacy | Quanscient"
+            },
+            {
+              "id": "865e57c8-5de2-4782-82e7-3299a8270f11",
+              "url": "https://www.quera.com/glossary/advantage",
+              "title": "What is Quantum Advantage"
+            },
+            {
+              "id": "1d17368e-f196-4ac1-b9c7-fca7f5a330e2",
+              "url": "https://postquantum.com/quantum-computing/quantum-supremacy-advantage/",
+              "title": "Quantum Supremacy vs. Quantum Advantage"
+            },
+            {
+              "id": "6017021c-129e-4b82-97db-8b6b5a6eef02",
+              "url": "https://entangledfuture.com/guides/quantum-advantage-explained/",
+              "title": "Quantum Advantage Explained: Supremacy, Utility & Impact"
+            },
+            {
+              "id": "ec1ef4f4-c9d2-451f-af25-333ea6ffe4e7",
+              "url": "https://servantarinze.com/quantum-supremacy-vs-quantum-advantage/",
+              "title": "Quantum Supremacy vs Quantum Advantage: 5 Key Differences Explained (2026)"
+            },
+            {
+              "id": "9e4b5772-1d3d-456a-82d1-6accb5ad6822",
+              "url": "https://www.quantumbytz.com/articles/quantum-supremacy-vs-quantum-advantage",
+              "title": "Quantum Supremacy vs. Quantum Advantage | QuantumBytz"
+            },
+            {
+              "id": "23a8ee4c-1214-421f-afbc-0829c97ffd10",
+              "url": "https://www.ibm.com/quantum/blog/what-is-quantum-utlity",
+              "title": "What is quantum utility? | IBM Quantum Computing Blog"
+            },
+            {
+              "id": "c54f411b-e0c3-4537-a4eb-6db430d5feb2",
+              "url": "https://www.ibm.com/think/topics/quantum-computing",
+              "title": "What Is Quantum Computing? | IBM"
+            },
+            {
+              "id": "c09459f5-16c5-48ea-8587-b3890c82826b",
+              "url": "https://arxiv.org/pdf/2303.02138",
+              "title": "Quantum utility -- definition and assessment of a practical quantum advantage"
+            },
+            {
+              "id": "8e5c525e-f34c-44c5-881d-5048db2e26c3",
+              "url": "https://www.nature.com/articles/s41586-022-04940-6",
+              "title": "Practical quantum advantage in quantum simulation | Nature"
+            },
+            {
+              "id": "55982ac9-a014-4ab4-8731-e2f58c376b3a",
+              "url": "https://q-ctrl.com/blog/practical-quantum-advantage-signals-a-new-commercial-era-for-quantum-computing",
+              "title": "Practical quantum advantage signals a new commercial era for quantum computing | Q-CTRL"
+            },
+            {
+              "id": "a8d17a41-beb5-43d2-aeb1-7b86347fdf97",
+              "url": "https://www.bluequbit.io/blog/quantum-computing-use-cases",
+              "title": "14 Quantum Computing Use Cases Reshaping the Future"
+            },
+            {
+              "id": "73ce5822-9e42-445e-9830-e32a31355fed",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9709576/",
+              "title": "Biology and medicine in the landscape of quantum advantages"
+            },
+            {
+              "id": "edd2bf5e-ff91-42d4-962a-755cb115cd75",
+              "url": "https://arxiv.org/pdf/2203.17181",
+              "title": "Quantum computing at the quantum advantage threshold: a down-to-business review"
+            },
+            {
+              "id": "763b0308-f663-4ee4-ba75-8b8cade4b381",
+              "url": "https://www.ibm.com/quantum/blog/on-quantum-supremacy",
+              "title": "On 'quantum supremacy' | IBM Quantum Computing Blog"
+            },
+            {
+              "id": "db7a4011-5c3d-4fb6-b014-0832b52e2abe",
+              "url": "https://www.science.org/content/article/ibm-casts-doubt-googles-claims-quantum-supremacy",
+              "title": "IBM casts doubt on Google's claims of quantum supremacy | Science | AAAS"
+            },
+            {
+              "id": "d0b67cb2-9097-4f78-8e8c-ee5a8898e47d",
+              "url": "https://www.sciencenews.org/article/google-quantum-supremacy-claim-controversy-top-science-stories-2019-yir",
+              "title": "Google claimed quantum supremacy in 2019 \u2014 and sparked controversy"
+            },
+            {
+              "id": "ce2ff25e-c64c-4fcf-a791-06f3e50094a8",
+              "url": "https://thequantuminsider.com/2026/01/12/quantum-advantage-has-likely-been-achieved-the-debate-is-over-what-counts/",
+              "title": "Quantum Advantage Has Likely Been Achieved \u2014 The Debate Is Over What Counts"
+            },
+            {
+              "id": "f2008141-973c-4e87-a779-09d55d17337a",
+              "url": "https://www.pbs.org/wgbh/nova/article/google-quantum-supremacy/",
+              "title": "Google says it just achieved 'quantum supremacy.' Is it true? | NOVA | PBS"
+            },
+            {
+              "id": "de9db341-27bf-44c6-b6eb-78151fafa3d2",
+              "url": "https://www.cbsnews.com/news/google-quantum-computing-quantum-supremacy-claim-by-google-disputed-by-ibm/",
+              "title": "Google quantum computing: 'Quantum supremacy' claim by Google disputed by IBM - CBS News"
+            },
+            {
+              "id": "8f0d737b-7a4d-48e0-80d6-a7e50059a8fd",
+              "url": "https://www.nature.com/articles/s41467-024-55342-3",
+              "title": "Verifiable measurement-based quantum random sampling with trapped ions | Nature Communications"
+            },
+            {
+              "id": "31846cd2-59b0-4a15-acfa-84f110c1defa",
+              "url": "https://arxiv.org/html/2506.20658v1",
+              "title": "A Framework for Quantum Advantage"
+            },
+            {
+              "id": "4a92e34e-9a8c-4cc3-896e-4064b0af2269",
+              "url": "https://arxiv.org/pdf/2305.01064",
+              "title": "Questions and Concerns About Google's Quantum Supremacy Claim"
+            },
+            {
+              "id": "c334b12f-aa12-47f6-b387-ad4e495d9cab",
+              "url": "https://statmodeling.stat.columbia.edu/2025/03/14/debate-about-quantum-supremacy-whatever-that-is/",
+              "title": "Debate about 'quantum supremacy' . . . whatever that is! | Statistical Modeling, Causal Inference, and Social Science"
+            },
+            {
+              "id": "7ad510b4-7646-423c-97a7-4a5cced2dfd1",
+              "url": "https://arxiv.org/pdf/1905.07240",
+              "title": "Quantum Computing: An Overview Across the System Stack"
+            },
+            {
+              "id": "0a83ce20-e0a6-4c9f-b910-af6b97c3e2fb",
+              "url": "https://www.technologyreview.com/2020/02/26/905777/google-ibm-quantum-supremacy-computing-feud/",
+              "title": "The Google-IBM 'quantum supremacy' feud | MIT Technology Review"
+            },
+            {
+              "id": "8f72140d-0b0f-4f1d-a831-0b41eea9273b",
+              "url": "https://onlinelibrary.wiley.com/doi/10.1002/eng2.70337",
+              "title": "Quantum Computing: Foundations, Architecture and Applications - Columbus Chinnappan - 2025 - Engineering Reports - Wiley Online Library"
+            },
+            {
+              "id": "acae81be-e281-41c6-99f9-c30a82181170",
+              "url": "https://thequantuminsider.com/2026/02/23/understanding-the-quantum-computing-hardware-landscape/",
+              "title": "Understanding the Quantum Computing Hardware Landscape"
+            },
+            {
+              "id": "615dbbf3-c120-4959-b0b6-82bd731a716d",
+              "url": "https://www.vaia.com/en-us/explanations/engineering/artificial-intelligence-engineering/quantum-supremacy/",
+              "title": "Quantum Supremacy: Explained & Definition | Vaia"
+            },
+            {
+              "id": "cd52aac8-93c5-4945-b481-33c926d97abb",
+              "url": "https://www.quantamagazine.org/quantum-supremacy-is-coming-heres-what-you-should-know-20190718/",
+              "title": "Quantum Supremacy Is Coming: Here's What You Should Know | Quanta Magazine"
+            },
+            {
+              "id": "74c5ea9b-8d1c-4589-85bb-b0c407f4b787",
+              "url": "https://arxiv.org/pdf/2001.00791",
+              "title": "On the meaning of quantum supremacy experiments"
+            },
+            {
+              "id": "037ed73f-7dcd-4665-a209-87456e646e69",
+              "url": "https://www.sciencenews.org/article/quantum-computers-hype-supremacy-error-correction-problems",
+              "title": "Quantum computers must repair error problems to live up to the hype | Science News"
+            },
+            {
+              "id": "a9dd4131-f487-4d82-9362-ea843812de33",
+              "url": "https://www.nature.com/articles/s41534-023-00703-x",
+              "title": "Boundaries of quantum supremacy via random circuit sampling | npj Quantum Information"
+            },
+            {
+              "id": "d2ead426-743c-4692-b3f6-0cf190aae4e2",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC9946823/",
+              "title": "Suppressing quantum errors by scaling a surface code logical qubit"
+            },
+            {
+              "id": "4d71f1c2-7a3e-4f66-9a8a-54872c08a342",
+              "url": "https://thequantuminsider.com/2026/03/16/understanding-quantum-error-correction/",
+              "title": "What Is Quantum Error Correction & How Does It Work"
+            },
+            {
+              "id": "85f74ab0-96e4-48e2-99e8-189b10bc36cb",
+              "url": "https://www.spinquanta.com/news-detail/quantum-computing-computers-the-next-leap-in-computing-architecture",
+              "title": "Quantum Computing Computers: The Next Leap in Computing Architecture | SpinQ"
+            },
+            {
+              "id": "5d05c44d-b47d-46ba-a917-694aaac15cba",
+              "url": "https://arxiv.org/pdf/2102.00371",
+              "title": "Comparison of Cloud-Based Ion Trap and Superconducting Quantum Computer Architectures"
+            },
+            {
+              "id": "888ec385-d190-4dd5-a9e1-c7757dc15963",
+              "url": "https://ts2.tech/en/quantum-showdown-superconducting-vs-trapped-ion-vs-photonic-who-will-rule-quantum-computing/",
+              "title": "Quantum Showdown: Superconducting vs Trapped Ion vs Photonic \u2013 Who Will Rule Quantum Computing?"
+            },
+            {
+              "id": "16a06b79-64c6-486a-b0a7-aced33dee899",
+              "url": "https://www.pnas.org/doi/10.1073/pnas.1618020114",
+              "title": "Experimental comparison of two quantum computing architectures | PNAS"
+            },
+            {
+              "id": "4810c90a-f7d2-4a2e-a6b0-32d79bbbbabe",
+              "url": "https://www.nature.com/articles/s41586-024-08406-9",
+              "title": "Scaling and networking a modular photonic quantum computer | Nature"
+            },
+            {
+              "id": "3a037e91-4d05-4c86-bf7f-d509e4516cb2",
+              "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8279951/",
+              "title": "Exponential suppression of bit or phase errors with cyclic error correction"
+            }
+          ],
+          "web_search_enabled": true
+        }
+      }
+    }
+  ]
+}
