@@ -51,6 +51,7 @@ export interface CostUpdateEvent {
   input_tokens: number;
   output_tokens: number;
   cumulative_usd: number;
+  priced?: boolean;
 }
 
 export type ResearchEvent =

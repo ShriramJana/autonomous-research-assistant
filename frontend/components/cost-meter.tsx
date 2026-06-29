@@ -67,7 +67,7 @@ export function CostMeter({
                     {u.outputTokens}
                   </td>
                   <td className="py-1.5 text-right font-mono text-[11px]">
-                    ${u.usd.toFixed(4)}
+                    {u.priced ? `$${u.usd.toFixed(4)}` : "n/a"}
                   </td>
                 </tr>
               ))}

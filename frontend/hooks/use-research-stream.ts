@@ -31,7 +31,10 @@ export interface ResearchStreamState {
   report: FinalReport | null;
   errorMessage: string | null;
   cumulativeCostUsd: number;
-  costByModel: Record<string, { inputTokens: number; outputTokens: number; usd: number }>;
+  costByModel: Record<
+    string,
+    { inputTokens: number; outputTokens: number; usd: number; priced: boolean }
+  >;
 }
 
 export const initialState: ResearchStreamState = {
@@ -124,11 +127,13 @@ export function reducer(state: ResearchStreamState, action: Action): ResearchStr
         inputTokens: 0,
         outputTokens: 0,
         usd: 0,
+        priced: true,
       };
       const updated = {
         inputTokens: prev.inputTokens + event.input_tokens,
         outputTokens: prev.outputTokens + event.output_tokens,
         usd: event.cumulative_usd, // cumulative per the contract; use latest
+        priced: event.priced ?? true,
       };
       return {
         ...state,
