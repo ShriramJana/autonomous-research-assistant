@@ -8,14 +8,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiGet } from "@/lib/api";
-import {
-  clearStoredApiKey,
-  getStoredApiKey,
-  setStoredApiKey,
-} from "@/lib/api-key";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { type Config, fetchConfig } from "@/lib/config";
+import {
+  type ActiveProvider,
+  type CredentialsState,
+  deleteAnthropicKey,
+  deleteOpenAIConfig,
+  getCredentials,
+  putAnthropicKey,
+  putOpenAIConfig,
+  setActiveProvider,
+} from "@/lib/credentials";
 
 type LoadState =
   | { kind: "loading" }
@@ -28,6 +33,7 @@ interface Quota {
   global_spend_usd: number;
   global_cap_usd: number;
   circuit_breaker_tripped: boolean;
+  tavily_cap_reached: boolean;
 }
 
 export default function SettingsPage() {
@@ -35,10 +41,25 @@ export default function SettingsPage() {
   const { user, loading } = useUser();
 
   const [state, setState] = useState<LoadState>({ kind: "loading" });
-  const [keyInput, setKeyInput] = useState("");
-  const [storedKey, setStoredKey] = useState<string | null>(null);
   const [quota, setQuota] = useState<Quota | null>(null);
   const [quotaError, setQuotaError] = useState<string | null>(null);
+
+  // Credentials state
+  const [creds, setCreds] = useState<CredentialsState | null>(null);
+  const [credsError, setCredsError] = useState<string | null>(null);
+
+  // Anthropic key form
+  const [anthropicKeyInput, setAnthropicKeyInput] = useState("");
+  const [anthropicSaving, setAnthropicSaving] = useState(false);
+
+  // OpenAI config form
+  const [openaiBaseUrl, setOpenaiBaseUrl] = useState("");
+  const [openaiModel, setOpenaiModel] = useState("");
+  const [openaiKeyInput, setOpenaiKeyInput] = useState("");
+  const [openaiSaving, setOpenaiSaving] = useState(false);
+
+  // Active provider
+  const [providerSaving, setProviderSaving] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,11 +79,34 @@ export default function SettingsPage() {
     };
   }, []);
 
+  const loadCredentials = () => {
+    let cancelled = false;
+    getCredentials()
+      .then((c) => {
+        if (!cancelled) {
+          setCreds(c);
+          setCredsError(null);
+          // Echo stored base_url/model into fields if configured and fields are empty
+          if (c.openai.configured) {
+            if (c.openai.base_url) setOpenaiBaseUrl((prev) => prev || c.openai.base_url!);
+            if (c.openai.model) setOpenaiModel((prev) => prev || c.openai.model!);
+          }
+        }
+      })
+      .catch((err: unknown) => {
+        if (!cancelled)
+          setCredsError(err instanceof Error ? err.message : "unknown error");
+      });
+    return () => {
+      cancelled = true;
+    };
+  };
+
   useEffect(() => {
-    // Read localStorage post-mount to avoid SSR/CSR hydration mismatch.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setStoredKey(getStoredApiKey());
-  }, []);
+    if (!user) return;
+    const cancel = loadCredentials();
+    return cancel;
+  }, [user]); // loadCredentials is a stable local fn; only re-run when user changes
 
   useEffect(() => {
     if (!user) return;
@@ -80,17 +124,65 @@ export default function SettingsPage() {
     };
   }, [user]);
 
-  const onSaveKey = () => {
-    const trimmed = keyInput.trim();
+  const onSaveAnthropicKey = async () => {
+    const trimmed = anthropicKeyInput.trim();
     if (!trimmed) return;
-    setStoredApiKey(trimmed);
-    setStoredKey(trimmed);
-    setKeyInput("");
+    setAnthropicSaving(true);
+    try {
+      await putAnthropicKey(trimmed);
+      setAnthropicKeyInput("");
+      loadCredentials();
+    } finally {
+      setAnthropicSaving(false);
+    }
   };
 
-  const onClearKey = () => {
-    clearStoredApiKey();
-    setStoredKey(null);
+  const onClearAnthropicKey = async () => {
+    setAnthropicSaving(true);
+    try {
+      await deleteAnthropicKey();
+      loadCredentials();
+    } finally {
+      setAnthropicSaving(false);
+    }
+  };
+
+  const onSaveOpenAI = async () => {
+    const baseUrl = openaiBaseUrl.trim();
+    const model = openaiModel.trim();
+    const key = openaiKeyInput.trim();
+    if (!baseUrl || !model || !key) return;
+    setOpenaiSaving(true);
+    try {
+      await putOpenAIConfig({ baseUrl, model, key });
+      setOpenaiKeyInput("");
+      loadCredentials();
+    } finally {
+      setOpenaiSaving(false);
+    }
+  };
+
+  const onClearOpenAI = async () => {
+    setOpenaiSaving(true);
+    try {
+      await deleteOpenAIConfig();
+      setOpenaiBaseUrl("");
+      setOpenaiModel("");
+      setOpenaiKeyInput("");
+      loadCredentials();
+    } finally {
+      setOpenaiSaving(false);
+    }
+  };
+
+  const onSetActiveProvider = async (provider: ActiveProvider) => {
+    setProviderSaving(true);
+    try {
+      await setActiveProvider(provider);
+      loadCredentials();
+    } finally {
+      setProviderSaving(false);
+    }
   };
 
   const onSignOut = async () => {
@@ -125,25 +217,82 @@ export default function SettingsPage() {
           Account & runtime
         </h1>
         <p className="text-muted-foreground text-sm">
-          Bring your own Anthropic key, track your free-tier usage, and view
-          which models ARA is routing to.
+          Manage your API credentials, track free-tier usage, and configure
+          which provider ARA uses.
         </p>
       </header>
 
+      {/* Active Provider */}
+      <section className="mb-8">
+        <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
+          Active provider
+        </h2>
+        <div className="bg-card flex flex-col gap-3 rounded-lg p-5">
+          {credsError ? (
+            <p className="text-muted-foreground font-mono text-xs">
+              Credentials unavailable — backend may be offline. ({credsError})
+            </p>
+          ) : creds === null ? (
+            <Skeleton className="h-4 w-64" />
+          ) : (
+            <>
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
+                <ProviderRadio
+                  label="Free (ARA-hosted)"
+                  value="free"
+                  current={creds.active_provider}
+                  disabled={providerSaving}
+                  alwaysEnabled
+                  onChange={onSetActiveProvider}
+                />
+                <ProviderRadio
+                  label="Anthropic (your key)"
+                  value="anthropic"
+                  current={creds.active_provider}
+                  disabled={providerSaving || !creds.anthropic_configured}
+                  alwaysEnabled={false}
+                  onChange={onSetActiveProvider}
+                />
+                <ProviderRadio
+                  label="OpenAI-compat (your key)"
+                  value="openai"
+                  current={creds.active_provider}
+                  disabled={providerSaving || !creds.openai.configured}
+                  alwaysEnabled={false}
+                  onChange={onSetActiveProvider}
+                />
+              </div>
+              <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+                Anthropic key → built-in web search (recommended, better
+                results). OpenAI-compat providers use Tavily for web search.
+              </p>
+              {quota?.tavily_cap_reached ? (
+                <p className="text-destructive font-mono text-[10px] tracking-wider">
+                  Tavily monthly cap reached — OpenAI-compat web search is
+                  paused until next month.
+                </p>
+              ) : null}
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Anthropic key */}
       <section className="mb-8">
         <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
           Anthropic API key
         </h2>
         <div className="bg-card flex flex-col gap-3 rounded-lg p-5">
-          {storedKey ? (
+          {creds?.anthropic_configured ? (
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <code className="text-foreground font-mono text-sm">
-                sk-ant-•••• (saved to this browser only)
+                sk-ant-•••• (encrypted on server)
               </code>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={onClearKey}
+                onClick={() => void onClearAnthropicKey()}
+                disabled={anthropicSaving}
                 className="font-mono text-xs uppercase tracking-wider"
               >
                 Clear
@@ -154,14 +303,15 @@ export default function SettingsPage() {
               <Input
                 type="password"
                 placeholder="sk-ant-…"
-                value={keyInput}
-                onChange={(e) => setKeyInput(e.target.value)}
+                value={anthropicKeyInput}
+                onChange={(e) => setAnthropicKeyInput(e.target.value)}
                 className="flex-1 font-mono"
+                autoComplete="off"
               />
               <Button
                 size="sm"
-                onClick={onSaveKey}
-                disabled={!keyInput.trim()}
+                onClick={() => void onSaveAnthropicKey()}
+                disabled={!anthropicKeyInput.trim() || anthropicSaving}
                 className="font-mono text-xs uppercase tracking-wider"
               >
                 Save
@@ -169,12 +319,101 @@ export default function SettingsPage() {
             </div>
           )}
           <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
-            Stored in this browser only. Sent per-request as{" "}
-            <code>X-Anthropic-Key</code>.
+            Stored encrypted on the server. Never returned. Enables native
+            Anthropic web search.
           </p>
         </div>
       </section>
 
+      {/* OpenAI-compatible config */}
+      <section className="mb-8">
+        <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
+          OpenAI-compatible provider
+        </h2>
+        <div className="bg-card flex flex-col gap-4 rounded-lg p-5">
+          {credsError ? null : creds === null ? (
+            <Skeleton className="h-4 w-64" />
+          ) : (
+            <>
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
+                    Base URL
+                  </label>
+                  <Input
+                    type="url"
+                    placeholder="https://api.openai.com/v1"
+                    value={openaiBaseUrl}
+                    onChange={(e) => setOpenaiBaseUrl(e.target.value)}
+                    className="font-mono"
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
+                    Model
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="gpt-4o"
+                    value={openaiModel}
+                    onChange={(e) => setOpenaiModel(e.target.value)}
+                    className="font-mono"
+                    autoComplete="off"
+                  />
+                </div>
+                <div className="flex flex-col gap-1">
+                  <label className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
+                    API key
+                  </label>
+                  <Input
+                    type="password"
+                    placeholder={
+                      creds.openai.configured ? "•••• (enter new key to update)" : "sk-…"
+                    }
+                    value={openaiKeyInput}
+                    onChange={(e) => setOpenaiKeyInput(e.target.value)}
+                    className="font-mono"
+                    autoComplete="off"
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => void onSaveOpenAI()}
+                  disabled={
+                    !openaiBaseUrl.trim() ||
+                    !openaiModel.trim() ||
+                    !openaiKeyInput.trim() ||
+                    openaiSaving
+                  }
+                  className="font-mono text-xs uppercase tracking-wider"
+                >
+                  Save
+                </Button>
+                {creds.openai.configured ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void onClearOpenAI()}
+                    disabled={openaiSaving}
+                    className="font-mono text-xs uppercase tracking-wider"
+                  >
+                    Clear
+                  </Button>
+                ) : null}
+              </div>
+              <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+                Key stored encrypted on server. Never returned. Base URL and
+                model are echoed back when configured.
+              </p>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Free tier quota */}
       <section className="mb-8">
         <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
           Free tier quota
@@ -204,6 +443,7 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      {/* Active models */}
       <section className="mb-8">
         <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
           Active models
@@ -235,6 +475,7 @@ export default function SettingsPage() {
         </div>
       </section>
 
+      {/* Depth presets */}
       <section className="mb-8">
         <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
           Depth presets
@@ -288,6 +529,7 @@ export default function SettingsPage() {
         </p>
       </section>
 
+      {/* Account */}
       <section className="mb-8">
         <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
           Account
@@ -308,6 +550,47 @@ export default function SettingsPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+function ProviderRadio({
+  label,
+  value,
+  current,
+  disabled,
+  alwaysEnabled,
+  onChange,
+}: {
+  label: string;
+  value: ActiveProvider;
+  current: ActiveProvider;
+  disabled: boolean;
+  alwaysEnabled: boolean;
+  onChange: (v: ActiveProvider) => void;
+}) {
+  const isSelected = current === value;
+  const isDisabled = disabled && !alwaysEnabled ? true : disabled;
+  return (
+    <label
+      className={`flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors ${
+        isSelected
+          ? "border-primary bg-primary/5 text-foreground"
+          : "border-border text-muted-foreground hover:border-primary/50"
+      } ${isDisabled ? "cursor-not-allowed opacity-50" : ""}`}
+    >
+      <input
+        type="radio"
+        name="active-provider"
+        value={value}
+        checked={isSelected}
+        disabled={isDisabled}
+        onChange={() => onChange(value)}
+        className="accent-primary"
+      />
+      <span className="font-mono text-[11px] uppercase tracking-wider">
+        {label}
+      </span>
+    </label>
   );
 }
 

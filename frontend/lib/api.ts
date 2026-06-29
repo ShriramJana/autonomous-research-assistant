@@ -1,7 +1,6 @@
 "use client";
 
 import type { Depth } from "@/hooks/use-depth";
-import { getStoredApiKey } from "@/lib/api-key";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 
 // All API calls are same-origin via the Next.js /api/:path* rewrite (see
@@ -23,10 +22,6 @@ async function authedFetch(input: string, init: RequestInit = {}): Promise<Respo
   if (session?.access_token) {
     headers.set("Authorization", `Bearer ${session.access_token}`);
   }
-  const key = getStoredApiKey();
-  if (key) {
-    headers.set("X-Anthropic-Key", key);
-  }
   return fetch(input, { ...init, headers, credentials: "include" });
 }
 
@@ -46,6 +41,15 @@ export async function apiPost<T>(
     body: JSON.stringify(body),
   });
   return throwOrJson<T>(res);
+}
+
+export async function apiPut(path: string, body: unknown): Promise<void> {
+  const res = await authedFetch(path, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) await throwOrJson(res);
 }
 
 export async function apiDelete(path: string): Promise<void> {
