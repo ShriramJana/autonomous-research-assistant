@@ -8,6 +8,10 @@ export interface DemoManifestEntry {
   model: string;
   created_at: string;
   n_events: number;
+  summary?: string;
+  n_sources?: number;
+  n_sub_queries?: number;
+  cost_usd?: number;
 }
 
 export interface DemoEvent {
