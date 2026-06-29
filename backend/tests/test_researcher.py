@@ -395,6 +395,49 @@ async def test_researcher_tavily_loop_raises_when_never_submits(monkeypatch: Any
         )
 
 
+async def test_researcher_tavily_loop_raises_on_budget_exceeded(monkeypatch: Any) -> None:
+    from ara.agents import researcher as researcher_mod
+
+    async def fake_tavily(query: str, *, api_key: str | None, max_results: int = 5) -> list[Any]:
+        return []
+
+    monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
+
+    sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
+    llm = _ScriptedLLM(
+        [_result(tool_uses=[_tu("web_search", {"query": "q"})], in_tokens=200_000)]
+    )
+    emit, _ = _make_emit()
+    with pytest.raises(ResearcherError, match="budget exceeded"):
+        await research_sub_query(
+            sub_query=sq,
+            llm=llm,
+            model="gpt-4o",
+            emit=emit,
+            input_token_budget=100_000,
+            tavily_api_key="k",
+        )
+
+
+async def test_researcher_tavily_loop_raises_when_stuck(monkeypatch: Any) -> None:
+    from ara.agents import researcher as researcher_mod
+
+    async def fake_tavily(query: str, *, api_key: str | None, max_results: int = 5) -> list[Any]:
+        return []
+
+    monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
+
+    sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
+    llm = _ScriptedLLM(
+        [_result(tool_uses=[], stop_reason="end_turn")]
+    )
+    emit, _ = _make_emit()
+    with pytest.raises(ResearcherError, match="called neither"):
+        await research_sub_query(
+            sub_query=sq, llm=llm, model="gpt-4o", emit=emit, tavily_api_key="k"
+        )
+
+
 async def test_researcher_offline_works_for_openai_client() -> None:
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
     llm = _ScriptedLLM(
