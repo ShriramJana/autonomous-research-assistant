@@ -10,6 +10,7 @@ import { CostMeter } from "@/components/cost-meter";
 import { StatusPill } from "@/components/status-pill";
 import { SourcesList } from "@/components/sources-list";
 import { useResearchStream } from "@/hooks/use-research-stream";
+import type { ResearchStreamState } from "@/hooks/use-research-stream";
 import { apiPost } from "@/lib/api";
 import { composeReportMarkdown } from "@/lib/report";
 import type { Source } from "@/lib/types";
@@ -28,15 +29,22 @@ export interface ResearchLiveProps {
   reportId?: string;
   shareToken?: string;
   streamUrl?: string;
+  /** When provided (demo replay), render this state instead of streaming. */
+  state?: ResearchStreamState;
 }
 
 export function ResearchLive({
   reportId,
   shareToken,
   streamUrl,
+  state: stateProp,
 }: ResearchLiveProps) {
   // TODO(Task 12): surface a proper "access denied" UI when SSE 403s.
-  const state = useResearchStream(reportId ?? null, shareToken, streamUrl);
+  // Hook call is unconditional (React rule). With a null reportId and no
+  // streamUrl it no-ops and returns idle state, so passing `stateProp` makes
+  // this component purely presentational with zero network activity.
+  const liveState = useResearchStream(reportId ?? null, shareToken, streamUrl);
+  const state = stateProp ?? liveState;
   const [mobileTab, setMobileTab] = useState<Tab>("report");
   const [flash, setFlash] = useState<Flash>(null);
 
