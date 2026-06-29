@@ -309,3 +309,112 @@ async def test_researcher_skips_unknown_cited_urls() -> None:
 
     assert len(finding.key_facts[0].citation_ids) == 1
     assert finding.key_facts[1].citation_ids == []
+
+
+# ---------------------------------------------------------------------------
+# Tavily loop tests (non-Anthropic / client-side search dispatch)
+# ---------------------------------------------------------------------------
+
+
+class _ScriptedLLM:
+    """Fake LLMClient that returns a queued CompletionResult per call."""
+
+    provider = "openai"
+    supports_server_side_search = False
+
+    def __init__(self, results: list[CompletionResult]) -> None:
+        self._results = list(results)
+        self.calls: list[dict[str, Any]] = []
+
+    async def complete_with_tools(self, **kwargs: Any) -> CompletionResult:
+        self.calls.append(kwargs)
+        return self._results.pop(0)
+
+
+async def test_researcher_tavily_loop_searches_then_submits(monkeypatch: Any) -> None:
+    from ara.agents import researcher as researcher_mod
+
+    searched: list[str] = []
+
+    async def fake_tavily(query: str, *, api_key: str | None, max_results: int = 5) -> list[Any]:
+        searched.append(query)
+        return []
+
+    monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
+
+    sq = SubQuery(question="What is RAG?", rationale="r", priority=Priority.HIGH)
+    llm = _ScriptedLLM(
+        [
+            _result(tool_uses=[_tu("web_search", {"query": "rag basics"})], stop_reason="tool_use"),
+            _result(
+                tool_uses=[
+                    _tu(
+                        SUBMIT_FINDING_TOOL_NAME,
+                        {
+                            "summary": "RAG augments LLMs.",
+                            "key_facts": [
+                                {"statement": "x", "source_urls": ["https://a.com"]}
+                            ],
+                            "sources": [{"url": "https://a.com", "title": "A"}],
+                        },
+                    )
+                ]
+            ),
+        ]
+    )
+    emit, events = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq, llm=llm, model="gpt-4o", emit=emit, tavily_api_key="k"
+    )
+
+    assert searched == ["rag basics"]
+    assert finding.summary == "RAG augments LLMs."
+    assert any(isinstance(e, ResearcherProgress) for e in events)
+    # Second call must carry the assistant tool-call turn + tool result turn.
+    second_msgs = llm.calls[1]["messages"]
+    assert any(m["role"] == "assistant" and m.get("tool_calls") for m in second_msgs)
+    assert any(m["role"] == "tool" for m in second_msgs)
+
+
+async def test_researcher_tavily_loop_raises_when_never_submits(monkeypatch: Any) -> None:
+    from ara.agents import researcher as researcher_mod
+
+    async def fake_tavily(query: str, *, api_key: str | None, max_results: int = 5) -> list[Any]:
+        return []
+
+    monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
+
+    sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
+    llm = _ScriptedLLM(
+        [_result(tool_uses=[_tu("web_search", {"query": "q"})]) for _ in range(10)]
+    )
+    emit, _ = _make_emit()
+    with pytest.raises(ResearcherError):
+        await research_sub_query(
+            sub_query=sq, llm=llm, model="gpt-4o", emit=emit, max_iterations=2, tavily_api_key="k"
+        )
+
+
+async def test_researcher_offline_works_for_openai_client() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
+    llm = _ScriptedLLM(
+        [
+            _result(
+                tool_uses=[
+                    _tu(
+                        SUBMIT_FINDING_TOOL_NAME,
+                        {
+                            "summary": "offline.",
+                            "key_facts": [{"statement": "x", "source_urls": ["https://a.com"]}],
+                            "sources": [{"url": "https://a.com", "title": "A"}],
+                        },
+                    )
+                ]
+            )
+        ]
+    )
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq, llm=llm, model="gpt-4o", emit=emit, web_search_enabled=False
+    )
+    assert finding.summary == "offline."

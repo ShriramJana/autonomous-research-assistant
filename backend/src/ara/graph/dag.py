@@ -82,6 +82,7 @@ def build_graph(
                     max_iterations=opts.max_iterations,
                     input_token_budget=settings.ara_researcher_input_token_budget,
                     web_search_enabled=opts.web_search_enabled,
+                    tavily_api_key=settings.tavily_api_key,
                 )
             except ResearcherError as exc:
                 await emit(

@@ -16,6 +16,9 @@ class Settings(BaseSettings):
 
     # Anthropic — `anthropic_api_key` is the server-side free-tier key.
     anthropic_api_key: str = Field(default="")
+
+    # Tavily (server-provided client-side search for non-Anthropic providers)
+    tavily_api_key: str = Field(default="")
     claude_planner_model: str = "claude-sonnet-4-5"
     claude_researcher_model: str = "claude-sonnet-4-5"
     claude_synthesizer_model: str = "claude-opus-4-5"
