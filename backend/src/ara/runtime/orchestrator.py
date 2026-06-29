@@ -12,7 +12,7 @@ from ara.llm.client import AnthropicClient, LLMClient
 from ara.models.events import CostUpdate, ReportComplete, ResearchEvent
 from ara.models.research import ReportEnvelope
 from ara.options import _DEPTH_PRESETS, Depth, ResearchOptions
-from ara.pricing import estimate_cost_usd
+from ara.pricing import estimate_cost_usd, model_is_priced
 from ara.runtime.overrides import RuntimeOverrides
 from ara.storage.base import ReportStore
 
@@ -59,6 +59,7 @@ async def run_report(
                 input_tokens=input_tokens,
                 output_tokens=output_tokens,
                 cumulative_usd=cumulative_usd,
+                priced=model_is_priced(model),
             )
         )
 
