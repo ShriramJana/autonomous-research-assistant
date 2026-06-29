@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { demoManifest } from "@/lib/demos";
+import { DemoCard } from "@/components/demo-card";
 
 export default function GalleryPage() {
   const items = demoManifest;
@@ -17,17 +16,8 @@ export default function GalleryPage() {
             Gallery is empty.
           </p>
         )}
-        {items.map((r) => (
-          <Link
-            key={r.slug}
-            href={`/demo/${r.slug}`}
-            className="bg-card hover:bg-card/80 block rounded-lg p-5 transition-colors"
-          >
-            <p className="font-medium leading-snug">{r.question}</p>
-            <p className="text-muted-foreground/60 mt-3 font-mono text-[10px] uppercase tracking-wider">
-              Watch replay
-            </p>
-          </Link>
+        {items.map((entry) => (
+          <DemoCard key={entry.slug} entry={entry} />
         ))}
       </div>
     </main>
