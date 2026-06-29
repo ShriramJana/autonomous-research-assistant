@@ -187,3 +187,13 @@ async def test_plan_ready_event_roundtrips() -> None:
     assert len(events) == 1
     assert isinstance(events[0], PlanReady)
     assert events[0].plan.original_question == "q"
+
+
+async def test_close_records_tavily_searches() -> None:
+    store = InMemoryReportStore()
+    rid, owner = uuid4(), uuid4()
+    await store.create(rid, "q", owner_id=owner, depth="quick", browse_web=False, used_byok=False)
+    await store.close(rid, status="completed", tavily_searches=7)
+    state = store.get_state(rid)
+    assert state is not None
+    assert state.tavily_searches == 7

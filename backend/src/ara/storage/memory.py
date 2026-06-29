@@ -37,6 +37,7 @@ class _ReportState:
     cost_usd: float | None = None
     report_payload: ReportEnvelope | None = None
     error_message: str | None = None
+    tavily_searches: int = 0
 
 
 class InMemoryReportStore:
@@ -87,6 +88,7 @@ class InMemoryReportStore:
         cost_usd: float | None = None,
         report_payload: ReportEnvelope | None = None,
         error_message: str | None = None,
+        tavily_searches: int = 0,
     ) -> None:
         state = self._reports.get(report_id)
         if state is None or state.closed:
@@ -96,6 +98,7 @@ class InMemoryReportStore:
         state.cost_usd = cost_usd
         state.report_payload = report_payload
         state.error_message = error_message
+        state.tavily_searches = tavily_searches
         for q in list(state.live_queues):
             await q.put(None)
 
