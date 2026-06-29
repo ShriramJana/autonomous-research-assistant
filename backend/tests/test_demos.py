@@ -75,5 +75,100 @@ def test_build_manifest_entry_summarizes() -> None:
             "model": "claude-sonnet-4-5",
             "created_at": "2026-06-28T00:00:00Z",
             "n_events": 3,
+            "summary": "",
+            "n_sources": 0,
+            "n_sub_queries": 3,
+            "cost_usd": 0.0,
         }
     ]
+
+
+def _enriched_payload() -> dict[str, object]:
+    """A payload (already in on-disk dict shape) with a report + cost event."""
+    long_summary = (
+        "Quantum supremacy is the milestone at which a programmable quantum "
+        "device solves a problem no classical computer can solve in any feasible "
+        "amount of time, a threshold first claimed by Google in 2019."
+    )
+    return {
+        "slug": "q",
+        "title": "Q",
+        "question": "What is quantum supremacy?",
+        "model": "claude-sonnet-4-5",
+        "created_at": "2026-06-28T00:00:00Z",
+        "events": [
+            {
+                "t_ms": 0,
+                "event": {
+                    "type": "plan_ready",
+                    "plan": {
+                        "original_question": "What is quantum supremacy?",
+                        "web_search_enabled": True,
+                        "sub_queries": [
+                            {"id": "1", "question": "a", "rationale": "a", "priority": 3},
+                            {"id": "2", "question": "b", "rationale": "b", "priority": 2},
+                        ],
+                    },
+                },
+            },
+            {
+                "t_ms": 100,
+                "event": {
+                    "type": "report_complete",
+                    "report": {
+                        "report_id": "00000000-0000-0000-0000-000000000000",
+                        "original_question": "What is quantum supremacy?",
+                        "web_search_enabled": True,
+                        "executive_summary": long_summary,
+                        "sections": [],
+                        "citations": [
+                            {"id": "a", "url": "https://example.com/1", "title": "One"},
+                            {"id": "b", "url": "https://example.com/2", "title": "Two"},
+                            {"id": "c", "url": "https://example.com/3", "title": "Three"},
+                        ],
+                    },
+                },
+            },
+            {
+                "t_ms": 120,
+                "event": {
+                    "type": "cost_update",
+                    "model": "claude-sonnet-4-5",
+                    "input_tokens": 1000,
+                    "output_tokens": 500,
+                    "cumulative_usd": 0.0492,
+                },
+            },
+        ],
+    }
+
+
+def test_build_manifest_enriches_from_report_and_cost() -> None:
+    entry = build_manifest([_enriched_payload()])[0]
+    assert entry["n_sub_queries"] == 2
+    assert entry["n_sources"] == 3
+    assert entry["cost_usd"] == 0.0492
+    # Summary is trimmed to <= ~160 chars on a word boundary with an ellipsis.
+    assert entry["summary"].endswith("…")
+    assert len(entry["summary"]) <= 161
+    assert entry["summary"].startswith("Quantum supremacy is the milestone")
+
+
+def test_build_manifest_source_fallback_counts_finding_urls() -> None:
+    payload = {
+        "slug": "s", "title": "S", "question": "q", "model": "m",
+        "created_at": "t",
+        "events": [
+            {"t_ms": 0, "event": {
+                "type": "researcher_complete", "sub_query_id": "1",
+                "finding": {"sub_query_id": "1", "summary": "x", "key_facts": [],
+                            "sources": [
+                                {"id": "a", "url": "https://e.com/1", "title": "1"},
+                                {"id": "b", "url": "https://e.com/1", "title": "dup"},
+                                {"id": "c", "url": "https://e.com/2", "title": "2"},
+                            ]}}},
+        ],
+    }
+    entry = build_manifest([payload])[0]
+    # No report_complete → fall back to distinct source URLs across findings.
+    assert entry["n_sources"] == 2
