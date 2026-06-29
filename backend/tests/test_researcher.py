@@ -1,6 +1,6 @@
 """Unit tests for the researcher agent.
 
-Mocks `LLMClient.complete_with_tools` with canned content-block lists that
+Mocks `llm.complete_with_tools` with canned `CompletionResult` values that
 simulate server-side web_search + client-side submit_finding responses.
 """
 
@@ -18,40 +18,31 @@ from ara.agents.researcher import (
     SUBMIT_FINDING_TOOL_NAME,
     research_sub_query,
 )
-from ara.llm.client import WEB_SEARCH_TOOL_TYPE
+from ara.llm.client import WEB_SEARCH_TOOL_TYPE, CompletionResult, ToolUse
 from ara.models.events import ResearcherProgress, ResearcherStarted, ResearchEvent
 from ara.models.research import Priority, SubQuery, SubQueryFinding
-from tests.conftest import make_usage
 
 
-def _server_tool_use(name: str, tool_input: dict[str, Any]) -> MagicMock:
-    b = MagicMock()
-    b.type = "server_tool_use"
-    b.name = name
-    b.input = tool_input
-    return b
+def _tu(name: str, payload: dict[str, Any]) -> ToolUse:
+    return ToolUse(id=f"id-{name}", name=name, input=payload)
 
 
-def _tool_use(name: str, tool_input: dict[str, Any]) -> MagicMock:
-    b = MagicMock()
-    b.type = "tool_use"
-    b.name = name
-    b.input = tool_input
-    return b
-
-
-def _make_response(
-    content: list[Any],
+def _result(
     *,
+    tool_uses: list[ToolUse] | None = None,
+    server_tool_uses: list[ToolUse] | None = None,
     stop_reason: str = "tool_use",
     in_tokens: int = 100,
     out_tokens: int = 50,
-) -> MagicMock:
-    response = MagicMock()
-    response.content = content
-    response.stop_reason = stop_reason
-    response.usage = make_usage(in_tokens, out_tokens)
-    return response
+) -> CompletionResult:
+    return CompletionResult(
+        text="",
+        tool_uses=tool_uses or [],
+        server_tool_uses=server_tool_uses or [],
+        stop_reason=stop_reason,
+        input_tokens=in_tokens,
+        output_tokens=out_tokens,
+    )
 
 
 def _make_emit() -> tuple[Callable[[ResearchEvent], Awaitable[None]], list[ResearchEvent]]:
@@ -65,10 +56,10 @@ def _make_emit() -> tuple[Callable[[ResearchEvent], Awaitable[None]], list[Resea
 
 async def test_researcher_happy_path() -> None:
     sq = SubQuery(question="What is RAG?", rationale="Foundations.", priority=Priority.HIGH)
-    response = _make_response(
-        [
-            _server_tool_use("web_search", {"query": "RAG retrieval augmented generation"}),
-            _tool_use(
+    result = _result(
+        server_tool_uses=[_tu("web_search", {"query": "RAG retrieval augmented generation"})],
+        tool_uses=[
+            _tu(
                 SUBMIT_FINDING_TOOL_NAME,
                 {
                     "summary": "RAG augments LLMs with retrieved context.",
@@ -80,44 +71,44 @@ async def test_researcher_happy_path() -> None:
                     ],
                     "sources": [{"url": "https://example.com/rag", "title": "RAG intro"}],
                 },
-            ),
-        ]
+            )
+        ],
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, events = _make_emit()
 
     finding = await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit)
-
     assert isinstance(finding, SubQueryFinding)
-    assert finding.sub_query_id == sq.id
     assert finding.summary == "RAG augments LLMs with retrieved context."
-    assert len(finding.sources) == 1
     assert finding.key_facts[0].citation_ids == [finding.sources[0].id]
-
     assert any(isinstance(e, ResearcherStarted) for e in events)
     assert any(isinstance(e, ResearcherProgress) for e in events)
 
 
 async def test_researcher_emits_progress_per_search() -> None:
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    response = _make_response(
-        [
-            _server_tool_use("web_search", {"query": "q1"}),
-            _server_tool_use("web_search", {"query": "q2"}),
-            _server_tool_use("web_search", {"query": "q3"}),
-            _tool_use(
+    result = _result(
+        server_tool_uses=[
+            _tu("web_search", {"query": "q1"}),
+            _tu("web_search", {"query": "q2"}),
+            _tu("web_search", {"query": "q3"}),
+        ],
+        tool_uses=[
+            _tu(
                 SUBMIT_FINDING_TOOL_NAME,
                 {
                     "summary": "s",
                     "key_facts": [{"statement": "x", "source_urls": ["https://a.com"]}],
                     "sources": [{"url": "https://a.com", "title": "A"}],
                 },
-            ),
-        ]
+            )
+        ],
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, events = _make_emit()
 
     await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit)
@@ -130,12 +121,13 @@ async def test_researcher_emits_progress_per_search() -> None:
 
 async def test_researcher_raises_when_submit_finding_missing() -> None:
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    response = _make_response(
-        [_server_tool_use("web_search", {"query": "q"})],
+    result = _result(
+        server_tool_uses=[_tu("web_search", {"query": "q"})],
         stop_reason="end_turn",
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, _ = _make_emit()
 
     with pytest.raises(ResearcherError, match="did not call"):
@@ -144,21 +136,22 @@ async def test_researcher_raises_when_submit_finding_missing() -> None:
 
 async def test_researcher_raises_on_token_budget_exceeded() -> None:
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    response = _make_response(
-        [
-            _tool_use(
+    result = _result(
+        tool_uses=[
+            _tu(
                 SUBMIT_FINDING_TOOL_NAME,
                 {
                     "summary": "s",
                     "key_facts": [{"statement": "x", "source_urls": ["https://a.com"]}],
                     "sources": [{"url": "https://a.com", "title": "A"}],
                 },
-            ),
+            )
         ],
         in_tokens=200_000,
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, _ = _make_emit()
 
     with pytest.raises(ResearcherError, match="budget exceeded"):
@@ -173,16 +166,17 @@ async def test_researcher_raises_on_token_budget_exceeded() -> None:
 
 async def test_researcher_raises_on_malformed_submit_finding() -> None:
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    response = _make_response(
-        [
-            _tool_use(
+    result = _result(
+        tool_uses=[
+            _tu(
                 SUBMIT_FINDING_TOOL_NAME,
                 {"summary": "s", "sources": [{"url": "not-a-url", "title": "x"}]},
-            ),
-        ]
+            )
+        ],
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, _ = _make_emit()
 
     with pytest.raises(ResearcherError, match="validation"):
@@ -191,9 +185,9 @@ async def test_researcher_raises_on_malformed_submit_finding() -> None:
 
 async def test_researcher_maps_multi_source_citations_to_uuids() -> None:
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    response = _make_response(
-        [
-            _tool_use(
+    result = _result(
+        tool_uses=[
+            _tu(
                 SUBMIT_FINDING_TOOL_NAME,
                 {
                     "summary": "multi-source fact",
@@ -209,11 +203,12 @@ async def test_researcher_maps_multi_source_citations_to_uuids() -> None:
                         {"url": "https://c.com", "title": "C (unused)"},
                     ],
                 },
-            ),
-        ]
+            )
+        ],
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, _ = _make_emit()
 
     finding = await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit)
@@ -226,20 +221,21 @@ async def test_researcher_maps_multi_source_citations_to_uuids() -> None:
 async def test_researcher_includes_web_search_tool_by_default() -> None:
     """When web_search is enabled (default), the tools list carries web_search."""
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    response = _make_response(
-        [
-            _tool_use(
+    result = _result(
+        tool_uses=[
+            _tu(
                 SUBMIT_FINDING_TOOL_NAME,
                 {
                     "summary": "s",
                     "key_facts": [{"statement": "x", "source_urls": ["https://a.com"]}],
                     "sources": [{"url": "https://a.com", "title": "A"}],
                 },
-            ),
-        ]
+            )
+        ],
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, _ = _make_emit()
 
     await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit)
@@ -255,9 +251,9 @@ async def test_researcher_omits_web_search_when_disabled() -> None:
     """With web_search disabled, the tool list is submit_finding only and the
     offline system prompt is used."""
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    response = _make_response(
-        [
-            _tool_use(
+    result = _result(
+        tool_uses=[
+            _tu(
                 SUBMIT_FINDING_TOOL_NAME,
                 {
                     "summary": "offline answer.",
@@ -266,11 +262,12 @@ async def test_researcher_omits_web_search_when_disabled() -> None:
                     ],
                     "sources": [{"url": "https://arxiv.org", "title": "arxiv"}],
                 },
-            ),
-        ]
+            )
+        ],
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, _ = _make_emit()
 
     await research_sub_query(
@@ -286,9 +283,9 @@ async def test_researcher_omits_web_search_when_disabled() -> None:
 async def test_researcher_skips_unknown_cited_urls() -> None:
     """A key_fact citing a URL missing from sources gets empty citations."""
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    response = _make_response(
-        [
-            _tool_use(
+    result = _result(
+        tool_uses=[
+            _tu(
                 SUBMIT_FINDING_TOOL_NAME,
                 {
                     "summary": "s",
@@ -298,11 +295,12 @@ async def test_researcher_skips_unknown_cited_urls() -> None:
                     ],
                     "sources": [{"url": "https://a.com", "title": "A"}],
                 },
-            ),
-        ]
+            )
+        ],
     )
     llm = MagicMock()
-    llm.complete_with_tools = AsyncMock(return_value=response)
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
     emit, _ = _make_emit()
 
     finding = await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit)

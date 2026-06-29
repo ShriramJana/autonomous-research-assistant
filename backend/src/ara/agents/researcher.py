@@ -19,7 +19,7 @@ from uuid import UUID
 from pydantic import ValidationError
 
 from ara.agents import EventEmitter, ResearcherError, extract_tool_use
-from ara.llm.client import LLMClient, ToolSpec
+from ara.llm.client import AnthropicClient, LLMClient, ToolSpec
 from ara.models.events import ResearcherProgress, ResearcherStarted
 from ara.models.research import KeyFact, Source, SubQuery, SubQueryFinding
 
@@ -144,7 +144,7 @@ async def research_sub_query(
     system: str
     if web_search_enabled:
         tools = [
-            LLMClient.web_search_tool_spec(max_uses=max_iterations),
+            AnthropicClient.web_search_tool_spec(max_uses=max_iterations),
             SUBMIT_FINDING_TOOL,
         ]
         system = RESEARCHER_SYSTEM_PROMPT
@@ -152,7 +152,7 @@ async def research_sub_query(
         tools = [SUBMIT_FINDING_TOOL]
         system = RESEARCHER_OFFLINE_SYSTEM_PROMPT
 
-    response = await llm.complete_with_tools(
+    result = await llm.complete_with_tools(
         model=model,
         messages=[{"role": "user", "content": sub_query.question}],
         tools=tools,
@@ -160,29 +160,25 @@ async def research_sub_query(
         max_tokens=max_tokens,
     )
 
-    if response.usage.input_tokens > input_token_budget:
+    if result.input_tokens > input_token_budget:
         raise ResearcherError(
-            f"Input token budget exceeded: "
-            f"{response.usage.input_tokens} > {input_token_budget}"
+            f"Input token budget exceeded: {result.input_tokens} > {input_token_budget}"
         )
 
-    for block in response.content:
-        if getattr(block, "type", None) == "server_tool_use":
-            tool_name = getattr(block, "name", "")
-            tool_input = getattr(block, "input", None)
-            query = tool_input.get("query", "") if isinstance(tool_input, dict) else ""
-            await emit(
-                ResearcherProgress(
-                    sub_query_id=sub_query.id,
-                    tool_call=f"{tool_name}({query!r})",
-                )
+    for tu in result.server_tool_uses:
+        query = tu.input.get("query", "") if isinstance(tu.input, dict) else ""
+        await emit(
+            ResearcherProgress(
+                sub_query_id=sub_query.id,
+                tool_call=f"{tu.name}({query!r})",
             )
+        )
 
-    finding_input = extract_tool_use(response, SUBMIT_FINDING_TOOL_NAME)
+    finding_input = extract_tool_use(result, SUBMIT_FINDING_TOOL_NAME)
     if finding_input is None:
         raise ResearcherError(
             f"Researcher did not call {SUBMIT_FINDING_TOOL_NAME!r} "
-            f"(stop_reason={response.stop_reason!r})"
+            f"(stop_reason={result.stop_reason!r})"
         )
 
     try:

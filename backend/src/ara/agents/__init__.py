@@ -1,10 +1,9 @@
 """Research pipeline agents: planner, researcher, synthesizer."""
 
 from collections.abc import Awaitable, Callable
-from typing import Any, cast
+from typing import Any
 
-from anthropic.types import Message
-
+from ara.llm.client import CompletionResult
 from ara.models.events import ResearchEvent
 
 EventEmitter = Callable[[ResearchEvent], Awaitable[None]]
@@ -26,11 +25,11 @@ class SynthesizerError(AgentError):
     """Synthesizer failed to produce a final report."""
 
 
-def extract_tool_use(response: Message, tool_name: str) -> dict[str, Any] | None:
-    """Return the input of the first tool_use block matching `tool_name`, or None."""
-    for block in response.content:
-        if block.type == "tool_use" and block.name == tool_name:
-            return cast(dict[str, Any], block.input)
+def extract_tool_use(result: CompletionResult, tool_name: str) -> dict[str, Any] | None:
+    """Return the input of the first client-side tool_use matching `tool_name`, or None."""
+    for tu in result.tool_uses:
+        if tu.name == tool_name:
+            return tu.input
     return None
 
 
