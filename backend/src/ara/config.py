@@ -19,6 +19,7 @@ class Settings(BaseSettings):
 
     # Tavily (server-provided client-side search for non-Anthropic providers)
     tavily_api_key: str = Field(default="")
+    tavily_global_monthly_cap: int = 1000
     claude_planner_model: str = "claude-sonnet-4-5"
     claude_researcher_model: str = "claude-sonnet-4-5"
     claude_synthesizer_model: str = "claude-opus-4-5"
@@ -43,6 +44,9 @@ class Settings(BaseSettings):
     # Free tier
     free_tier_per_user_monthly: int = 3
     free_tier_global_cap_usd: float = 20.0
+
+    # Credential storage (Fernet key for encrypting saved provider keys)
+    ara_encryption_key: str = Field(default="")
 
     @property
     def cors_origins_list(self) -> list[str]:

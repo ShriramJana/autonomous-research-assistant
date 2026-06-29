@@ -30,3 +30,11 @@ def test_settings_has_tavily_key_default_empty() -> None:
 
     s = Settings(_env_file=None)  # type: ignore[call-arg]
     assert s.tavily_api_key == ""
+
+
+def test_settings_2b_defaults() -> None:
+    from ara.config import Settings
+
+    s = Settings(_env_file=None)  # type: ignore[call-arg]
+    assert s.ara_encryption_key == ""
+    assert s.tavily_global_monthly_cap == 1000
