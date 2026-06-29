@@ -162,6 +162,49 @@ def _parse_sse_lines(text: str) -> list[dict[str, Any]]:
     return events
 
 
+async def test_create_research_openai_requires_base_url_and_model() -> None:
+    async with await _async_client() as client:
+        resp = await client.post(
+            "/api/research",
+            json={"question": "q", "provider": "openai"},
+            headers={"X-Provider-Key": "sk-test"},
+        )
+    assert resp.status_code == 400
+
+
+async def test_create_research_openai_builds_openai_overrides() -> None:
+    import asyncio
+
+    captured: dict[str, Any] = {}
+    done = asyncio.Event()
+
+    async def fake_run_report(**kwargs: Any) -> None:
+        captured["overrides"] = kwargs["overrides"]
+        done.set()
+
+    with patch("ara.api.routes.run_report", fake_run_report):
+        async with await _async_client() as client:
+            resp = await client.post(
+                "/api/research",
+                json={
+                    "question": "q",
+                    "provider": "openai",
+                    "base_url": "https://api.openai.com/v1",
+                    "model": "gpt-4o",
+                    "depth": "standard",
+                    "browse_web": True,
+                },
+                headers={"X-Provider-Key": "sk-test"},
+            )
+        await asyncio.wait_for(done.wait(), timeout=2.0)
+    assert resp.status_code == 200
+    ov = captured["overrides"]
+    assert ov.provider == "openai"
+    assert ov.base_url == "https://api.openai.com/v1"
+    assert ov.api_key == "sk-test"
+    assert ov.planner_model == ov.researcher_model == ov.synthesizer_model == "gpt-4o"
+
+
 async def test_stream_delivers_plan_ready_and_report_complete() -> None:
     fake_plan, fake_research, fake_synth = _fakes()
 
