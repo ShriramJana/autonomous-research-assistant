@@ -41,6 +41,9 @@ class CreateResearchRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     depth: Depth = "standard"
     browse_web: bool = True
+    provider: Literal["anthropic", "openai"] = "anthropic"
+    base_url: str | None = None
+    model: str | None = None
 
 
 class CreateResearchResponse(BaseModel):
@@ -333,12 +336,29 @@ async def create_research(
     user: User = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
     x_anthropic_key: str | None = Header(default=None, alias="X-Anthropic-Key"),
+    x_provider_key: str | None = Header(default=None, alias="X-Provider-Key"),
 ) -> CreateResearchResponse:
     pool = _pool_or_503(request)
     store: ReportStore = request.app.state.store
     tasks: set[asyncio.Task[None]] = request.app.state.tasks
 
-    if x_anthropic_key:
+    if req.provider == "openai":
+        if not (req.base_url and req.model and x_provider_key):
+            raise HTTPException(
+                status_code=400,
+                detail="openai provider requires base_url, model, and X-Provider-Key header",
+            )
+        options = options_for_depth(req.depth, web_search_enabled=req.browse_web)
+        overrides = RuntimeOverrides(
+            api_key=x_provider_key,
+            planner_model=req.model,
+            researcher_model=req.model,
+            synthesizer_model=req.model,
+            options=options,
+            provider="openai",
+            base_url=req.base_url,
+        )
+    elif x_anthropic_key:
         api_key = x_anthropic_key
         options = options_for_depth(req.depth, web_search_enabled=req.browse_web)
         overrides = RuntimeOverrides(
