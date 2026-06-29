@@ -1,0 +1,10 @@
+[
+  {
+    "slug": "sample-quantum",
+    "title": "What is quantum supremacy?",
+    "question": "What is quantum supremacy?",
+    "model": "claude-opus-4-5",
+    "created_at": "2026-06-28T00:00:00Z",
+    "n_events": 13
+  }
+]
