@@ -8,7 +8,8 @@ from uuid import UUID
 from ara.agents import PlannerError, SynthesizerError
 from ara.config import Settings
 from ara.graph.dag import GraphModels, build_graph
-from ara.llm.client import AnthropicClient, LLMClient
+from ara.llm.client import LLMClient
+from ara.llm.factory import build_client
 from ara.models.events import CostUpdate, ReportComplete, ResearchEvent
 from ara.models.research import ReportEnvelope
 from ara.options import _DEPTH_PRESETS, Depth, ResearchOptions
@@ -64,7 +65,7 @@ async def run_report(
         )
 
     if llm is None:
-        llm = AnthropicClient(api_key=overrides.api_key, on_api_call=on_api_call)
+        llm = build_client(overrides, on_api_call=on_api_call)
 
     models = GraphModels(
         planner=overrides.planner_model,
