@@ -23,3 +23,10 @@ def test_admin_user_id_optional() -> None:
     """ADMIN_USER_ID is optional — when unset, no user has admin powers."""
     s = Settings(_env_file=None)  # type: ignore[call-arg]
     assert s.admin_user_id is None
+
+
+def test_settings_has_tavily_key_default_empty() -> None:
+    from ara.config import Settings
+
+    s = Settings(_env_file=None)  # type: ignore[call-arg]
+    assert s.tavily_api_key == ""
