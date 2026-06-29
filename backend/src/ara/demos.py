@@ -42,10 +42,60 @@ def build_demo_payload(
     }
 
 
+def _truncate_summary(text: str, *, limit: int = 160) -> str:
+    """Trim to <= limit chars on a word boundary, adding an ellipsis."""
+    text = text.strip()
+    if len(text) <= limit:
+        return text
+    clipped = text[:limit].rsplit(" ", 1)[0].rstrip()
+    return f"{clipped}…"
+
+
+def _event_summary(events: list[dict[str, Any]]) -> dict[str, Any]:
+    """Derive the gallery-card fields from a payload's captured events.
+
+    Reads the wire-shape event dicts (the `event` value produced by
+    model_dump). Pure — no I/O.
+    """
+    summary = ""
+    n_sources = 0
+    n_sub_queries = 0
+    cost_usd = 0.0
+    started = 0
+    seen_urls: set[str] = set()
+    for item in events:
+        ev = item["event"]
+        etype = ev["type"]
+        if etype == "plan_ready":
+            n_sub_queries = len(ev["plan"]["sub_queries"])
+        elif etype == "researcher_started":
+            started += 1
+        elif etype == "researcher_complete":
+            for src in ev["finding"].get("sources", []):
+                seen_urls.add(src["url"])
+        elif etype == "report_complete":
+            report = ev["report"]
+            summary = _truncate_summary(report.get("executive_summary", ""))
+            n_sources = len(report.get("citations", []))
+        elif etype == "cost_update":
+            cost_usd = ev["cumulative_usd"]
+    if n_sub_queries == 0:
+        n_sub_queries = started
+    if n_sources == 0:
+        n_sources = len(seen_urls)
+    return {
+        "summary": summary,
+        "n_sources": n_sources,
+        "n_sub_queries": n_sub_queries,
+        "cost_usd": cost_usd,
+    }
+
+
 def build_manifest(payloads: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Summarize demo payloads into the manifest the gallery lists."""
-    return [
-        {
+    out: list[dict[str, Any]] = []
+    for p in payloads:
+        entry: dict[str, Any] = {
             "slug": p["slug"],
             "title": p["title"],
             "question": p["question"],
@@ -53,5 +103,6 @@ def build_manifest(payloads: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "created_at": p["created_at"],
             "n_events": len(p["events"]),
         }
-        for p in payloads
-    ]
+        entry.update(_event_summary(p["events"]))
+        out.append(entry)
+    return out
