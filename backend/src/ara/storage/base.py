@@ -48,6 +48,7 @@ class ReportStore(Protocol):
         cost_usd: float | None = None,
         report_payload: ReportEnvelope | None = None,
         error_message: str | None = None,
+        tavily_searches: int = 0,
     ) -> None:
         """Finalize a report. Subscribers draining the tail still see buffered events."""
         ...

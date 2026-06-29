@@ -121,6 +121,7 @@ class SupabaseReportStore:
         cost_usd: float | None = None,
         report_payload: ReportEnvelope | None = None,
         error_message: str | None = None,
+        tavily_searches: int = 0,
     ) -> None:
         payload_json = report_payload.model_dump_json() if report_payload else None
         async with self._pool.acquire() as conn:
@@ -128,7 +129,7 @@ class SupabaseReportStore:
                 """
                 update reports
                 set status = $2, cost_usd = $3, report_payload = $4::jsonb,
-                    error_message = $5, completed_at = now()
+                    error_message = $5, tavily_searches = $6, completed_at = now()
                 where id = $1
                 """,
                 report_id,
@@ -136,6 +137,7 @@ class SupabaseReportStore:
                 cost_usd,
                 payload_json,
                 error_message,
+                tavily_searches,
             )
         subs = self._subs.get(report_id)
         if subs is None or subs.closed:
