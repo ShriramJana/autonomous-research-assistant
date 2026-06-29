@@ -34,7 +34,7 @@ export interface ResearchStreamState {
   costByModel: Record<string, { inputTokens: number; outputTokens: number; usd: number }>;
 }
 
-const initialState: ResearchStreamState = {
+export const initialState: ResearchStreamState = {
   status: "idle",
   plan: null,
   agents: [],
@@ -45,9 +45,9 @@ const initialState: ResearchStreamState = {
   costByModel: {},
 };
 
-type Action = { kind: "event"; event: ResearchEvent } | { kind: "reset" };
+export type Action = { kind: "event"; event: ResearchEvent } | { kind: "reset" };
 
-function reducer(state: ResearchStreamState, action: Action): ResearchStreamState {
+export function reducer(state: ResearchStreamState, action: Action): ResearchStreamState {
   if (action.kind === "reset") return initialState;
   const event = action.event;
   switch (event.type) {
