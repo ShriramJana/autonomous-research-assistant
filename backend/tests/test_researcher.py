@@ -81,6 +81,8 @@ async def test_researcher_happy_path() -> None:
 
     finding = await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit)
     assert isinstance(finding, SubQueryFinding)
+    assert finding.sub_query_id == sq.id
+    assert len(finding.sources) == 1
     assert finding.summary == "RAG augments LLMs with retrieved context."
     assert finding.key_facts[0].citation_ids == [finding.sources[0].id]
     assert any(isinstance(e, ResearcherStarted) for e in events)
