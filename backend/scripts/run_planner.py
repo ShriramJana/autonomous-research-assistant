@@ -20,7 +20,7 @@ import sys
 from ara.agents import PlannerError
 from ara.agents.planner import plan_research
 from ara.config import get_settings
-from ara.llm.client import LLMClient
+from ara.llm.client import AnthropicClient
 from ara.pricing import estimate_cost_usd
 
 
@@ -35,7 +35,7 @@ async def _main(question: str) -> int:
     async def record(model: str, inp: int, out: int) -> None:
         usage.append((model, inp, out))
 
-    llm = LLMClient(api_key=settings.anthropic_api_key, on_api_call=record)
+    llm = AnthropicClient(api_key=settings.anthropic_api_key, on_api_call=record)
 
     try:
         plan = await plan_research(

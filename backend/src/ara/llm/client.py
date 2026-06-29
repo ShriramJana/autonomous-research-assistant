@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from collections.abc import AsyncIterator, Awaitable, Callable
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any, Protocol, cast
 
 from anthropic import AsyncAnthropic
 from anthropic.types import Message
@@ -54,6 +54,50 @@ StreamEvent = TextDelta | ToolUseBlock | MessageStop
 OnApiCall = Callable[[str, int, int], Awaitable[None]]
 
 
+@dataclass(frozen=True)
+class ToolUse:
+    id: str
+    name: str
+    input: dict[str, Any]
+
+
+@dataclass(frozen=True)
+class CompletionResult:
+    text: str
+    tool_uses: list[ToolUse]
+    server_tool_uses: list[ToolUse]
+    stop_reason: str
+    input_tokens: int
+    output_tokens: int
+
+
+class LLMClient(Protocol):
+    """Structural interface both native clients satisfy."""
+
+    provider: str
+    supports_server_side_search: bool
+
+    async def complete_with_tools(
+        self,
+        *,
+        model: str,
+        messages: list[MessageDict],
+        tools: list[ToolSpec] | None = None,
+        tool_choice: dict[str, Any] | None = None,
+        system: str | None = None,
+        max_tokens: int = 4096,
+    ) -> CompletionResult: ...
+
+    def stream_completion(
+        self,
+        *,
+        model: str,
+        messages: list[MessageDict],
+        system: str | None = None,
+        max_tokens: int = 4096,
+    ) -> AsyncIterator[str]: ...
+
+
 def _extract_text_delta(event: object) -> str | None:
     """Duck-typed narrowing of Anthropic's streaming event union.
 
@@ -70,12 +114,11 @@ def _extract_text_delta(event: object) -> str | None:
     return text if isinstance(text, str) else None
 
 
-class LLMClient:
-    """Async, typed facade over `anthropic.AsyncAnthropic`.
+class AnthropicClient:
+    """Async, typed facade over `anthropic.AsyncAnthropic` (Protocol impl)."""
 
-    All three methods accept the same `messages` / `system` / `max_tokens`
-    kwargs so swapping between completion modes is mechanical at call sites.
-    """
+    provider: str = "anthropic"
+    supports_server_side_search: bool = True
 
     def __init__(
         self,
@@ -87,14 +130,14 @@ class LLMClient:
         if anthropic_client is None:
             if not api_key:
                 raise ValueError(
-                    "LLMClient requires either `anthropic_client` or a non-empty `api_key`"
+                    "AnthropicClient requires either `anthropic_client` or a non-empty `api_key`"
                 )
             anthropic_client = AsyncAnthropic(api_key=api_key)
         self._client = anthropic_client
         self._on_api_call = on_api_call
 
     @classmethod
-    def from_settings(cls, settings: Settings) -> LLMClient:
+    def from_settings(cls, settings: Settings) -> AnthropicClient:
         return cls(api_key=settings.anthropic_api_key)
 
     @staticmethod
@@ -115,7 +158,7 @@ class LLMClient:
         tool_choice: dict[str, Any] | None = None,
         system: str | None = None,
         max_tokens: int = 4096,
-    ) -> Message:
+    ) -> CompletionResult:
         kwargs: dict[str, Any] = {
             "model": model,
             "messages": messages,
@@ -130,7 +173,7 @@ class LLMClient:
 
         response: Message = await self._client.messages.create(**kwargs)
         await self._record(model, response.usage.input_tokens, response.usage.output_tokens)
-        return response
+        return _to_completion_result(response)
 
     async def stream_completion(
         self,
@@ -205,3 +248,37 @@ class LLMClient:
     async def _record(self, model: str, input_tokens: int, output_tokens: int) -> None:
         if self._on_api_call is not None:
             await self._on_api_call(model, input_tokens, output_tokens)
+
+
+def _to_completion_result(response: Message) -> CompletionResult:
+    text_parts: list[str] = []
+    tool_uses: list[ToolUse] = []
+    server_tool_uses: list[ToolUse] = []
+    for block in response.content:
+        btype = getattr(block, "type", None)
+        if btype == "text":
+            text_parts.append(getattr(block, "text", ""))
+        elif btype == "tool_use":
+            tool_uses.append(
+                ToolUse(
+                    id=getattr(block, "id", ""),
+                    name=getattr(block, "name", ""),
+                    input=cast(dict[str, Any], getattr(block, "input", {}) or {}),
+                )
+            )
+        elif btype == "server_tool_use":
+            server_tool_uses.append(
+                ToolUse(
+                    id=getattr(block, "id", ""),
+                    name=getattr(block, "name", ""),
+                    input=cast(dict[str, Any], getattr(block, "input", {}) or {}),
+                )
+            )
+    return CompletionResult(
+        text="".join(text_parts),
+        tool_uses=tool_uses,
+        server_tool_uses=server_tool_uses,
+        stop_reason=response.stop_reason or "end_turn",
+        input_tokens=response.usage.input_tokens,
+        output_tokens=response.usage.output_tokens,
+    )

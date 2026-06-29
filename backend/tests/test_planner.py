@@ -13,31 +13,30 @@ import pytest
 
 from ara.agents import PlannerError
 from ara.agents.planner import PLANNER_TOOL_NAME, plan_research
+from ara.llm.client import CompletionResult, ToolUse
 from ara.models.research import Priority, ResearchPlan
-from tests.conftest import make_usage
 
 
-def _mock_tool_use_response(tool_name: str, tool_input: dict[str, Any]) -> MagicMock:
-    block = MagicMock()
-    block.type = "tool_use"
-    block.name = tool_name
-    block.input = tool_input
-
-    response = MagicMock()
-    response.content = [block]
-    response.stop_reason = "tool_use"
-    response.usage = make_usage()
-    return response
+def _mock_tool_use_response(tool_name: str, tool_input: dict[str, Any]) -> CompletionResult:
+    return CompletionResult(
+        text="",
+        tool_uses=[ToolUse(id="tu-1", name=tool_name, input=tool_input)],
+        server_tool_uses=[],
+        stop_reason="tool_use",
+        input_tokens=10,
+        output_tokens=5,
+    )
 
 
-def _mock_no_tool_response() -> MagicMock:
-    block = MagicMock()
-    block.type = "text"
-    response = MagicMock()
-    response.content = [block]
-    response.stop_reason = "end_turn"
-    response.usage = make_usage()
-    return response
+def _mock_no_tool_response() -> CompletionResult:
+    return CompletionResult(
+        text="some text",
+        tool_uses=[],
+        server_tool_uses=[],
+        stop_reason="end_turn",
+        input_tokens=10,
+        output_tokens=5,
+    )
 
 
 async def test_planner_returns_validated_plan() -> None:
