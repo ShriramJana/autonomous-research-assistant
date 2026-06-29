@@ -17,7 +17,7 @@ from langgraph.graph import END, START, StateGraph
 
 from ara.agents import EventEmitter, PlannerError, ResearcherError, SynthesizerError
 from ara.agents.planner import plan_research
-from ara.agents.researcher import research_sub_query
+from ara.agents.researcher import OnTavilySearch, research_sub_query
 from ara.agents.synthesizer import synthesize_report
 from ara.config import Settings
 from ara.graph.state import GraphState
@@ -46,6 +46,7 @@ def build_graph(
     settings: Settings,
     models: GraphModels,
     options: ResearchOptions | None = None,
+    on_tavily_search: OnTavilySearch | None = None,
 ) -> Any:
     """Return a compiled LangGraph bound to `llm`, `emit`, the per-run
     `models`, and per-run `options`. Settings is still consulted for
@@ -83,6 +84,7 @@ def build_graph(
                     input_token_budget=settings.ara_researcher_input_token_budget,
                     web_search_enabled=opts.web_search_enabled,
                     tavily_api_key=settings.tavily_api_key,
+                    on_tavily_search=on_tavily_search,
                 )
             except ResearcherError as exc:
                 await emit(

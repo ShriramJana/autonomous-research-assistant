@@ -43,6 +43,7 @@ async def run_report(
         used_byok=_is_byok(overrides.api_key, settings),
     )
     cumulative_usd = 0.0
+    tavily_searches = 0
     final_report: ReportEnvelope | None = None
 
     async def emit(event: ResearchEvent) -> None:
@@ -50,6 +51,10 @@ async def run_report(
         await store.put_event(report_id, event)
         if isinstance(event, ReportComplete):
             final_report = event.report
+
+    async def on_tavily_search() -> None:
+        nonlocal tavily_searches
+        tavily_searches += 1
 
     async def on_api_call(model: str, input_tokens: int, output_tokens: int) -> None:
         nonlocal cumulative_usd
@@ -73,7 +78,8 @@ async def run_report(
         synthesizer=overrides.synthesizer_model,
     )
     graph = build_graph(
-        llm=llm, emit=emit, settings=settings, models=models, options=overrides.options
+        llm=llm, emit=emit, settings=settings, models=models,
+        options=overrides.options, on_tavily_search=on_tavily_search,
     )
 
     status: Literal["completed", "error"] = "completed"
@@ -93,6 +99,7 @@ async def run_report(
             cost_usd=cumulative_usd,
             report_payload=final_report,
             error_message=error_message,
+            tavily_searches=tavily_searches,
         )
 
 

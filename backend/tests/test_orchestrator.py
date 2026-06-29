@@ -364,6 +364,47 @@ async def test_orchestrator_marks_used_byok_when_key_differs() -> None:
     assert state.browse_web is True
 
 
+async def test_pipeline_records_tavily_search_count() -> None:
+    from ara.storage.memory import InMemoryReportStore
+
+    store = InMemoryReportStore()
+    report_id = uuid4()
+    plan = _plan_with_n(3)
+    settings = _settings()
+
+    async def fake_plan(**kwargs: Any) -> ResearchPlan:
+        return plan
+
+    async def fake_research(
+        *, sub_query: SubQuery, emit: Any, on_tavily_search: Any = None, **kwargs: Any
+    ) -> SubQueryFinding:
+        if on_tavily_search is not None:
+            await on_tavily_search()
+            await on_tavily_search()
+        src = _source("https://x.com", "x")
+        return SubQueryFinding(
+            sub_query_id=sub_query.id, summary="s",
+            key_facts=[KeyFact(statement="f", citation_ids=[src.id])], sources=[src],
+        )
+
+    async def fake_synth(*, emit: Any, **kwargs: Any) -> FinalReport:
+        return _fake_final_report(kwargs["report_id"], kwargs["original_question"])
+
+    with (
+        patch("ara.graph.dag.plan_research", fake_plan),
+        patch("ara.graph.dag.research_sub_query", fake_research),
+        patch("ara.graph.dag.synthesize_report", fake_synth),
+    ):
+        await run_report(
+            report_id=report_id, question="top", store=store, settings=settings,
+            overrides=_overrides(settings), owner_id=uuid4(),
+        )
+
+    state = store.get_state(report_id)
+    assert state is not None
+    assert state.tavily_searches == 6  # 2 per researcher x 3 sub-queries
+
+
 @pytest.mark.asyncio
 async def test_orchestrator_records_error_status_on_failure() -> None:
     """When the graph raises a terminal error, close() must record status='error'."""
