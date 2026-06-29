@@ -15,17 +15,29 @@ from typing import Any, Literal
 from uuid import UUID, uuid4
 
 import asyncpg
-from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from sse_starlette.sse import EventSourceResponse
 
 from ara.auth import User, get_current_user, get_optional_user, require_admin
 from ara.config import Settings, get_settings
+from ara.credentials import (
+    CredentialError,
+    check_tavily_cap,
+    clear_anthropic,
+    clear_openai,
+    get_credentials,
+    set_active,
+    upsert_anthropic,
+    upsert_openai,
+)
+from ara.crypto import CredentialDecryptError, encrypt_secret
 from ara.options import Depth, depth_presets, options_for_depth
 from ara.quota import QuotaDenial, check_free_tier
 from ara.runtime.orchestrator import run_report
 from ara.runtime.overrides import RuntimeOverrides
+from ara.runtime.resolver import resolve_overrides
 from ara.storage.base import ReportStore
 
 router = APIRouter(prefix="/api")
@@ -41,9 +53,32 @@ class CreateResearchRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     depth: Depth = "standard"
     browse_web: bool = True
-    provider: Literal["anthropic", "openai"] = "anthropic"
-    base_url: str | None = None
-    model: str | None = None
+
+
+class AnthropicKeyRequest(BaseModel):
+    key: str = Field(min_length=1)
+
+
+class OpenAIConfigRequest(BaseModel):
+    base_url: str = Field(min_length=1)
+    model: str = Field(min_length=1)
+    key: str = Field(min_length=1)
+
+
+class ActiveProviderRequest(BaseModel):
+    provider: Literal["free", "anthropic", "openai"]
+
+
+class OpenAIConfigStatus(BaseModel):
+    configured: bool
+    base_url: str | None
+    model: str | None
+
+
+class CredentialsResponse(BaseModel):
+    active_provider: Literal["free", "anthropic", "openai"]
+    anthropic_configured: bool
+    openai: OpenAIConfigStatus
 
 
 class CreateResearchResponse(BaseModel):
@@ -100,6 +135,9 @@ class QuotaResponse(BaseModel):
     global_spend_usd: float
     global_cap_usd: float
     circuit_breaker_tripped: bool
+    tavily_used: int
+    tavily_cap: int
+    tavily_cap_reached: bool
 
 
 # ---------- Helpers ----------
@@ -113,6 +151,15 @@ def _pool_or_503(request: Request) -> asyncpg.Pool:
             detail="Database not configured (set SUPABASE_DB_URL)",
         )
     return pool
+
+
+def _encryption_key_or_503(settings: Settings) -> str:
+    if not settings.ara_encryption_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Credential storage not configured (set ARA_ENCRYPTION_KEY)",
+        )
+    return settings.ara_encryption_key
 
 
 async def _fetch_report_row(pool: asyncpg.Pool, report_id: UUID) -> asyncpg.Record | None:
@@ -208,6 +255,7 @@ async def get_quota(
 ) -> QuotaResponse:
     pool = _pool_or_503(request)
     status_ = await check_free_tier(user.id, pool, settings)
+    tavily = await check_tavily_cap(pool, settings)
     return QuotaResponse(
         used=status_.used,
         limit=status_.limit,
@@ -217,7 +265,96 @@ async def get_quota(
             isinstance(status_, QuotaDenial)
             and status_.reason == "free_tier_global_cap_reached"
         ),
+        tavily_used=tavily.used,
+        tavily_cap=tavily.cap,
+        tavily_cap_reached=tavily.reached,
     )
+
+
+# ---------- Credential endpoints ----------
+
+
+@router.get("/credentials", response_model=CredentialsResponse)
+async def get_credentials_route(
+    request: Request,
+    user: User = Depends(get_current_user),
+) -> CredentialsResponse:
+    pool = _pool_or_503(request)
+    rec = await get_credentials(user.id, pool)
+    if rec is None:
+        return CredentialsResponse(
+            active_provider="free",
+            anthropic_configured=False,
+            openai=OpenAIConfigStatus(configured=False, base_url=None, model=None),
+        )
+    return CredentialsResponse(
+        active_provider=rec.active_provider,  # type: ignore[arg-type]
+        anthropic_configured=rec.anthropic_key_ciphertext is not None,
+        openai=OpenAIConfigStatus(
+            configured=rec.openai_key_ciphertext is not None,
+            base_url=rec.openai_base_url,
+            model=rec.openai_model,
+        ),
+    )
+
+
+@router.put("/credentials/anthropic", status_code=204)
+async def put_anthropic_key(
+    req: AnthropicKeyRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+) -> None:
+    pool = _pool_or_503(request)
+    key = _encryption_key_or_503(settings)
+    await upsert_anthropic(user.id, pool, ciphertext=encrypt_secret(req.key, key=key))
+
+
+@router.delete("/credentials/anthropic", status_code=204)
+async def delete_anthropic_key(
+    request: Request, user: User = Depends(get_current_user)
+) -> None:
+    pool = _pool_or_503(request)
+    await clear_anthropic(user.id, pool)
+
+
+@router.put("/credentials/openai", status_code=204)
+async def put_openai_config(
+    req: OpenAIConfigRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+) -> None:
+    pool = _pool_or_503(request)
+    key = _encryption_key_or_503(settings)
+    await upsert_openai(
+        user.id,
+        pool,
+        ciphertext=encrypt_secret(req.key, key=key),
+        base_url=req.base_url,
+        model=req.model,
+    )
+
+
+@router.delete("/credentials/openai", status_code=204)
+async def delete_openai_config(
+    request: Request, user: User = Depends(get_current_user)
+) -> None:
+    pool = _pool_or_503(request)
+    await clear_openai(user.id, pool)
+
+
+@router.put("/credentials/active", status_code=204)
+async def put_active_provider(
+    req: ActiveProviderRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+) -> None:
+    pool = _pool_or_503(request)
+    try:
+        await set_active(user.id, pool, provider=req.provider)
+    except CredentialError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 # ---------- Reports CRUD ----------
@@ -335,40 +472,35 @@ async def create_research(
     request: Request,
     user: User = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
-    x_anthropic_key: str | None = Header(default=None, alias="X-Anthropic-Key"),
-    x_provider_key: str | None = Header(default=None, alias="X-Provider-Key"),
 ) -> CreateResearchResponse:
     pool = _pool_or_503(request)
     store: ReportStore = request.app.state.store
     tasks: set[asyncio.Task[None]] = request.app.state.tasks
 
-    if req.provider == "openai":
-        if not (req.base_url and req.model and x_provider_key):
-            raise HTTPException(
-                status_code=400,
-                detail="openai provider requires base_url, model, and X-Provider-Key header",
-            )
-        options = options_for_depth(req.depth, web_search_enabled=req.browse_web)
-        overrides = RuntimeOverrides(
-            api_key=x_provider_key,
-            planner_model=req.model,
-            researcher_model=req.model,
-            synthesizer_model=req.model,
-            options=options,
-            provider="openai",
-            base_url=req.base_url,
+    record = await get_credentials(user.id, pool)
+
+    tavily_capped = False
+    if record is not None and record.active_provider == "openai" and req.browse_web:
+        tavily_capped = (await check_tavily_cap(pool, settings)).reached
+
+    try:
+        overrides = resolve_overrides(
+            record,
+            settings=settings,
+            depth=req.depth,
+            browse_web=req.browse_web,
+            tavily_capped=tavily_capped,
         )
-    elif x_anthropic_key:
-        api_key = x_anthropic_key
-        options = options_for_depth(req.depth, web_search_enabled=req.browse_web)
-        overrides = RuntimeOverrides(
-            api_key=api_key,
-            planner_model=settings.claude_planner_model,
-            researcher_model=settings.claude_researcher_model,
-            synthesizer_model=settings.claude_synthesizer_model,
-            options=options,
-        )
-    else:
+    except CredentialDecryptError:
+        raise HTTPException(
+            status_code=400,
+            detail="Saved credential could not be read — please re-save it in Settings",
+        ) from None
+    except CredentialError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    if overrides is None:
+        # Free-tier path (unchanged behavior).
         if not settings.anthropic_api_key:
             raise HTTPException(
                 status_code=503,
@@ -391,13 +523,12 @@ async def create_research(
                     "global_cap_usd": quota.global_cap_usd,
                 },
             )
-        options = options_for_depth("quick", web_search_enabled=False)
         overrides = RuntimeOverrides(
             api_key=settings.anthropic_api_key,
             planner_model=FREE_TIER_MODEL,
             researcher_model=FREE_TIER_MODEL,
             synthesizer_model=FREE_TIER_MODEL,
-            options=options,
+            options=options_for_depth("quick", web_search_enabled=False),
         )
 
     report_id = uuid4()

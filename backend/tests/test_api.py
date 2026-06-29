@@ -8,18 +8,23 @@ which matches how it behaves under real uvicorn.
 
 Agents are monkey-patched at their DAG import sites so the pipeline
 completes without hitting Anthropic.
+
+Phase 2a BYOK-via-header tests (test_create_research_openai_*) have been
+removed — BYOK is now exercised via stored credentials (see
+test_credentials_api.py).
 """
 
 from __future__ import annotations
 
 import json
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from uuid import UUID, uuid4
 
 import httpx
 
 from ara.auth import User, get_current_user, get_optional_user
+from ara.config import Settings, get_settings
 from ara.main import create_app
 from ara.models.research import (
     FinalReport,
@@ -33,7 +38,6 @@ from ara.models.research import (
 )
 
 _TEST_USER = User(id=uuid4(), email="test@example.com")
-_BYOK_HEADER = {"X-Anthropic-Key": "test-byok-key"}
 
 
 async def _bypass_access(
@@ -86,9 +90,16 @@ async def _async_client() -> httpx.AsyncClient:
     # Bypass Supabase auth in tests by force-injecting a stable fake user.
     app.dependency_overrides[get_current_user] = lambda: _TEST_USER
     app.dependency_overrides[get_optional_user] = lambda: _TEST_USER
-    # POST /research calls _pool_or_503 before branching on BYOK. Set a
-    # truthy sentinel pool so the gate passes; the BYOK path then never
-    # actually uses the pool (no quota check).
+    # Provide a settings instance with a server-side key so the free-tier
+    # path in create_research can proceed (get_credentials returns None →
+    # free path needs anthropic_api_key set).
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        anthropic_api_key="sk-ant-free-tier-test",
+        ara_encryption_key="",
+    )
+    # POST /research calls _pool_or_503 then get_credentials — set a truthy
+    # sentinel pool so the 503 gate passes; get_credentials is patched in
+    # each test so the sentinel pool is never actually used for DB calls.
     app.state.db_pool = object()
     transport = httpx.ASGITransport(app=app)
     return httpx.AsyncClient(transport=transport, base_url="http://test")
@@ -97,7 +108,7 @@ async def _async_client() -> httpx.AsyncClient:
 async def test_post_research_rejects_empty_question() -> None:
     async with await _async_client() as client:
         resp = await client.post(
-            "/api/research", json={"question": ""}, headers=_BYOK_HEADER
+            "/api/research", json={"question": ""}
         )
     assert resp.status_code == 422
 
@@ -127,17 +138,23 @@ async def test_get_config_returns_sanitized_settings() -> None:
 
 
 async def test_post_research_returns_report_id() -> None:
+    """Free-tier path: no stored credentials → Haiku run → returns report_id."""
+    from ara.quota import QuotaOk
+
     fake_plan, fake_research, fake_synth = _fakes()
+    fake_quota = QuotaOk(used=0, limit=3, global_spend_usd=0.0, global_cap_usd=20.0)
     with (
         patch("ara.graph.dag.plan_research", fake_plan),
         patch("ara.graph.dag.research_sub_query", fake_research),
         patch("ara.graph.dag.synthesize_report", fake_synth),
+        # No stored credentials → free-tier path.
+        patch("ara.api.routes.get_credentials", new=AsyncMock(return_value=None)),
+        patch("ara.api.routes.check_free_tier", new=AsyncMock(return_value=fake_quota)),
     ):
         async with await _async_client() as client:
             resp = await client.post(
                 "/api/research",
                 json={"question": "what is rag?"},
-                headers=_BYOK_HEADER,
             )
 
     assert resp.status_code == 200
@@ -162,51 +179,11 @@ def _parse_sse_lines(text: str) -> list[dict[str, Any]]:
     return events
 
 
-async def test_create_research_openai_requires_base_url_and_model() -> None:
-    async with await _async_client() as client:
-        resp = await client.post(
-            "/api/research",
-            json={"question": "q", "provider": "openai"},
-            headers={"X-Provider-Key": "sk-test"},
-        )
-    assert resp.status_code == 400
-
-
-async def test_create_research_openai_builds_openai_overrides() -> None:
-    import asyncio
-
-    captured: dict[str, Any] = {}
-    done = asyncio.Event()
-
-    async def fake_run_report(**kwargs: Any) -> None:
-        captured["overrides"] = kwargs["overrides"]
-        done.set()
-
-    with patch("ara.api.routes.run_report", fake_run_report):
-        async with await _async_client() as client:
-            resp = await client.post(
-                "/api/research",
-                json={
-                    "question": "q",
-                    "provider": "openai",
-                    "base_url": "https://api.openai.com/v1",
-                    "model": "gpt-4o",
-                    "depth": "standard",
-                    "browse_web": True,
-                },
-                headers={"X-Provider-Key": "sk-test"},
-            )
-        await asyncio.wait_for(done.wait(), timeout=2.0)
-    assert resp.status_code == 200
-    ov = captured["overrides"]
-    assert ov.provider == "openai"
-    assert ov.base_url == "https://api.openai.com/v1"
-    assert ov.api_key == "sk-test"
-    assert ov.planner_model == ov.researcher_model == ov.synthesizer_model == "gpt-4o"
-
-
 async def test_stream_delivers_plan_ready_and_report_complete() -> None:
+    from ara.quota import QuotaOk
+
     fake_plan, fake_research, fake_synth = _fakes()
+    fake_quota = QuotaOk(used=0, limit=3, global_spend_usd=0.0, global_cap_usd=20.0)
 
     with (
         patch("ara.graph.dag.plan_research", fake_plan),
@@ -215,10 +192,13 @@ async def test_stream_delivers_plan_ready_and_report_complete() -> None:
         # Streaming route's access check expects a real DB row; stub it
         # so the in-memory store path can be exercised.
         patch("ara.api.routes._require_report_access", _bypass_access),
+        # No stored credentials → free-tier path.
+        patch("ara.api.routes.get_credentials", new=AsyncMock(return_value=None)),
+        patch("ara.api.routes.check_free_tier", new=AsyncMock(return_value=fake_quota)),
     ):
         async with await _async_client() as client:
             resp = await client.post(
-                "/api/research", json={"question": "q"}, headers=_BYOK_HEADER
+                "/api/research", json={"question": "q"}
             )
             report_id = resp.json()["report_id"]
 
