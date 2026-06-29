@@ -5,16 +5,16 @@
 **Autonomous Research Assistant (ARA) v1.** Flagship portfolio project for **LLMTechno** (AI consulting).
 Three-stage agent pipeline — Planner → Researchers (parallel) → Synthesizer — with live SSE streaming to a Next.js UI. Details in [ARCHITECTURE.md](ARCHITECTURE.md) (written at the end of v1).
 
-## Current status — RESUME HERE (updated 2026-06-28)
+## Current status — RESUME HERE (updated 2026-06-29)
 
-v1 core pipeline is ~95% complete (planner/researcher/synthesizer, SSE, Supabase storage, auth, free-tier quota, 60 tests, polished Next.js UI). Three remaining phases to make it portfolio-ready, captured in a design spec and a per-phase plan:
+v1 core pipeline is ~95% complete (planner/researcher/synthesizer, SSE, Supabase storage, auth, free-tier quota, polished Next.js UI). **Phase 1 (client-side demo gallery) is DONE and pushed to `origin/dev`** — next up is Phase 2.
 
 - **Spec (all 3 phases):** [docs/superpowers/specs/2026-06-28-ship-ara-v1-demo-byok-deploy-design.md](docs/superpowers/specs/2026-06-28-ship-ara-v1-demo-byok-deploy-design.md)
-- **Phase 1 plan (DO THIS FIRST):** [docs/superpowers/plans/2026-06-28-phase1-client-side-demo-gallery.md](docs/superpowers/plans/2026-06-28-phase1-client-side-demo-gallery.md) — free, credit-free demo: record real runs to static JSON in `frontend/public/demos/`, replay 100% client-side (no backend), public gallery links to `/demo/[slug]`. 10 bite-sized tasks, TDD.
-- **Phase 2 (not yet planned):** Multi-provider BYOK. Keep Anthropic-native (with Claude web search); add ONE OpenAI-compatible path (configurable `base_url` → OpenRouter/OpenAI/Gemini-compat/Ollama). Non-Anthropic search via Tavily free tier. One model field, user's choice; UI hint that quality scales with the model they bring.
+- **✅ Phase 1 — DONE:** [docs/superpowers/plans/2026-06-28-phase1-client-side-demo-gallery.md](docs/superpowers/plans/2026-06-28-phase1-client-side-demo-gallery.md). Free, credit-free demo: record real runs to static JSON in `frontend/public/demos/`, replay 100% client-side via `useReplayFromJson` (drives the live reducer over a timer), public gallery + `/demo/[slug]` route. Recorder: `backend/scripts/record_run.py "Q" --slug s --title T`. Committed fixture `sample-quantum.json`. Final review: ready to merge. **Deferred (recorded in `.superpowers/sdd/progress.md`):** 4 Minor findings (guard recorder write on `status=="completed"`; add a recorder↔frontend JSON contract test; demo-banner copy nuance re free Supabase auth calls; vitest devDep ordering), the first real `record_run.py` capture (needs `ANTHROPIC_API_KEY`), and in-browser visual confirmation of the animation.
+- **Phase 2 (DO THIS NEXT — not yet planned):** Multi-provider BYOK. Keep Anthropic-native (with Claude web search); add ONE OpenAI-compatible path (configurable `base_url` → OpenRouter/OpenAI/Gemini-compat/Ollama). Non-Anthropic search via Tavily free tier. One model field, user's choice; UI hint that quality scales with the model they bring.
 - **Phase 3 (not yet planned):** Deploy live (frontend → Vercel; backend host TBD) + portfolio post linking GitHub + live URL.
 
-To execute Phase 1: use **superpowers:subagent-driven-development** (or executing-plans) against the Phase 1 plan above. Phases 2 & 3 each need their own plan (brainstorming → writing-plans) before execution.
+Phases 2 & 3 each need their own plan (brainstorming → writing-plans) before execution, then **superpowers:subagent-driven-development** (or executing-plans) to run them.
 
 Permissions: `.claude/settings.local.json` (gitignored) is set to `bypassPermissions` — no prompts.
 
