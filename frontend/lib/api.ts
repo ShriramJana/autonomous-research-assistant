@@ -35,10 +35,14 @@ export async function apiGet<T>(path: string): Promise<T> {
   return throwOrJson<T>(res);
 }
 
-export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+export async function apiPost<T>(
+  path: string,
+  body: unknown,
+  extraHeaders: Record<string, string> = {},
+): Promise<T> {
   const res = await authedFetch(path, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...extraHeaders },
     body: JSON.stringify(body),
   });
   return throwOrJson<T>(res);
@@ -75,6 +79,10 @@ export interface CreateResearchResponse {
 export interface CreateResearchOptions {
   depth?: Depth;
   browseWeb?: boolean;
+  provider?: "anthropic" | "openai";
+  baseUrl?: string;
+  model?: string;
+  providerKey?: string;
 }
 
 export async function createResearch(
@@ -84,5 +92,13 @@ export async function createResearch(
   const body: Record<string, unknown> = { question };
   if (options.depth) body.depth = options.depth;
   if (typeof options.browseWeb === "boolean") body.browse_web = options.browseWeb;
-  return apiPost<CreateResearchResponse>("/api/research", body);
+  if (options.provider) body.provider = options.provider;
+  if (options.baseUrl) body.base_url = options.baseUrl;
+  if (options.model) body.model = options.model;
+
+  const headers: Record<string, string> =
+    options.provider === "openai" && options.providerKey
+      ? { "X-Provider-Key": options.providerKey }
+      : {};
+  return apiPost<CreateResearchResponse>("/api/research", body, headers);
 }
