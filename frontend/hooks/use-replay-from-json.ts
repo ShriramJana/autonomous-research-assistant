@@ -4,10 +4,8 @@ import { useEffect, useReducer, useState } from "react";
 
 import { initialState, reducer } from "@/hooks/use-research-stream";
 import type { ResearchStreamState } from "@/hooks/use-research-stream";
-import { computeDelays } from "@/lib/replay";
+import { computeReplaySchedule } from "@/lib/replay";
 import type { DemoEvent } from "@/lib/demos";
-
-const MAX_GAP_MS = 800;
 
 export interface ReplayResult {
   state: ResearchStreamState;
@@ -25,7 +23,9 @@ export function useReplayFromJson(events: DemoEvent[] | null): ReplayResult {
     if (!events || events.length === 0) return;
     dispatch({ kind: "reset" });
 
-    const delays = computeDelays(events, { maxGapMs: MAX_GAP_MS });
+    const delays = computeReplaySchedule(
+      events.map((e) => ({ t_ms: e.t_ms, type: e.event.type })),
+    );
     const timers: ReturnType<typeof setTimeout>[] = [];
     let elapsed = 0;
     for (let i = 0; i < events.length; i++) {
