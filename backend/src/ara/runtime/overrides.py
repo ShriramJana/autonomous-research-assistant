@@ -22,3 +22,5 @@ class RuntimeOverrides:
     researcher_model: str
     synthesizer_model: str
     options: ResearchOptions
+    provider: str = "anthropic"
+    base_url: str | None = None
