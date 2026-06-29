@@ -16,7 +16,20 @@ PRICING: dict[str, tuple[float, float]] = {
     "claude-opus-4-6": (15.0, 75.0),
     "claude-opus-4-7": (15.0, 75.0),
     "claude-haiku-4-5": (0.80, 4.0),
+    # OpenAI (and OpenRouter slugs) — list prices, update when they change.
+    "gpt-4o": (2.50, 10.0),
+    "gpt-4o-mini": (0.15, 0.60),
+    "gpt-4.1": (2.0, 8.0),
+    "gpt-4.1-mini": (0.40, 1.60),
+    "gpt-4.1-nano": (0.10, 0.40),
+    "openai/gpt-4o": (2.50, 10.0),
+    "openai/gpt-4o-mini": (0.15, 0.60),
 }
+
+
+def model_is_priced(model: str) -> bool:
+    """True when `model` has a known $/MTok rate (so USD is meaningful)."""
+    return model in PRICING
 
 
 def estimate_cost_usd(model: str, input_tokens: int, output_tokens: int) -> float:

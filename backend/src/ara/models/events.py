@@ -64,13 +64,14 @@ class ErrorEvent(BaseModel):
 
 
 class CostUpdate(BaseModel):
-    """Running API cost snapshot; emitted after every Anthropic response."""
+    """Running API cost snapshot; emitted after every provider response."""
 
     type: Literal["cost_update"] = "cost_update"
     model: str
     input_tokens: int
     output_tokens: int
     cumulative_usd: float
+    priced: bool = True
 
 
 ResearchEvent = Annotated[
