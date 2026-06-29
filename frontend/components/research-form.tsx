@@ -50,6 +50,10 @@ export function ResearchForm({
   const { browseWeb, toggleBrowseWeb } = useBrowseWeb();
   const [hasKey, setHasKey] = useState(false);
   const [quota, setQuota] = useState<Quota | null>(null);
+  const [provider, setProvider] = useState<"anthropic" | "openai">("anthropic");
+  const [baseUrl, setBaseUrl] = useState("https://api.openai.com/v1");
+  const [providerModel, setProviderModel] = useState("");
+  const [providerKey, setProviderKey] = useState("");
 
   useEffect(() => {
     // Read localStorage post-mount to avoid SSR/CSR hydration mismatch.
@@ -85,7 +89,14 @@ export function ResearchForm({
     setSubmitting(true);
     try {
       const trimmed = question.trim();
-      const { report_id } = await createResearch(trimmed, { depth, browseWeb });
+      const { report_id } = await createResearch(trimmed, {
+        depth,
+        browseWeb,
+        provider,
+        ...(provider === "openai"
+          ? { baseUrl, model: providerModel, providerKey }
+          : {}),
+      });
       router.push(`/r/${report_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -204,10 +215,25 @@ export function ResearchForm({
                 Browse Web · {browseWeb ? "On" : "Off"}
               </span>
             </button>
+            <button
+              type="button"
+              onClick={() => setProvider((p) => (p === "anthropic" ? "openai" : "anthropic"))}
+              className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors"
+              aria-label={`Provider: ${provider}`}
+            >
+              <span className="font-mono text-[10px] uppercase tracking-wider">
+                Provider · {provider === "anthropic" ? "Anthropic" : "OpenAI-compat"}
+              </span>
+            </button>
           </div>
           <button
             type="submit"
-            disabled={!question.trim() || submitting || freeBlocked}
+            disabled={
+              !question.trim() ||
+              submitting ||
+              freeBlocked ||
+              (provider === "openai" && (!baseUrl || !providerModel || !providerKey))
+            }
             className="from-primary to-primary-container text-primary-foreground shadow-primary/10 inline-flex items-center gap-2 rounded-md bg-gradient-to-r px-8 py-2 text-sm font-bold shadow-lg transition-all hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span className="font-mono text-xs tracking-tight">
@@ -219,6 +245,33 @@ export function ResearchForm({
           </button>
         </div>
       </div>
+      {provider === "openai" ? (
+        <div className="mt-3 flex flex-col gap-2">
+          <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+            Bring an Anthropic key for built-in web search (recommended). Other
+            providers search via Tavily; quality scales with the model you bring.
+          </p>
+          <input
+            value={baseUrl}
+            onChange={(e) => setBaseUrl(e.target.value)}
+            placeholder="Base URL (e.g. https://api.openai.com/v1)"
+            className="bg-secondary text-foreground placeholder:text-muted-foreground/50 rounded-md px-3 py-2 font-mono text-xs outline-none"
+          />
+          <input
+            value={providerModel}
+            onChange={(e) => setProviderModel(e.target.value)}
+            placeholder="Model (e.g. gpt-4o)"
+            className="bg-secondary text-foreground placeholder:text-muted-foreground/50 rounded-md px-3 py-2 font-mono text-xs outline-none"
+          />
+          <input
+            type="password"
+            value={providerKey}
+            onChange={(e) => setProviderKey(e.target.value)}
+            placeholder="Provider API key (sent per request, not stored)"
+            className="bg-secondary text-foreground placeholder:text-muted-foreground/50 rounded-md px-3 py-2 font-mono text-xs outline-none"
+          />
+        </div>
+      ) : null}
       {error ? (
         <p className="text-destructive mt-3 px-2 font-mono text-xs">
           {error}
