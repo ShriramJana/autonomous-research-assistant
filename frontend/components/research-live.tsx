@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Check, Copy, Download, Share2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { PlanTree } from "@/components/plan-tree";
+import { ResearchTimeline } from "@/components/research-timeline";
 import { ReportStream } from "@/components/report-stream";
 import { CostMeter } from "@/components/cost-meter";
 import { StatusPill } from "@/components/status-pill";
@@ -101,14 +101,7 @@ export function ResearchLive({
     }
   };
 
-  const planPanel = (
-    <PlanTree
-      originalQuestion={originalQuestion}
-      agents={state.agents}
-      isPlanning={state.status === "planning"}
-      webSearchEnabled={webSearchEnabled}
-    />
-  );
+  const planPanel = <ResearchTimeline state={state} />;
   const reportPanel = (
     <ReportStream
       streamedMarkdown={state.streamedMarkdown}
