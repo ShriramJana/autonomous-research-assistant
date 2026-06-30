@@ -24,7 +24,7 @@ export function PipelineGraph() {
         </div>
 
         {/* Arrow: Question → Planner */}
-        <div className="ara-pl-arrow ara-pl-arrow-h">
+        <div className="ara-pl-arrow-h">
           <div className="ara-pl-flow" />
         </div>
 
@@ -42,7 +42,7 @@ export function PipelineGraph() {
           <div className="ara-pl-researchers">
             {[0, 1, 2].map((i) => (
               <div key={i} className="ara-pl-researcher-row">
-                <div className="ara-pl-stub ara-pl-stub-left">
+                <div className="ara-pl-stub">
                   <div className="ara-pl-flow" style={{ animationDelay: `${i * 0.35}s` }} />
                 </div>
                 <div
@@ -52,13 +52,13 @@ export function PipelineGraph() {
                   <span className="ara-pl-label">RESEARCH</span>
                   <span className="ara-pl-title">Researcher {i + 1}</span>
                 </div>
-                <div className="ara-pl-stub ara-pl-stub-right">
+                <div className="ara-pl-stub">
                   <div className="ara-pl-flow" style={{ animationDelay: `${i * 0.35}s` }} />
                 </div>
               </div>
             ))}
           </div>
-          <div className="ara-pl-fanout-rail ara-pl-fanout-rail-right" />
+          <div className="ara-pl-fanout-rail" />
         </div>
 
         {/* ── Synthesizer node ── */}
@@ -68,7 +68,7 @@ export function PipelineGraph() {
         </div>
 
         {/* Arrow: Synthesizer → Report */}
-        <div className="ara-pl-arrow ara-pl-arrow-h">
+        <div className="ara-pl-arrow-h">
           <div className="ara-pl-flow" />
         </div>
 
