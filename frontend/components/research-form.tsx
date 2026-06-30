@@ -9,7 +9,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { apiGet, createResearch } from "@/lib/api";
+import { apiGet, createResearch, type ApiError } from "@/lib/api";
+import { freeTierBlockMessage, friendlyRunError } from "@/lib/run-status";
 import { getCredentials } from "@/lib/credentials";
 import { useBrowseWeb } from "@/hooks/use-browse-web";
 import { type Depth, useDepth } from "@/hooks/use-depth";
@@ -18,6 +19,7 @@ interface Quota {
   used: number;
   limit: number;
   circuit_breaker_tripped: boolean;
+  free_tier_available: boolean;
 }
 
 const DEPTH_OPTIONS: Array<{
@@ -61,10 +63,8 @@ export function ResearchForm({
   }, []);
 
   const freeTier = activeProvider === "free";
-  const freeBlocked =
-    freeTier &&
-    quota !== null &&
-    (quota.used >= quota.limit || quota.circuit_breaker_tripped);
+  const blockMsg = freeTier ? freeTierBlockMessage(quota) : null;
+  const freeBlocked = blockMsg !== null;
 
   useEffect(() => {
     const focusOnHash = () => {
@@ -89,7 +89,9 @@ export function ResearchForm({
       });
       router.push(`/r/${report_id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
+      const status = (err as ApiError).status;
+      const fallback = err instanceof Error ? err.message : "Unknown error";
+      setError(friendlyRunError(status, fallback));
       setSubmitting(false);
     }
   };
@@ -110,10 +112,9 @@ export function ResearchForm({
 
   return (
     <form onSubmit={onSubmit} className="w-full">
-      {freeBlocked ? (
+      {blockMsg ? (
         <p className="border-destructive/40 bg-destructive/10 text-destructive mb-3 rounded-md border px-4 py-2 font-mono text-xs">
-          Free tier exhausted — add your Anthropic API key in Settings to keep
-          running reports
+          {blockMsg}
         </p>
       ) : null}
       <div className="bg-secondary focus-within:ring-border group relative rounded-xl p-1 transition-all duration-300 focus-within:ring-1">
@@ -225,11 +226,14 @@ export function ResearchForm({
           {error}
         </p>
       ) : null}
-      {freeTier && quota !== null ? (
+      {freeTier && quota !== null && quota.free_tier_available ? (
         <p className="text-muted-foreground/70 mt-3 px-2 font-mono text-[10px] tracking-wider">
           {quota.used} of {quota.limit} free reports used this month
         </p>
       ) : null}
+      <p className="text-muted-foreground/50 mt-3 px-2 font-mono text-[10px] tracking-wider">
+        Free-hosted demo — if it&apos;s been idle, your first run may take ~30–60s to wake up.
+      </p>
     </form>
   );
 }
