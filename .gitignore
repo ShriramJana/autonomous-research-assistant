@@ -27,5 +27,12 @@ next-env.d.ts
 .vscode/
 .idea/
 
-# Editor-local settings
-*.local.json
+# Local working notes — not for the public repo
+
+
+
+
+
+# Design scratch (Stitch exports) — local only
+/stitch_ara_ai_research_platform/
+/stitch_ara_research_terminal/
