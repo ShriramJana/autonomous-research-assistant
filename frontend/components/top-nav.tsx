@@ -15,7 +15,7 @@ import { createSupabaseBrowser } from "@/lib/supabase/client";
 const NAV_LINKS = [
   { href: "/", label: "Dashboard", match: (p: string) => p === "/" },
   { href: "/gallery", label: "Gallery", match: (p: string) => p === "/gallery" },
-  { href: "/#history", label: "History", match: () => false },
+  { href: "/history", label: "History", match: (p: string) => p === "/history" },
   { href: "/settings", label: "Settings", match: (p: string) => p === "/settings" },
 ] as const;
 

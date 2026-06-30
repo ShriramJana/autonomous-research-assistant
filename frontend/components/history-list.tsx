@@ -5,7 +5,7 @@ import { ChevronRight, FileText, Trash2 } from "lucide-react";
 
 import { useReports, type ReportSummary } from "@/hooks/use-reports";
 
-export function HistoryList() {
+export function HistoryList({ emptyHint = false }: { emptyHint?: boolean } = {}) {
   const { items, loading, error, remove } = useReports();
 
   if (loading) {
@@ -22,7 +22,20 @@ export function HistoryList() {
       </section>
     );
   }
-  if (items.length === 0) return null;
+  if (items.length === 0) {
+    if (!emptyHint) return null;
+    return (
+      <section className="w-full" id="history">
+        <p className="text-muted-foreground/70 font-mono text-xs">
+          No reports yet — run your first research from the{" "}
+          <Link href="/" className="text-primary underline">
+            dashboard
+          </Link>
+          .
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="w-full" id="history">
