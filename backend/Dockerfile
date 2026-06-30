@@ -4,7 +4,7 @@ RUN pip install --no-cache-dir uv==0.11.3
 
 WORKDIR /app
 
-COPY pyproject.toml ./
+COPY pyproject.toml README.md ./
 COPY src ./src
 
 RUN uv sync --no-dev
