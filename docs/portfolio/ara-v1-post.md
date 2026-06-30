@@ -1,8 +1,8 @@
 # Building an Autonomous Research Assistant with a Three-Stage LLM Pipeline
 
-I built ARA (Autonomous Research Assistant) as the flagship portfolio project for [LLMTechno](LIVE_URL), my AI consulting practice. It is a research agent that takes a natural-language question, decomposes it into parallel sub-queries, web-searches each one, and synthesizes a cited report — all streamed live to the browser as it runs. The source is on GitHub at [ShriramJana/autonomous-research-assistant](https://github.com/ShriramJana/autonomous-research-assistant).
+I built ARA (Autonomous Research Assistant) as the flagship portfolio project for LLMTechno, my AI consulting practice. It is a research agent that takes a natural-language question, decomposes it into parallel sub-queries, web-searches each one, and synthesizes a cited report — all streamed live to the browser as it runs. The source is on GitHub at [ShriramJana/autonomous-research-assistant](https://github.com/ShriramJana/autonomous-research-assistant).
 
-**[Try it live at LIVE_URL](LIVE_URL)** — no account required for the demo gallery; bring your own Anthropic key for a live run.
+**[Try it live](https://autonomous-research-assistant-tawny.vercel.app)** — no account required for the demo gallery; bring your own Anthropic or OpenAI key for a live run.
 
 ---
 
@@ -91,7 +91,7 @@ I wanted this project to be demonstrable without burning API budget every time a
 
 **For everyone:** a static demo gallery with three pre-recorded real runs (quantum supremacy, the 2008 financial crisis, transformer model history). Each recording is a JSON file in `frontend/public/demos/` committed to the repo. A client-side replayer (`lib/replay.ts`) scales the original event timestamps to approximately 20 seconds total, with per-stage dwell and a readable synthesis cadence. No backend is involved; no Supabase auth calls happen.
 
-**For visitors with an Anthropic key:** they save their key in Settings (write-only — the key is encrypted server-side with Fernet and stored per-user in Supabase; it is never returned to the client). When they submit a run, the backend resolves their stored credential and uses it. My server-side `ANTHROPIC_API_KEY` is intentionally absent in production; every live run is on the visitor's key. My monthly hosting bill for the backend is the Render free tier: $0.
+**For visitors with their own API key:** they save an Anthropic or OpenAI key in Settings (write-only — the key is encrypted server-side with Fernet and stored per-user in Supabase; it is never returned to the client). When they submit a run, the backend resolves their stored credential and uses it. My server-side `ANTHROPIC_API_KEY` is intentionally absent in production; every live run is on the visitor's key. My monthly hosting bill for the backend is the Render free tier: $0.
 
 **The tradeoff:** Render's free tier spins down after inactivity. The first request after a cold start takes 30–60 seconds to respond. I surface this in the UI with a notice shown while the request is pending, so visitors know to wait rather than retry.
 
@@ -108,7 +108,7 @@ A global Tavily cap (`TAVILY_GLOBAL_MONTHLY_CAP`, default 1000 searches/month) i
 | LLM | Anthropic SDK directly — `AnthropicClient` and `OpenAICompatClient` behind an `LLMClient` Protocol |
 | Web search | Anthropic server-side `web_search_20250305`; client-side Tavily for non-Anthropic providers |
 | Packaging | `uv` + `pyproject.toml` |
-| Frontend | Next.js 15, TypeScript strict, Tailwind v4, shadcn/ui |
+| Frontend | Next.js 16, TypeScript strict, Tailwind v4, shadcn/ui |
 | Auth + persistence | Supabase (Postgres for credential storage and run metadata; GoTrue for auth) |
 | Hosting | Vercel (frontend), Render free tier (backend) |
 
@@ -134,4 +134,4 @@ No LangChain, no LiteLLM, no generic LLM abstraction beyond the `LLMClient` Prot
 
 Source: [https://github.com/ShriramJana/autonomous-research-assistant](https://github.com/ShriramJana/autonomous-research-assistant)
 
-Live: [LIVE_URL](LIVE_URL)
+Live: [https://autonomous-research-assistant-tawny.vercel.app](https://autonomous-research-assistant-tawny.vercel.app)
