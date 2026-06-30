@@ -27,5 +27,12 @@ next-env.d.ts
 .vscode/
 .idea/
 
-# Claude Code — personal settings only (team/project .claude/settings.json is commitable)
-.claude/settings.local.json
+# Local agent tooling & working notes — not for the public repo
+.claude/
+.superpowers/
+/CLAUDE.md
+/docs/superpowers/
+
+# Design scratch (Stitch exports) — local only
+/stitch_ara_ai_research_platform/
+/stitch_ara_research_terminal/
