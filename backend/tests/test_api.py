@@ -186,6 +186,41 @@ def _parse_sse_lines(text: str) -> list[dict[str, Any]]:
     return events
 
 
+async def test_quota_reports_free_tier_unavailable_when_no_anthropic_key() -> None:
+    app = create_app()
+    app.state.db_pool = object()
+    user = User(id=uuid4(), email="t@example.com")
+    app.dependency_overrides[get_current_user] = lambda: user
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        anthropic_api_key="", supabase_db_url="postgres://x"
+    )
+
+    async def _status(*_a: object, **_k: object) -> object:
+        class _S:
+            used = 0
+            limit = 3
+            global_spend_usd = 0.0
+            global_cap_usd = 20.0
+        return _S()
+
+    async def _tav(*_a: object, **_k: object) -> object:
+        class _T:
+            used = 0
+            cap = 1000
+            reached = False
+        return _T()
+
+    with patch("ara.api.routes.check_free_tier", _status), patch(
+        "ara.api.routes.check_tavily_cap", _tav
+    ):
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.get("/api/quota")
+
+    assert resp.status_code == 200
+    assert resp.json()["free_tier_available"] is False
+
+
 async def test_stream_delivers_plan_ready_and_report_complete() -> None:
     from ara.quota import QuotaOk
 

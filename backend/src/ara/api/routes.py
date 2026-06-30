@@ -139,6 +139,7 @@ class QuotaResponse(BaseModel):
     tavily_used: int
     tavily_cap: int
     tavily_cap_reached: bool
+    free_tier_available: bool
 
 
 # ---------- Helpers ----------
@@ -275,6 +276,7 @@ async def get_quota(
         tavily_used=tavily.used,
         tavily_cap=tavily.cap,
         tavily_cap_reached=tavily.reached,
+        free_tier_available=bool(settings.anthropic_api_key),
     )
 
 
