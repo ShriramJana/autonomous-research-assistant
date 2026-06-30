@@ -130,6 +130,25 @@ No LangChain, no LiteLLM, no generic LLM abstraction beyond the `LLMClient` Prot
 
 ---
 
+## Where This Goes Next
+
+ARA v1 searches the open web. The highest-leverage next step is grounding it in **peer-reviewed literature** — a dedicated scholarly-research agent that runs alongside the web researcher and draws on open academic APIs, so a claim can cite a 2024 paper instead of a blog post. The integrations I would prioritize, in order:
+
+- **OpenAlex** — an open catalog of ~250M scholarly works with full citation graphs, authors, and venues. The broadest free index, and the natural backbone for academic search.
+- **Semantic Scholar** — AI-generated abstracts, TLDRs, and "influential citation" signals; ideal for ranking which papers on a topic actually matter rather than just which exist.
+- **arXiv** — preprints across CS, physics, math, and quantitative biology, for surfacing cutting-edge work months before formal publication.
+- **PubMed / NCBI E-utilities** — the authoritative biomedical index, where general web search is least trustworthy and the stakes are highest.
+- **Crossref** — DOI resolution and publisher metadata to canonicalize and deduplicate citations across all of the above.
+
+Two product features fall out of this naturally:
+
+- **Citation export** — emit a report's sources as BibTeX/RIS so results drop straight into Zotero, Mendeley, or a manuscript's bibliography.
+- **Source-quality signals** — show publication date, venue, and citation count beside each source, so readers can weigh evidence rather than trust it flat.
+
+The current design already anticipates this. Each scholarly API is just another tool the researcher agent can call — the `LLMClient` Protocol and tool-dispatch loop do not care whether a search hits the web or OpenAlex — and because every source already carries a stable UUID, academic and web references coexist in one deduplicated citation list with no schema changes.
+
+---
+
 ## Source and Live Demo
 
 Source: [https://github.com/ShriramJana/autonomous-research-assistant](https://github.com/ShriramJana/autonomous-research-assistant)
