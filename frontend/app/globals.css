@@ -169,3 +169,213 @@
 @media (prefers-reduced-motion: reduce) {
   .ara-glow { animation: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PipelineGraph — animated pipeline diagram for the landing page.
+   All keyframes are inside @media (prefers-reduced-motion: no-preference) so
+   reduced-motion users see a clean static diagram.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Container */
+.ara-pipeline {
+  width: 100%;
+  padding: 2rem 0;
+}
+
+/* ── Shared node shell ── */
+.ara-pl-node {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(67, 70, 84, 0.35);
+  padding: 0.625rem 0.875rem;
+  background: var(--card);
+  min-width: 5.5rem;
+  position: relative;
+  transition: box-shadow 0.3s ease;
+  flex-shrink: 0;
+}
+
+.ara-pl-label {
+  font-family: var(--font-geist-mono, monospace);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--muted-foreground);
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.ara-pl-title {
+  font-family: var(--font-geist-sans, sans-serif);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--foreground);
+  white-space: nowrap;
+}
+
+/* ── Endpoint nodes (Question / Report) ── */
+.ara-pl-endpoint {
+  background: var(--muted);
+  border-color: rgba(67, 70, 84, 0.5);
+}
+
+/* ── Stage nodes (Planner / Researcher / Synthesizer) ── */
+.ara-pl-stage {
+  background: var(--card);
+}
+
+/* ── Citation chips on Report node ── */
+.ara-pl-chips {
+  display: flex;
+  gap: 0.2rem;
+  margin-top: 0.25rem;
+}
+.ara-pl-chip {
+  font-family: var(--font-geist-mono, monospace);
+  font-size: 0.5rem;
+  color: var(--primary);
+  background: rgba(181, 196, 255, 0.1);
+  border: 1px solid rgba(181, 196, 255, 0.25);
+  border-radius: 2px;
+  padding: 0 0.2rem;
+}
+
+/* ── Horizontal arrows ── */
+.ara-pl-arrow-h {
+  width: 2rem;
+  height: 2px;
+  background: rgba(67, 70, 84, 0.4);
+  position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
+  /* Hide on mobile — fan-out handles spacing */
+  display: none;
+}
+@media (min-width: 640px) {
+  .ara-pl-arrow-h { display: block; }
+}
+
+/* ── Fan-out container ── */
+.ara-pl-fanout {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+/* Vertical rails connecting the 3 researcher stubs to the main line */
+.ara-pl-fanout-rail {
+  width: 2px;
+  height: 100%;
+  background: rgba(67, 70, 84, 0.4);
+  display: none;
+}
+@media (min-width: 640px) {
+  .ara-pl-fanout-rail { display: block; }
+}
+.ara-pl-fanout-rail-right {
+  /* mirror of left rail */
+}
+
+/* ── Researcher list ── */
+.ara-pl-researchers {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* ── Each researcher row: stub-left + node + stub-right ── */
+.ara-pl-researcher-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+}
+
+/* ── Short horizontal stubs to/from researcher nodes ── */
+.ara-pl-stub {
+  width: 1.5rem;
+  height: 2px;
+  background: rgba(67, 70, 84, 0.4);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: none;
+}
+@media (min-width: 640px) {
+  .ara-pl-stub { display: block; }
+}
+
+/* ── Flow pulse — the animated travelling highlight ── */
+.ara-pl-flow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(181, 196, 255, 0.6) 50%,
+    transparent 100%
+  );
+  width: 60%;
+  /* Static (no animation) by default — keyframes applied below */
+  transform: translateX(-100%);
+}
+
+/* ── Stage glow cycling ── */
+.ara-pl-planner,
+.ara-pl-researcher,
+.ara-pl-synthesizer {
+  /* base state — no glow */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Keyframes — ONLY applied when reduced-motion is acceptable
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion: no-preference) {
+
+  /* Flow pulse along connector lines */
+  @keyframes ara-flow {
+    0%   { transform: translateX(-100%); opacity: 0; }
+    20%  { opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateX(200%); opacity: 0; }
+  }
+
+  .ara-pl-flow {
+    animation: ara-flow 2.4s ease-in-out infinite;
+  }
+
+  /* Planner glow — phase 0 */
+  @keyframes ara-planner-glow {
+    0%, 15%  { box-shadow: 0 0 0 1px rgba(181, 196, 255, 0.5), 0 0 12px rgba(181, 196, 255, 0.25); border-color: rgba(181, 196, 255, 0.5); }
+    25%, 100% { box-shadow: none; border-color: rgba(67, 70, 84, 0.35); }
+  }
+  .ara-pl-planner {
+    animation: ara-planner-glow 4.8s ease-in-out infinite;
+  }
+
+  /* Researcher glow — phase 1 (offset so it starts after planner) */
+  @keyframes ara-researcher-glow {
+    0%, 24%  { box-shadow: none; border-color: rgba(67, 70, 84, 0.35); }
+    30%, 60% { box-shadow: 0 0 0 1px rgba(99, 138, 255, 0.5), 0 0 12px rgba(99, 138, 255, 0.25); border-color: rgba(99, 138, 255, 0.5); }
+    70%, 100% { box-shadow: none; border-color: rgba(67, 70, 84, 0.35); }
+  }
+  .ara-pl-researcher {
+    animation: ara-researcher-glow 4.8s ease-in-out infinite;
+  }
+
+  /* Synthesizer glow — phase 2 */
+  @keyframes ara-synthesizer-glow {
+    0%, 64%  { box-shadow: none; border-color: rgba(67, 70, 84, 0.35); }
+    70%, 90% { box-shadow: 0 0 0 1px rgba(181, 196, 255, 0.5), 0 0 14px rgba(181, 196, 255, 0.3); border-color: rgba(181, 196, 255, 0.5); }
+    100%     { box-shadow: none; border-color: rgba(67, 70, 84, 0.35); }
+  }
+  .ara-pl-synthesizer {
+    animation: ara-synthesizer-glow 4.8s ease-in-out infinite;
+  }
+}
