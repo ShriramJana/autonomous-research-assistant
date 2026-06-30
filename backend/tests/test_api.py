@@ -113,6 +113,13 @@ async def test_post_research_rejects_empty_question() -> None:
     assert resp.status_code == 422
 
 
+async def test_health_is_public_and_ok() -> None:
+    async with await _async_client() as client:
+        resp = await client.get("/api/health")
+    assert resp.status_code == 200
+    assert resp.json() == {"status": "ok"}
+
+
 async def test_get_config_returns_sanitized_settings() -> None:
     async with await _async_client() as client:
         resp = await client.get("/api/config")

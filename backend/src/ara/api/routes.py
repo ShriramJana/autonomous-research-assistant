@@ -1,6 +1,7 @@
 """HTTP routes.
 
 Auth: all endpoints require a signed-in Supabase user EXCEPT:
+- GET  /api/health             (public — liveness)
 - GET  /api/config             (public)
 - GET  /api/gallery            (public — lists is_sample=true reports)
 - GET  /api/reports/{id}       (public when is_sample OR ?t=share_token)
@@ -227,6 +228,12 @@ async def get_config() -> ConfigResponse:
         ),
         depth_presets={d: DepthPresetConfig(**p) for d, p in depth_presets().items()},
     )
+
+
+@router.get("/health")
+async def health() -> dict[str, str]:
+    """Liveness probe for the host (Render). Public, no DB, no auth."""
+    return {"status": "ok"}
 
 
 @router.get("/gallery", response_model=list[ReportSummary])
