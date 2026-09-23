@@ -20,7 +20,19 @@ export async function middleware(request: NextRequest) {
       },
     },
   );
-  await supabase.auth.getUser();
+  // Refresh the session, but never let a slow/unreachable Supabase Auth server
+  // hang the middleware — Vercel kills it at ~25s with MIDDLEWARE_INVOCATION_TIMEOUT,
+  // which would 504 the entire site. Cap the call and degrade to "logged out".
+  try {
+    await Promise.race([
+      supabase.auth.getUser(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("auth timeout")), 5000),
+      ),
+    ]);
+  } catch {
+    // Session couldn't be refreshed; continue unauthenticated rather than 504.
+  }
   return response;
 }
 
