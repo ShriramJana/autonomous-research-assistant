@@ -1,0 +1,52 @@
+backend:
+  image:
+    repository: ara-backend
+    tag: dev
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 8000
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  # SSE runs are long-lived: give in-flight research runs time to finish
+  # before the pod dies. Must exceed your longest expected run.
+  terminationGracePeriodSeconds: 120
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 6
+    targetCPUUtilizationPercentage: 70
+
+frontend:
+  image:
+    repository: ara-frontend
+    tag: dev
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 3000
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+ingress:
+  enabled: true
+  className: nginx
+  host: ara.localtest.me
+
+# Values here land in a Secret. For real clusters use a sealed secret or
+# an external secrets operator instead of committing anything.
+secrets:
+  ANTHROPIC_API_KEY: ""
+  ARA_ENCRYPTION_KEY: ""
+  SUPABASE_URL: ""
+  SUPABASE_DB_URL: ""
+  TAVILY_API_KEY: ""
+
+config:
+  ARA_HOST: "0.0.0.0"
+  ARA_PORT: "8000"
+  ARA_RESEARCHER_MAX_ITERATIONS: "5"
+  ARA_EVENT_BUFFER_SIZE: "50"
+  CLAUDE_PLANNER_MODEL: "claude-sonnet-4-5"
+  CLAUDE_RESEARCHER_MODEL: "claude-sonnet-4-5"
+  CLAUDE_SYNTHESIZER_MODEL: "claude-opus-4-5"
