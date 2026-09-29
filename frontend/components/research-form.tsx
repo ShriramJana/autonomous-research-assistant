@@ -232,7 +232,7 @@ export function ResearchForm({
         </p>
       ) : null}
       <p className="text-muted-foreground/50 mt-3 px-2 font-mono text-[10px] tracking-wider">
-        Free-hosted demo — if it&apos;s been idle, your first run may take ~30–60s to wake up.
+        Free-hosted demo — if it&apos;s been idle, your first run may take ~20s to wake up.
       </p>
     </form>
   );

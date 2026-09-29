@@ -233,7 +233,7 @@ async def get_config() -> ConfigResponse:
 
 @router.get("/health")
 async def health() -> dict[str, str]:
-    """Liveness probe for the host (Render). Public, no DB, no auth."""
+    """Liveness probe for the host (Cloud Run). Public, no DB, no auth."""
     return {"status": "ok"}
 
 

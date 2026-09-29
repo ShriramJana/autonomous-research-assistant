@@ -91,9 +91,9 @@ I wanted this project to be demonstrable without burning API budget every time a
 
 **For everyone:** a static demo gallery with three pre-recorded real runs (quantum supremacy, the 2008 financial crisis, transformer model history). Each recording is a JSON file in `frontend/public/demos/` committed to the repo. A client-side replayer (`lib/replay.ts`) scales the original event timestamps to approximately 20 seconds total, with per-stage dwell and a readable synthesis cadence. No backend is involved; no Supabase auth calls happen.
 
-**For visitors with their own API key:** they save an Anthropic or OpenAI key in Settings (write-only — the key is encrypted server-side with Fernet and stored per-user in Supabase; it is never returned to the client). When they submit a run, the backend resolves their stored credential and uses it. My server-side `ANTHROPIC_API_KEY` is intentionally absent in production; every live run is on the visitor's key. My monthly hosting bill for the backend is the Render free tier: $0.
+**For visitors with their own API key:** they save an Anthropic or OpenAI key in Settings (write-only — the key is encrypted server-side with Fernet and stored per-user in Supabase; it is never returned to the client). When they submit a run, the backend resolves their stored credential and uses it. My server-side `ANTHROPIC_API_KEY` is intentionally absent in production; every live run is on the visitor's key. The backend runs on Google Cloud Run, which scales to zero when idle, so portfolio-level traffic stays within its free tier.
 
-**The tradeoff:** Render's free tier spins down after inactivity. The first request after a cold start takes 30–60 seconds to respond. I surface this in the UI with a notice shown while the request is pending, so visitors know to wait rather than retry.
+**The tradeoff:** scale-to-zero means the first request after an idle period pays a cold start of roughly 20 seconds. I surface this in the UI with a notice shown while the request is pending, so visitors know to wait rather than retry. Cloud Run also allows a 60-minute request timeout, which matters when a single SSE stream stays open for the whole research run.
 
 A global Tavily cap (`TAVILY_GLOBAL_MONTHLY_CAP`, default 1000 searches/month) is tracked per run in the `reports` table and checked before each run. When the cap is reached, runs that use the client-side Tavily path degrade gracefully to model-knowledge-only rather than failing hard.
 
@@ -110,7 +110,7 @@ A global Tavily cap (`TAVILY_GLOBAL_MONTHLY_CAP`, default 1000 searches/month) i
 | Packaging | `uv` + `pyproject.toml` |
 | Frontend | Next.js 16, TypeScript strict, Tailwind v4, shadcn/ui |
 | Auth + persistence | Supabase (Postgres for credential storage and run metadata; GoTrue for auth) |
-| Hosting | Vercel (frontend), Render free tier (backend) |
+| Hosting | Vercel (frontend), Google Cloud Run (backend) |
 
 No LangChain, no LiteLLM, no generic LLM abstraction beyond the `LLMClient` Protocol I wrote. The Anthropic and OpenAI SDKs are called directly.
 
