@@ -36,7 +36,7 @@ Built as the flagship portfolio project for LLMTechno.
 | Packaging | `uv` + `pyproject.toml` |
 | Frontend | Next.js 16 (App Router), TypeScript strict, Tailwind v4, shadcn/ui |
 | Auth + persistence | Supabase (Postgres + Auth) |
-| Hosting | Vercel (frontend) · Render (backend) |
+| Hosting | Vercel (frontend) · Google Cloud Run (backend) |
 
 No LangChain or LiteLLM — the provider SDKs are called directly behind a small `LLMClient` Protocol. See [ARCHITECTURE.md](./ARCHITECTURE.md) for the DAG, the SSE event contract, and v2 extension points.
 
@@ -79,7 +79,14 @@ Backend on `:8000`, frontend on `:3000` → open <http://localhost:3000>.
 ## Deployment
 
 - **Frontend → Vercel** (root directory `frontend/`): set `BACKEND_ORIGIN` to the backend URL plus the `NEXT_PUBLIC_SUPABASE_*` vars. All `/api/*` calls (including the SSE stream) proxy to the backend through a same-origin Next.js rewrite, so auth cookies just work.
-- **Backend → Render** (Docker, `backend/Dockerfile`, single instance): in production `ANTHROPIC_API_KEY` is intentionally left **unset**, so every live run uses the visitor's own stored key — keeping hosting cost at **$0** on the free tier.
+- **Backend → Google Cloud Run** (Docker, `backend/Dockerfile`): scale-to-zero, max 1 instance, 60-minute request timeout (a research run holds one SSE stream open), and CPU always allocated so background research tasks keep running between requests. In production `ANTHROPIC_API_KEY` is intentionally left **unset**, so every live run uses the visitor's own stored key — keeping hosting within Cloud Run's free tier.
+
+  ```bash
+  gcloud run deploy ara-backend --source backend --region us-east4 \
+    --allow-unauthenticated --env-vars-file env.yaml \
+    --timeout 3600 --min-instances 0 --max-instances 1 \
+    --no-cpu-throttling --cpu-boost --memory 1Gi
+  ```
 
 ## License
 
