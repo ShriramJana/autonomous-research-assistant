@@ -3,7 +3,7 @@
 
 import type { FinalReport, ResearchPlan, SubQueryFinding } from "@/lib/types";
 
-export type ErrorStage = "plan" | "research" | "synthesis";
+export type ErrorStage = "plan" | "research" | "synthesis" | "runtime";
 
 export interface PlanReadyEvent {
   type: "plan_ready";

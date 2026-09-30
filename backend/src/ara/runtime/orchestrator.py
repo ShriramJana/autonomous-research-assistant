@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import contextlib
 from typing import Literal
 from uuid import UUID
 
@@ -11,7 +12,7 @@ from ara.config import Settings
 from ara.graph.dag import GraphModels, build_graph
 from ara.llm.client import LLMClient
 from ara.llm.factory import build_client
-from ara.models.events import CostUpdate, ReportComplete, ResearchEvent
+from ara.models.events import CostUpdate, ErrorEvent, ReportComplete, ResearchEvent
 from ara.models.research import ReportEnvelope
 from ara.options import _DEPTH_PRESETS, Depth, ResearchOptions
 from ara.pricing import estimate_cost_usd, model_is_priced
@@ -97,6 +98,9 @@ async def run_report(
         # Cancelled by shutdown drain: record as error, then propagate.
         status = "error"
         error_message = "Run interrupted by server shutdown"
+        # Give viewers a terminal event; a failed emit must not block re-raise/close.
+        with contextlib.suppress(Exception):
+            await emit(ErrorEvent(stage="runtime", message=error_message))
         raise
     finally:
         await store.close(
