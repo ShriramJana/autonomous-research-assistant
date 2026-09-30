@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from ara.api.routes import router
 from ara.config import get_settings
 from ara.storage.memory import InMemoryReportStore
+from ara.storage.notify import EventDoorbell
 from ara.storage.supabase import SupabaseReportStore
 
 
@@ -21,17 +22,21 @@ def create_app() -> FastAPI:
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        doorbell: EventDoorbell | None = None
         if settings.supabase_db_url:
-            app.state.db_pool = await asyncpg.create_pool(
-                settings.supabase_db_url, min_size=1, max_size=10
-            )
-            app.state.store = SupabaseReportStore(pool=app.state.db_pool)
+            db_url = settings.supabase_db_url
+            app.state.db_pool = await asyncpg.create_pool(db_url, min_size=1, max_size=10)
+            doorbell = EventDoorbell(lambda: asyncpg.connect(db_url))
+            await doorbell.start()
+            app.state.store = SupabaseReportStore(pool=app.state.db_pool, doorbell=doorbell)
         else:
             app.state.db_pool = None
             app.state.store = InMemoryReportStore(buffer_size=settings.ara_event_buffer_size)
         try:
             yield
         finally:
+            if doorbell is not None:
+                await doorbell.stop()
             if app.state.db_pool is not None:
                 await app.state.db_pool.close()
 
