@@ -13,11 +13,18 @@ backend:
     requests: { cpu: 100m, memory: 256Mi }
     limits:   { cpu: 1000m, memory: 1Gi }
   # SSE runs are long-lived. Order on pod termination:
-  #   preStop sleep (leave Service endpoints) -> SIGTERM -> uvicorn closes
-  #   listener, waits for open streams -> lifespan drains in-flight runs.
-  # Invariant (enforced at render time): drain < grace - preStop.
+  #   preStop sleep (leave Service endpoints) -> SIGTERM -> uvicorn stops
+  #   accepting and waits up to gracefulShutdownSeconds for open streams,
+  #   then cancels them -> THEN the lifespan drain runs in-flight research
+  #   for up to shutdownDrainSeconds and cancels the rest.
+  # (Without the graceful timeout uvicorn waits forever on open SSE streams
+  # and the drain never runs.)
+  # Invariant (enforced at render time):
+  #   preStop + graceful + drain < terminationGracePeriodSeconds
+  #   (defaults: 10 + 5 + 100 = 115 < 120).
   terminationGracePeriodSeconds: 120
   preStopSleepSeconds: 10
+  gracefulShutdownSeconds: 5
   shutdownDrainSeconds: 100
   autoscaling:
     enabled: true

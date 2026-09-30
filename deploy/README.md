@@ -43,7 +43,7 @@ make k8s-down                                   # delete the cluster
 
 After code changes: `make k8s-build && make k8s-deploy`.
 
-`.env` becomes the `ara-secrets` Secret as-is. Values in `.env` must be unquoted (`KEY=value`, not `KEY=\"value\"`): `kubectl --from-env-file` and the image build keep quote characters literally. If it contains
+`.env` becomes the `ara-secrets` Secret as-is. Values in `.env` must be unquoted (`KEY=value`, not `KEY="value"`): `kubectl --from-env-file` and the image build keep quote characters literally. If it contains
 `ANTHROPIC_API_KEY`, the cluster has the owner-key free tier (production does
 not). Chart `config:` values override same-named `.env` keys.
 
@@ -65,11 +65,19 @@ the logs.
 
 ## What each lifecycle setting does
 
+Order on pod termination: preStop sleep, then SIGTERM, then uvicorn stops
+accepting and waits up to `gracefulShutdownSeconds` for open streams before
+closing them, then the lifespan drains in-flight runs for up to
+`shutdownDrainSeconds` and cancels the rest. The chart refuses to render
+unless `preStopSleepSeconds + gracefulShutdownSeconds + shutdownDrainSeconds
+< terminationGracePeriodSeconds` (defaults: 10 + 5 + 100 = 115 < 120).
+
 | Setting | Default | Why |
 |---|---|---|
 | `backend.preStopSleepSeconds` | 10 | Pod leaves the Service endpoints before SIGTERM, so no new stream lands on a dying pod |
 | `backend.terminationGracePeriodSeconds` | 120 | Upper bound on the whole shutdown before SIGKILL |
-| `backend.shutdownDrainSeconds` | 100 | After uvicorn stops accepting connections, the app waits this long for in-flight research runs, then cancels the rest. Must be < grace − preStop (the chart refuses to render otherwise) |
+| `backend.gracefulShutdownSeconds` | 5 | After SIGTERM uvicorn stops accepting connections and waits up to this long for open SSE streams, then closes them. Without it uvicorn waits forever on open streams and the drain below never runs |
+| `backend.shutdownDrainSeconds` | 100 | The lifespan then waits this long for in-flight research runs and cancels the rest; cancelled runs are recorded as status `error` "Run interrupted by server shutdown" and viewers get a terminal `error` event (stage `runtime`). |
 | ingress `proxy-buffering: off` | — | nginx would otherwise batch SSE events |
 | ingress `proxy-read-timeout: 3600` | — | The default 60s cuts long runs |
 | HPA `scaleDownStabilizationSeconds` | 300 | Scale-down waits instead of removing pods mid-run |
@@ -87,7 +95,9 @@ Start a run, find its pod, then `kubectl delete pod <pod> --grace-period=0 --for
 
 Expected: the run dies with the pod (runs are not persisted jobs), and the
 viewer's stream stops receiving events, even when the stream is served by the
-other pod. This documents the known limit; see Next steps.
+other pod. The report stays `running` after a force-kill (nothing gets to
+close it), in contrast with drained or cancelled runs, which end as `error`.
+This documents the known limit; see Next steps.
 
 | Trial | Stream served by same pod? | What the viewer saw | Report status after |
 |---|---|---|---|
@@ -102,6 +112,7 @@ Protections off:
 helm upgrade ara deploy/helm/ara \
   --set backend.terminationGracePeriodSeconds=30 \
   --set backend.preStopSleepSeconds=0 \
+  --set backend.gracefulShutdownSeconds=0 \
   --set backend.shutdownDrainSeconds=0
 ```
 

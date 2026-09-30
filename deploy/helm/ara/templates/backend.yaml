@@ -1,6 +1,6 @@
 {{- $b := .Values.backend }}
-{{- if ge (int $b.shutdownDrainSeconds) (sub (int $b.terminationGracePeriodSeconds) (int $b.preStopSleepSeconds) | int) }}
-{{- fail "backend.shutdownDrainSeconds must be < terminationGracePeriodSeconds - preStopSleepSeconds (unless all protections are off: set drain to 0)" }}
+{{- if ge (add (int $b.preStopSleepSeconds) (int $b.gracefulShutdownSeconds) (int $b.shutdownDrainSeconds)) (int $b.terminationGracePeriodSeconds) }}
+{{- fail "shutdown budget exceeded: preStopSleepSeconds + gracefulShutdownSeconds + shutdownDrainSeconds must be < terminationGracePeriodSeconds" }}
 {{- end }}
 apiVersion: apps/v1
 kind: Deployment
