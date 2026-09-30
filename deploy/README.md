@@ -22,7 +22,7 @@ talks to the same Supabase project.
 
 One-time Supabase step for Google sign-in on the cluster: Supabase dashboard →
 Authentication → URL Configuration → Redirect URLs → add
-`http://ara.localtest.me:8080/**`.
+`http://ara.localtest.me:8088/**`.
 
 ## Up and running
 
@@ -32,7 +32,7 @@ make k8s-build    # build both images, load them into kind
 make k8s-deploy   # Secret from .env, helm upgrade --install, wait for rollout
 ```
 
-Open http://ara.localtest.me:8080 (`localtest.me` resolves to 127.0.0.1).
+Open http://ara.localtest.me:8088 (`localtest.me` resolves to 127.0.0.1).
 
 ```bash
 kubectl get pods -o wide
