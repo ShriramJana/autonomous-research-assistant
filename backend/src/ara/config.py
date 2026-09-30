@@ -36,6 +36,10 @@ class Settings(BaseSettings):
     # Per-report SSE ring buffer (reconnect continuity)
     ara_event_buffer_size: int = 50
 
+    # Graceful shutdown: how long lifespan waits for in-flight research runs.
+    # Keep below (k8s terminationGracePeriodSeconds - preStop sleep).
+    ara_shutdown_drain_seconds: float = 100.0
+
     # Supabase (auth + persistence)
     supabase_url: str = Field(default="")
     supabase_db_url: str = Field(default="")
