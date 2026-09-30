@@ -31,6 +31,7 @@ def create_app() -> FastAPI:
         logging.basicConfig(
             level=logging.INFO, format="%(levelname)s:     %(name)s - %(message)s"
         )
+        logging.getLogger("httpx").setLevel(logging.WARNING)
         doorbell: EventDoorbell | None = None
         if settings.supabase_db_url:
             db_url = settings.supabase_db_url

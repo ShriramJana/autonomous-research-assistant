@@ -468,3 +468,8 @@ async def test_cancelled_run_is_closed_as_error() -> None:
     assert state.closed
     assert state.status == "error"
     assert state.error_message == "Run interrupted by server shutdown"
+    # Viewers get a terminal event, not a silent stream end.
+    errors = [e for e in state.buffer if isinstance(e, ErrorEvent)]
+    assert [(e.stage, e.message) for e in errors] == [
+        ("runtime", "Run interrupted by server shutdown")
+    ]

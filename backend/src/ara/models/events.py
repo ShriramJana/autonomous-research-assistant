@@ -14,7 +14,7 @@ from pydantic import BaseModel, Field, TypeAdapter
 
 from ara.models.research import FinalReport, ResearchPlan, SubQueryFinding
 
-ErrorStage = Literal["plan", "research", "synthesis"]
+ErrorStage = Literal["plan", "research", "synthesis", "runtime"]
 
 
 class PlanReady(BaseModel):

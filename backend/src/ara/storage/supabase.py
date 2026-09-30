@@ -16,11 +16,10 @@ events. NOTIFY reaches every replica; the payload is just the report id and
 Ordering: researchers run in parallel, so two put_events for one report can
 be in flight at once. Ids are assigned at INSERT but become visible at
 commit; if id 11 committed before id 10, a subscriber would advance past 10
-and never see it. A per-report asyncio.Lock serializes each single-statement insert (which
-autocommits before the call returns). All
-of a run's writes come from the one process running it, so this makes
-commit order equal id order per report, and ``id > last_id`` is
-exactly-once.
+and never see it. A per-report asyncio.Lock serializes the inserts: each is
+a single statement that autocommits before the call returns. All of a run's writes
+come from the one process running it, so this makes commit order equal id
+order per report, and ``id > last_id`` is exactly-once.
 
 Termination: rows and ``reports.status`` are read in one statement (one
 snapshot). The subscriber exits only after a read that shows the report
@@ -182,6 +181,7 @@ class SupabaseReportStore:
         # read and the wait is not lost (the event stays set).
         bell = self._doorbell.register(report_id)
         try:
+            # status None (unknown report) is not "running", so the stream ends.
             status, events = await self._fetch(_TAIL_SQL, report_id, _REPLAY_TAIL)
             last_id = _NO_ID
             for event_id, event in events:
