@@ -46,4 +46,4 @@ ingress:
 # Non-secret, cluster-specific settings. Listed after the Secret in envFrom,
 # so these override same-named keys from .env.
 config:
-  ARA_CORS_ORIGINS: "http://ara.localtest.me:8080"
+  ARA_CORS_ORIGINS: "http://ara.localtest.me:8088"
