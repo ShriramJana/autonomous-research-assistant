@@ -2,7 +2,7 @@
 
 Persistence per Protocol method:
 - create:    INSERT into reports
-- put_event: INSERT into report_events + pg_notify('ara_events', report_id)
+- put_event: one statement: INSERT into report_events + pg_notify('ara_events', id)
 - subscribe: replay the last N events, then re-read rows newer than the
              last seen id whenever the doorbell rings (or every
              ``poll_interval`` seconds), until the report is closed
@@ -15,8 +15,9 @@ events. NOTIFY reaches every replica; the payload is just the report id and
 
 Ordering: researchers run in parallel, so two put_events for one report can
 be in flight at once. Ids are assigned at INSERT but become visible at
-COMMIT; if id 11 committed before id 10, a subscriber would advance past 10
-and never see it. A per-report asyncio.Lock serializes insert+commit. All
+commit; if id 11 committed before id 10, a subscriber would advance past 10
+and never see it. A per-report asyncio.Lock serializes each single-statement insert (which
+autocommits before the call returns). All
 of a run's writes come from the one process running it, so this makes
 commit order equal id order per report, and ``id > last_id`` is
 exactly-once.
@@ -70,6 +71,14 @@ left join lateral (
 ) e on true
 where r.id = $1
 order by e.id asc
+"""
+
+# One statement = atomic + autocommit; NOTIFY is delivered on commit.
+_PUT_EVENT_SQL = """
+with ins as (
+  insert into report_events (report_id, event) values ($1, $2::jsonb)
+)
+select pg_notify($3, $1::text)
 """
 
 _Fetched = tuple[str | None, list[tuple[int, ResearchEvent]]]
@@ -129,17 +138,8 @@ class SupabaseReportStore:
 
     async def put_event(self, report_id: UUID, event: ResearchEvent) -> None:
         payload_json = event.model_dump_json()
-        async with (
-            self._write_lock(report_id),
-            self._pool.acquire() as conn,
-            conn.transaction(),
-        ):
-            await conn.execute(
-                "insert into report_events (report_id, event) values ($1, $2::jsonb)",
-                report_id,
-                payload_json,
-            )
-            await conn.execute("select pg_notify($1, $2)", CHANNEL, str(report_id))
+        async with self._write_lock(report_id), self._pool.acquire() as conn:
+            await conn.execute(_PUT_EVENT_SQL, report_id, payload_json, CHANNEL)
 
     async def close(
         self,
@@ -152,28 +152,30 @@ class SupabaseReportStore:
         tavily_searches: int = 0,
     ) -> None:
         payload_json = report_payload.model_dump_json() if report_payload else None
-        async with (
-            self._write_lock(report_id),
-            self._pool.acquire() as conn,
-            conn.transaction(),
-        ):
-            await conn.execute(
-                """
-                        update reports
-                        set status = $2, cost_usd = $3, report_payload = $4::jsonb,
-                            error_message = $5, tavily_searches = $6,
-                            completed_at = now()
-                        where id = $1
-                        """,
-                report_id,
-                status,
-                cost_usd,
-                payload_json,
-                error_message,
-                tavily_searches,
-            )
-            await conn.execute("select pg_notify($1, $2)", CHANNEL, str(report_id))
-        self._write_locks.pop(report_id, None)
+        try:
+            async with (
+                self._write_lock(report_id),
+                self._pool.acquire() as conn,
+                conn.transaction(),
+            ):
+                await conn.execute(
+                    """
+                    update reports
+                    set status = $2, cost_usd = $3, report_payload = $4::jsonb,
+                        error_message = $5, tavily_searches = $6,
+                        completed_at = now()
+                    where id = $1
+                    """,
+                    report_id,
+                    status,
+                    cost_usd,
+                    payload_json,
+                    error_message,
+                    tavily_searches,
+                )
+                await conn.execute("select pg_notify($1, $2)", CHANNEL, str(report_id))
+        finally:
+            self._write_locks.pop(report_id, None)
 
     async def subscribe(self, report_id: UUID) -> AsyncIterator[ResearchEvent]:
         # Register BEFORE the first read so a NOTIFY landing between the
