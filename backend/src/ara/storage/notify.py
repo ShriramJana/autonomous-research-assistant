@@ -84,10 +84,12 @@ class EventDoorbell:
             task.cancel()
             with contextlib.suppress(asyncio.CancelledError):
                 await task
-        conn, self._conn = self._conn, None
-        if conn is not None:
-            await conn.close()
-        self.connected.clear()
+        try:
+            conn, self._conn = self._conn, None
+            if conn is not None:
+                await conn.close()
+        finally:
+            self.connected.clear()
 
     def _on_notify(self, _conn: Any, _pid: int, _channel: str, payload: str) -> None:
         self.dispatch(payload)
@@ -99,6 +101,7 @@ class EventDoorbell:
             lost = asyncio.Event()
             try:
                 conn = await self._connect()
+                self._conn = conn
                 conn.add_termination_listener(lambda _c, e=lost: e.set())
                 await conn.add_listener(CHANNEL, self._on_notify)
             except Exception:
@@ -107,6 +110,7 @@ class EventDoorbell:
                     backoff,
                     exc_info=True,
                 )
+                self._conn = None
                 if conn is not None:
                     with contextlib.suppress(Exception):
                         await conn.close()
@@ -114,7 +118,6 @@ class EventDoorbell:
                 backoff = min(backoff * 2, self._max_backoff)
                 continue
 
-            self._conn = conn
             backoff = self._initial_backoff
             self.connected.set()
             self.wake_all()
