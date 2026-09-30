@@ -183,3 +183,15 @@ frontend/
 - Redis / Celery / any external broker
 - LangChain (LangGraph only — DAG orchestration)
 - LiteLLM or any LLM abstraction layer (Anthropic SDK directly)
+
+## Live events across processes
+
+Any backend replica can serve a report's SSE stream, but only the replica
+running the research writes its events. `SupabaseReportStore.put_event`
+inserts into `report_events` and calls `pg_notify('ara_events', report_id)` in
+the same transaction. Each process holds one LISTEN connection
+(`ara.storage.notify.EventDoorbell`) that wakes local subscribers for that
+report; they re-read rows with `id > last_seen`, falling back to a 2s poll if
+the listener is down. A per-report write lock keeps commit order equal to id
+order when parallel researchers emit at once. See `deploy/README.md` for how
+this plays out on Kubernetes.

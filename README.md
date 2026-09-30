@@ -88,6 +88,8 @@ Backend on `:8000`, frontend on `:3000` → open <http://localhost:3000>.
     --no-cpu-throttling --cpu-boost --memory 1Gi
   ```
 
+- **Local Kubernetes** (kind + Helm, 2+ backend replicas): see [deploy/README.md](./deploy/README.md) for the runbook and the resilience experiments.
+
 ## License
 
 [MIT](./LICENSE) © 2026 Shriram Jana
