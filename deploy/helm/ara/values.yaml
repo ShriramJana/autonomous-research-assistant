@@ -1,0 +1,49 @@
+# Secret holding the app's env (created from the repo-root .env by
+# `make k8s-deploy`). Never put secret values in this file or in --set.
+existingSecret: ara-secrets
+
+backend:
+  image:
+    repository: ara-backend
+    tag: dev
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 8000
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: 1000m, memory: 1Gi }
+  # SSE runs are long-lived. Order on pod termination:
+  #   preStop sleep (leave Service endpoints) -> SIGTERM -> uvicorn closes
+  #   listener, waits for open streams -> lifespan drains in-flight runs.
+  # Invariant (enforced at render time): drain < grace - preStop.
+  terminationGracePeriodSeconds: 120
+  preStopSleepSeconds: 10
+  shutdownDrainSeconds: 100
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetCPUUtilizationPercentage: 70
+    # Don't yank pods out from under active research runs.
+    scaleDownStabilizationSeconds: 300
+
+frontend:
+  image:
+    repository: ara-frontend
+    tag: dev
+    pullPolicy: IfNotPresent
+  replicas: 2
+  port: 3000
+  resources:
+    requests: { cpu: 50m, memory: 128Mi }
+    limits:   { cpu: 500m, memory: 512Mi }
+
+ingress:
+  enabled: true
+  className: nginx
+  host: ara.localtest.me
+
+# Non-secret, cluster-specific settings. Listed after the Secret in envFrom,
+# so these override same-named keys from .env.
+config:
+  ARA_CORS_ORIGINS: "http://ara.localtest.me:8080"

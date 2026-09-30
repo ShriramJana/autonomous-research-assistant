@@ -1,0 +1,84 @@
+{{- $b := .Values.backend }}
+{{- if ge (int $b.shutdownDrainSeconds) (sub (int $b.terminationGracePeriodSeconds) (int $b.preStopSleepSeconds) | int) }}
+{{- fail "backend.shutdownDrainSeconds must be < terminationGracePeriodSeconds - preStopSleepSeconds (unless all protections are off: set drain to 0)" }}
+{{- end }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-backend
+  labels: { app: {{ .Release.Name }}-backend }
+spec:
+  replicas: {{ $b.replicas }}
+  selector:
+    matchLabels: { app: {{ .Release.Name }}-backend }
+  template:
+    metadata:
+      labels: { app: {{ .Release.Name }}-backend }
+    spec:
+      terminationGracePeriodSeconds: {{ $b.terminationGracePeriodSeconds }}
+      containers:
+        - name: backend
+          image: "{{ $b.image.repository }}:{{ $b.image.tag }}"
+          imagePullPolicy: {{ $b.image.pullPolicy }}
+          ports:
+            - containerPort: {{ $b.port }}
+          env:
+            - name: PORT
+              value: {{ $b.port | quote }}
+          envFrom:
+            # Later sources win: chart config overrides .env keys.
+            - secretRef:    { name: {{ .Values.existingSecret }} }
+            - configMapRef: { name: {{ .Release.Name }}-config }
+          {{- if gt (int $b.preStopSleepSeconds) 0 }}
+          lifecycle:
+            preStop:
+              # Let the endpoint leave the Service before SIGTERM so no new
+              # stream lands on a terminating pod.
+              exec:
+                command: ["sh", "-c", "sleep {{ $b.preStopSleepSeconds }}"]
+          {{- end }}
+          readinessProbe:
+            httpGet: { path: /api/health, port: {{ $b.port }} }
+            initialDelaySeconds: 3
+            periodSeconds: 5
+            failureThreshold: 2
+          livenessProbe:
+            httpGet: { path: /api/health, port: {{ $b.port }} }
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            failureThreshold: 3
+          resources: {{- toYaml $b.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-backend
+spec:
+  selector: { app: {{ .Release.Name }}-backend }
+  ports:
+    - port: {{ $b.port }}
+      targetPort: {{ $b.port }}
+{{- if $b.autoscaling.enabled }}
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-backend
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-backend
+  minReplicas: {{ $b.autoscaling.minReplicas }}
+  maxReplicas: {{ $b.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $b.autoscaling.targetCPUUtilizationPercentage }}
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: {{ $b.autoscaling.scaleDownStabilizationSeconds }}
+{{- end }}
