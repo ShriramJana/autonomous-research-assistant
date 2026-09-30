@@ -64,8 +64,9 @@ k8s-lint:
 	helm template ara deploy/helm/ara \
 	  --set backend.terminationGracePeriodSeconds=30 \
 	  --set backend.preStopSleepSeconds=0 \
+	  --set backend.gracefulShutdownSeconds=0 \
 	  --set backend.shutdownDrainSeconds=0 > /dev/null
-	! helm template ara deploy/helm/ara --set backend.shutdownDrainSeconds=115 > /dev/null 2>&1
+	helm template ara deploy/helm/ara --set backend.shutdownDrainSeconds=115 2>&1 | grep -q "shutdown budget exceeded"
 
 k8s-down:
 	kind delete cluster --name $(KIND_CLUSTER)
