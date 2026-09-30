@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import Literal
 from uuid import UUID
 
@@ -92,6 +93,11 @@ async def run_report(
     except Exception as exc:  # pragma: no cover — defense-in-depth
         status = "error"
         error_message = f"Unexpected: {exc!r}"
+    except asyncio.CancelledError:
+        # Cancelled by shutdown drain: record as error, then propagate.
+        status = "error"
+        error_message = "Run interrupted by server shutdown"
+        raise
     finally:
         await store.close(
             report_id,

@@ -7,6 +7,7 @@ handling, degraded findings, report closure) without touching Anthropic.
 
 from __future__ import annotations
 
+import asyncio
 from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
@@ -432,3 +433,38 @@ async def test_orchestrator_records_error_status_on_failure() -> None:
     assert state is not None
     assert state.status == "error"
     assert state.error_message is not None
+
+
+async def test_cancelled_run_is_closed_as_error() -> None:
+    """A run cancelled at shutdown must not be recorded as completed."""
+    store = InMemoryReportStore()
+    report_id = uuid4()
+    settings = _settings()
+    started = asyncio.Event()
+
+    async def blocking_plan(**kwargs: Any) -> ResearchPlan:
+        started.set()
+        await asyncio.Event().wait()  # never fires
+        raise AssertionError("unreachable")
+
+    with patch("ara.graph.dag.plan_research", blocking_plan):
+        task = asyncio.create_task(
+            run_report(
+                report_id=report_id,
+                question="top",
+                store=store,
+                settings=settings,
+                overrides=_overrides(settings),
+                owner_id=uuid4(),
+            )
+        )
+        await asyncio.wait_for(started.wait(), timeout=2.0)
+        task.cancel()
+        with pytest.raises(asyncio.CancelledError):
+            await task
+
+    state = store.get_state(report_id)
+    assert state is not None
+    assert state.closed
+    assert state.status == "error"
+    assert state.error_message == "Run interrupted by server shutdown"
