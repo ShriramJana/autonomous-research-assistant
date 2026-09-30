@@ -135,3 +135,23 @@ async def test_connect_failure_is_retried() -> None:
     await asyncio.wait_for(bell.connected.wait(), 1.0)
     assert calls == 2
     await bell.stop()
+
+
+async def test_stop_closes_connection_mid_add_listener() -> None:
+    """Regression: stop() must close conn even if add_listener is still awaiting."""
+    block_event = asyncio.Event()
+
+    class BlockingConn(FakeConn):
+        async def add_listener(self, channel: str, cb: Callable[..., None]) -> None:
+            # Block forever, simulating slow add_listener
+            await block_event.wait()
+
+    conn = BlockingConn()
+    bell = EventDoorbell(connector([conn]))
+    await bell.start()
+    # Wait for connect() to return (but add_listener is still blocking)
+    await _until(lambda: bell._conn is conn)
+    # Now stop() should close the connection even though add_listener didn't complete
+    await bell.stop()
+    assert conn.closed
+    assert not bell.connected.is_set()
