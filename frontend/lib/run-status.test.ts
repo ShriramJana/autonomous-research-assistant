@@ -11,6 +11,8 @@ const base: QuotaInfo = {
 
 const BYOK =
   "This live demo runs on your own API key — add an Anthropic or OpenAI key in Settings to run a report.";
+const LOCAL =
+  "Pick a model in Settings — Use Ollama (local) for a free local model, or add an Anthropic/OpenAI key.";
 
 describe("freeTierBlockMessage", () => {
   it("returns null when quota is unknown", () => {
@@ -23,6 +25,11 @@ describe("freeTierBlockMessage", () => {
 
   it("asks for a key when the server has no free tier", () => {
     expect(freeTierBlockMessage({ ...base, free_tier_available: false })).toBe(BYOK);
+    expect(freeTierBlockMessage({ ...base, free_tier_available: false }, "hosted")).toBe(BYOK);
+  });
+
+  it("points at Ollama in local mode instead of the BYOK demo copy", () => {
+    expect(freeTierBlockMessage({ ...base, free_tier_available: false }, "local")).toBe(LOCAL);
   });
 
   it("explains the site-wide cap", () => {
@@ -39,6 +46,11 @@ describe("freeTierBlockMessage", () => {
 describe("friendlyRunError", () => {
   it("maps 503 to the BYOK message", () => {
     expect(friendlyRunError(503, "API 503")).toBe(BYOK);
+    expect(friendlyRunError(503, "API 503", "hosted")).toBe(BYOK);
+  });
+
+  it("maps 503 to the local setup message in local mode", () => {
+    expect(friendlyRunError(503, "API 503", "local")).toBe(LOCAL);
   });
 
   it("maps 402 to a quota message", () => {

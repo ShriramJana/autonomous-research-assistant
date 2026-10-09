@@ -2,6 +2,8 @@
 // like the other lib/* helpers. The BYOK string is the canonical one shared
 // with the cold-start notice in research-form.tsx.
 
+import type { Mode } from "./config";
+
 export interface QuotaInfo {
   used: number;
   limit: number;
@@ -12,12 +14,23 @@ export interface QuotaInfo {
 export const BYOK_MESSAGE =
   "This live demo runs on your own API key — add an Anthropic or OpenAI key in Settings to run a report.";
 
+// Local mode has no server key either, but the free path is Ollama, not BYOK.
+export const LOCAL_SETUP_MESSAGE =
+  "Pick a model in Settings — Use Ollama (local) for a free local model, or add an Anthropic/OpenAI key.";
+
+function noKeyMessage(mode: Mode | null): string {
+  return mode === "local" ? LOCAL_SETUP_MESSAGE : BYOK_MESSAGE;
+}
+
 // Why: in production the server has no ANTHROPIC_API_KEY, so the free tier is
 // off and every "free"-provider user must bring their own key. We still cover
 // the owner-key (local/dev) exhaustion and site-wide-cap states.
-export function freeTierBlockMessage(quota: QuotaInfo | null): string | null {
+export function freeTierBlockMessage(
+  quota: QuotaInfo | null,
+  mode: Mode | null = null,
+): string | null {
   if (quota === null) return null;
-  if (!quota.free_tier_available) return BYOK_MESSAGE;
+  if (!quota.free_tier_available) return noKeyMessage(mode);
   if (quota.circuit_breaker_tripped) {
     return "Free tier is capped site-wide for this month — add your Anthropic API key in Settings to keep running reports.";
   }
@@ -27,8 +40,12 @@ export function freeTierBlockMessage(quota: QuotaInfo | null): string | null {
   return null;
 }
 
-export function friendlyRunError(status: number | undefined, fallback: string): string {
-  if (status === 503) return BYOK_MESSAGE;
+export function friendlyRunError(
+  status: number | undefined,
+  fallback: string,
+  mode: Mode | null = null,
+): string {
+  if (status === 503) return noKeyMessage(mode);
   if (status === 402) {
     return "Free-tier limit reached — add your own API key in Settings to keep running reports.";
   }

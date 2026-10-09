@@ -65,7 +65,7 @@ export function ResearchForm({
   }, []);
 
   const freeTier = activeProvider === "free";
-  const blockMsg = freeTier ? freeTierBlockMessage(quota) : null;
+  const blockMsg = freeTier ? freeTierBlockMessage(quota, mode) : null;
   const freeBlocked = blockMsg !== null;
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export function ResearchForm({
     } catch (err) {
       const status = (err as ApiError).status;
       const fallback = err instanceof Error ? err.message : "Unknown error";
-      setError(friendlyRunError(status, fallback));
+      setError(friendlyRunError(status, fallback, mode));
       setSubmitting(false);
     }
   };

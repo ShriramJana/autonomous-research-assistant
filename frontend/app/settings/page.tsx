@@ -175,6 +175,11 @@ export default function SettingsPage() {
     try {
       await putOpenAIConfig({ baseUrl, model, key });
       setOpenaiKeyInput("");
+      // Local mode: there is no server key, so "free" can never run. Saving the
+      // first model (typically Ollama) should make it the active provider.
+      if (mode === "local" && creds?.active_provider === "free") {
+        await setActiveProvider("openai");
+      }
       loadCredentials();
     } finally {
       setOpenaiSaving(false);
@@ -397,19 +402,23 @@ export default function SettingsPage() {
           ) : (
             <>
               <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    onClick={() => void onUseOllama()}
-                    className="font-mono text-xs uppercase tracking-wider"
-                  >
-                    Use Ollama (local)
-                  </Button>
-                  <span className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
-                    Runs on your machine. No API key needed.
-                  </span>
-                </div>
+                {/* Local mode only: on the hosted backend localhost:11434 is the
+                    server's own container, so an Ollama config could never work. */}
+                {mode === "local" ? (
+                  <div className="flex items-center gap-3">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => void onUseOllama()}
+                      className="font-mono text-xs uppercase tracking-wider"
+                    >
+                      Use Ollama (local)
+                    </Button>
+                    <span className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+                      Runs on your machine. No API key needed.
+                    </span>
+                  </div>
+                ) : null}
                 <div className="flex flex-col gap-1">
                   <label className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
                     Base URL
@@ -695,14 +704,17 @@ export default function SettingsPage() {
             Signed in as{" "}
             <span className="text-foreground font-mono">{user.email}</span>
           </p>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => void onSignOut()}
-            className="font-mono text-xs uppercase tracking-wider"
-          >
-            Sign out
-          </Button>
+          {/* Local mode has no session (and maybe no Supabase env) to sign out of. */}
+          {mode === "local" ? null : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => void onSignOut()}
+              className="font-mono text-xs uppercase tracking-wider"
+            >
+              Sign out
+            </Button>
+          )}
         </div>
       </section>
     </main>

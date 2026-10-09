@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { apiDelete, apiGet, apiPost } from "@/lib/api";
+import { useMode } from "@/hooks/use-mode";
 import { useUser } from "@/hooks/use-user";
 import { ResearchLive } from "@/components/research-live";
 
@@ -20,9 +21,12 @@ export function ReportPageActions({
   shareToken?: string;
 }) {
   const { user } = useUser();
+  const { mode } = useMode();
+  // Local mode: the single built-in user owns the whole install, gallery included.
   const isAdmin =
-    typeof process !== "undefined" &&
-    user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID;
+    mode === "local" ||
+    (typeof process !== "undefined" &&
+      user?.id === process.env.NEXT_PUBLIC_ADMIN_USER_ID);
   const [report, setReport] = useState<ReportDetail | null>(null);
   const [replayMode, setReplayMode] = useState(false);
 
