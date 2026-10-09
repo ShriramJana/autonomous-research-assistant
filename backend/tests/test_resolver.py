@@ -94,3 +94,48 @@ def test_decrypt_failure_propagates() -> None:
     with pytest.raises(CredentialDecryptError):
         resolve_overrides(rec, settings=_settings(), depth="standard",
                           browse_web=True, tavily_capped=False)
+
+
+def _openai_rec(**kw: object) -> CredentialRecord:
+    return _rec(
+        active_provider="openai",
+        openai_key_ciphertext=encrypt_secret("sk", key=KEY),
+        openai_base_url="http://x/v1",
+        openai_model="m",
+        **kw,
+    )
+
+
+def test_user_tavily_key_is_decrypted_into_overrides() -> None:
+    s = _settings()
+    s.tavily_api_key = "server-key"
+    rec = _openai_rec(tavily_key_ciphertext=encrypt_secret("tvly-user", key=KEY))
+    ov = resolve_overrides(rec, settings=s, depth="quick", browse_web=True, tavily_capped=False)
+    assert ov is not None and ov.tavily_api_key == "tvly-user"
+    assert ov.options.web_search_enabled is True
+
+
+def test_user_tavily_key_ignores_global_cap() -> None:
+    s = _settings()
+    s.tavily_api_key = ""
+    rec = _openai_rec(tavily_key_ciphertext=encrypt_secret("tvly-user", key=KEY))
+    ov = resolve_overrides(rec, settings=s, depth="quick", browse_web=True, tavily_capped=True)
+    assert ov is not None and ov.options.web_search_enabled is True
+
+
+def test_openai_without_any_tavily_key_disables_web_search() -> None:
+    s = _settings()
+    s.tavily_api_key = ""
+    ov = resolve_overrides(
+        _openai_rec(), settings=s, depth="quick", browse_web=True, tavily_capped=False
+    )
+    assert ov is not None and ov.tavily_api_key is None
+    assert ov.options.web_search_enabled is False
+
+
+def test_anthropic_ignores_tavily_for_web_search() -> None:
+    s = _settings()
+    s.tavily_api_key = ""
+    rec = _rec(active_provider="anthropic", anthropic_key_ciphertext=encrypt_secret("a", key=KEY))
+    ov = resolve_overrides(rec, settings=s, depth="quick", browse_web=True, tavily_capped=False)
+    assert ov is not None and ov.options.web_search_enabled is True

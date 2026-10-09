@@ -14,6 +14,12 @@ from ara.options import Depth, options_for_depth
 from ara.runtime.overrides import RuntimeOverrides
 
 
+def _user_tavily(record: CredentialRecord, settings: Settings) -> str | None:
+    if record.tavily_key_ciphertext is None:
+        return None
+    return decrypt_secret(record.tavily_key_ciphertext, key=settings.ara_encryption_key)
+
+
 def resolve_overrides(
     record: CredentialRecord | None,
     *,
@@ -35,6 +41,7 @@ def resolve_overrides(
             researcher_model=settings.claude_researcher_model,
             synthesizer_model=settings.claude_synthesizer_model,
             options=options_for_depth(depth, web_search_enabled=browse_web),
+            tavily_api_key=_user_tavily(record, settings),
         )
 
     if record.active_provider == "openai":
@@ -45,7 +52,11 @@ def resolve_overrides(
         ):
             raise CredentialError("openai is active but not fully configured")
         api_key = decrypt_secret(record.openai_key_ciphertext, key=settings.ara_encryption_key)
-        web = browse_web and not tavily_capped
+        user_tavily = _user_tavily(record, settings)
+        if user_tavily is not None:
+            web = browse_web
+        else:
+            web = browse_web and bool(settings.tavily_api_key) and not tavily_capped
         return RuntimeOverrides(
             api_key=api_key,
             planner_model=record.openai_model,
@@ -54,6 +65,7 @@ def resolve_overrides(
             options=options_for_depth(depth, web_search_enabled=web),
             provider="openai",
             base_url=record.openai_base_url,
+            tavily_api_key=user_tavily,
         )
 
     raise CredentialError(f"unknown active_provider {record.active_provider!r}")

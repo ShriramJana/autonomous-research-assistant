@@ -62,17 +62,13 @@ training knowledge and submit a structured finding via the submit_finding tool.
 Workflow:
 1. Consider the sub-query carefully using your existing knowledge.
 2. Synthesize 3-8 key facts that directly answer the sub-query.
-3. Cite canonical sources you are confident exist (e.g. the homepage of a \
-   well-known site, a canonical paper or spec). Do NOT invent specific URLs, \
-   blog posts, or papers that might not exist.
+3. Do NOT list any sources — leave "sources" empty and give each key fact an \
+   empty "source_urls" list. You cannot verify URLs without web access.
 4. Call submit_finding with your summary, key_facts, and sources.
 
 Critical constraints:
 - Acknowledge uncertainty in the summary when your knowledge may be stale.
-- Every key_fact must cite at least one URL from your sources list.
-- If you cannot think of a confident canonical source, use the root homepage \
-  of an authoritative publisher (arxiv.org, ietf.org, who.int, etc.) rather \
-  than guessing a deep link.
+- Never include URLs or sources of any kind; key facts are uncited in this mode.
 - You MUST end by calling submit_finding. Plain-text-only replies are a failure.
 """
 
@@ -242,9 +238,19 @@ async def research_sub_query(
         )
 
     try:
-        return _build_finding(sub_query.id, finding_input)
+        finding = _build_finding(sub_query.id, finding_input)
     except (ValidationError, KeyError, TypeError) as exc:
         raise ResearcherError(f"Researcher output failed validation: {exc}") from exc
+    if not web_search_enabled:
+        finding = finding.model_copy(
+            update={
+                "sources": [],
+                "key_facts": [
+                    f.model_copy(update={"citation_ids": []}) for f in finding.key_facts
+                ],
+            }
+        )
+    return finding
 
 
 async def _research_with_tavily(

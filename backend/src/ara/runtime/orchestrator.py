@@ -82,6 +82,7 @@ async def run_report(
     graph = build_graph(
         llm=llm, emit=emit, settings=settings, models=models,
         options=overrides.options, on_tavily_search=on_tavily_search,
+        tavily_api_key=overrides.tavily_api_key,
     )
 
     status: Literal["completed", "error"] = "completed"

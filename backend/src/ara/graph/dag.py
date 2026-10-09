@@ -47,6 +47,7 @@ def build_graph(
     models: GraphModels,
     options: ResearchOptions | None = None,
     on_tavily_search: OnTavilySearch | None = None,
+    tavily_api_key: str | None = None,
 ) -> Any:
     """Return a compiled LangGraph bound to `llm`, `emit`, the per-run
     `models`, and per-run `options`. Settings is still consulted for
@@ -83,7 +84,7 @@ def build_graph(
                     max_iterations=opts.max_iterations,
                     input_token_budget=settings.ara_researcher_input_token_budget,
                     web_search_enabled=opts.web_search_enabled,
-                    tavily_api_key=settings.tavily_api_key,
+                    tavily_api_key=tavily_api_key or settings.tavily_api_key,
                     on_tavily_search=on_tavily_search,
                 )
             except ResearcherError as exc:

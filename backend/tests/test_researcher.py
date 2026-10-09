@@ -502,3 +502,21 @@ async def test_researcher_offline_works_for_openai_client() -> None:
         sub_query=sq, llm=llm, model="gpt-4o", emit=emit, web_search_enabled=False
     )
     assert finding.summary == "offline."
+
+
+async def test_offline_path_drops_sources() -> None:
+    """Small models invent sources when they can't browse; offline findings carry none."""
+    finding_input = {
+        "summary": "s",
+        "key_facts": [{"statement": "f", "source_urls": ["https://example.com/"]}],
+        "sources": [{"url": "https://example.com/", "title": "Made up"}],
+    }
+    llm = _ScriptedLLM([_result(tool_uses=[_tu(SUBMIT_FINDING_TOOL_NAME, finding_input)])])
+    sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, web_search_enabled=False
+    )
+    assert finding.sources == []
+    assert finding.key_facts
+    assert all(f.citation_ids == [] for f in finding.key_facts)

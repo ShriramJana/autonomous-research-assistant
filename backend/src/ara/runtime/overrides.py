@@ -24,3 +24,4 @@ class RuntimeOverrides:
     options: ResearchOptions
     provider: str = "anthropic"
     base_url: str | None = None
+    tavily_api_key: str | None = None
