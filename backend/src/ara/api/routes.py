@@ -36,6 +36,7 @@ from ara.credentials import (
 )
 from ara.crypto import CredentialDecryptError, encrypt_secret
 from ara.db import ReportRow, ReportsRepo
+from ara.ollama import list_models as list_ollama_models
 from ara.options import Depth, depth_presets, options_for_depth
 from ara.quota import QuotaDenial, check_free_tier
 from ara.runtime.orchestrator import run_report
@@ -150,6 +151,16 @@ class QuotaResponse(BaseModel):
     free_tier_available: bool
 
 
+class OllamaModelOut(BaseModel):
+    name: str
+    size_bytes: int
+
+
+class OllamaModelsResponse(BaseModel):
+    available: bool
+    models: list[OllamaModelOut]
+
+
 # ---------- Helpers ----------
 
 
@@ -250,6 +261,17 @@ async def get_gallery(request: Request) -> list[ReportSummary]:
 @router.get("/me", response_model=MeResponse)
 async def get_me(user: User = Depends(get_current_user)) -> MeResponse:
     return MeResponse(id=user.id, email=user.email)
+
+
+@router.get("/ollama/models", response_model=OllamaModelsResponse)
+async def get_ollama_models(
+    _: User = Depends(get_current_user), settings: Settings = Depends(get_settings)
+) -> OllamaModelsResponse:
+    status_ = await list_ollama_models(settings.ollama_base_url)
+    return OllamaModelsResponse(
+        available=status_.available,
+        models=[OllamaModelOut(name=m.name, size_bytes=m.size_bytes) for m in status_.models],
+    )
 
 
 @router.get("/quota", response_model=QuotaResponse)

@@ -326,3 +326,15 @@ async def test_local_key_resolved_at_app_construction(
     finally:
         await repo.close()
         get_settings.cache_clear()
+
+
+async def test_ollama_models_endpoint_never_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    from ara.ollama import OllamaStatus
+
+    async def fake(base_url: str, *, timeout: float = 2.0) -> OllamaStatus:
+        return OllamaStatus(available=False, models=[])
+
+    monkeypatch.setattr("ara.api.routes.list_ollama_models", fake)
+    async with await _async_client() as client:
+        resp = await client.get("/api/ollama/models")
+    assert resp.status_code == 200 and resp.json() == {"available": False, "models": []}
