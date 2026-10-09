@@ -50,6 +50,12 @@ export function ReportStream({
           </div>
         ) : null}
 
+        {report && report.web_search_enabled === false ? (
+          <p className="border-primary/30 bg-primary/5 mb-6 rounded-md border px-4 py-2 font-mono text-[11px] tracking-wider">
+            Model knowledge only — no sources were browsed for this report.
+          </p>
+        ) : null}
+
         {showCompletedHeader ? (
           <div className="mb-8 flex max-w-2xl flex-col gap-3 print:hidden">
             <p className="text-primary font-mono text-[10px] uppercase tracking-[0.2em]">

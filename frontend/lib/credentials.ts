@@ -7,6 +7,7 @@ export type ActiveProvider = "free" | "anthropic" | "openai";
 export interface CredentialsState {
   active_provider: ActiveProvider;
   anthropic_configured: boolean;
+  tavily_configured: boolean;
   openai: { configured: boolean; base_url: string | null; model: string | null };
 }
 
@@ -26,3 +27,6 @@ export const deleteOpenAIConfig = () => apiDelete("/api/credentials/openai");
 
 export const setActiveProvider = (provider: ActiveProvider) =>
   apiPut("/api/credentials/active", { provider });
+
+export const putTavilyKey = (key: string) => apiPut("/api/credentials/tavily", { key });
+export const deleteTavilyKey = () => apiDelete("/api/credentials/tavily");

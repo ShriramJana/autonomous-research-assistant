@@ -16,11 +16,21 @@ import {
   type CredentialsState,
   deleteAnthropicKey,
   deleteOpenAIConfig,
+  deleteTavilyKey,
   getCredentials,
   putAnthropicKey,
   putOpenAIConfig,
+  putTavilyKey,
   setActiveProvider,
 } from "@/lib/credentials";
+import { useMode } from "@/hooks/use-mode";
+import {
+  OLLAMA_OPENAI_BASE_URL,
+  OLLAMA_PLACEHOLDER_KEY,
+  type OllamaStatus,
+  formatGb,
+  getOllamaModels,
+} from "@/lib/ollama";
 
 type LoadState =
   | { kind: "loading" }
@@ -39,6 +49,7 @@ interface Quota {
 export default function SettingsPage() {
   const router = useRouter();
   const { user, loading } = useUser();
+  const { mode } = useMode();
 
   const [state, setState] = useState<LoadState>({ kind: "loading" });
   const [quota, setQuota] = useState<Quota | null>(null);
@@ -57,6 +68,14 @@ export default function SettingsPage() {
   const [openaiModel, setOpenaiModel] = useState("");
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
   const [openaiSaving, setOpenaiSaving] = useState(false);
+
+  // Ollama preset
+  const [ollama, setOllama] = useState<OllamaStatus | null>(null);
+  const [useOllama, setUseOllama] = useState(false);
+
+  // Tavily key form
+  const [tavilyKeyInput, setTavilyKeyInput] = useState("");
+  const [tavilySaving, setTavilySaving] = useState(false);
 
   // Active provider
   const [providerSaving, setProviderSaving] = useState(false);
@@ -175,6 +194,44 @@ export default function SettingsPage() {
     }
   };
 
+  const onUseOllama = async () => {
+    setOpenaiBaseUrl(OLLAMA_OPENAI_BASE_URL);
+    setOpenaiKeyInput(OLLAMA_PLACEHOLDER_KEY);
+    setUseOllama(true);
+    try {
+      const status = await getOllamaModels();
+      setOllama(status);
+      if (status.available && status.models[0] && !openaiModel.trim()) {
+        setOpenaiModel(status.models[0].name);
+      }
+    } catch {
+      setOllama({ available: false, models: [] });
+    }
+  };
+
+  const onSaveTavily = async () => {
+    const trimmed = tavilyKeyInput.trim();
+    if (!trimmed) return;
+    setTavilySaving(true);
+    try {
+      await putTavilyKey(trimmed);
+      setTavilyKeyInput("");
+      loadCredentials();
+    } finally {
+      setTavilySaving(false);
+    }
+  };
+
+  const onClearTavily = async () => {
+    setTavilySaving(true);
+    try {
+      await deleteTavilyKey();
+      loadCredentials();
+    } finally {
+      setTavilySaving(false);
+    }
+  };
+
   const onSetActiveProvider = async (provider: ActiveProvider) => {
     setProviderSaving(true);
     try {
@@ -190,6 +247,10 @@ export default function SettingsPage() {
     await supabase.auth.signOut();
     router.push("/");
   };
+
+  const ollamaInstalled = !!ollama?.available && ollama.models.length > 0;
+  const modelIsCustom =
+    !ollama || !ollama.models.some((m) => m.name === openaiModel);
 
   if (loading) return null;
 
@@ -336,6 +397,19 @@ export default function SettingsPage() {
           ) : (
             <>
               <div className="flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    onClick={() => void onUseOllama()}
+                    className="font-mono text-xs uppercase tracking-wider"
+                  >
+                    Use Ollama (local)
+                  </Button>
+                  <span className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+                    Runs on your machine. No API key needed.
+                  </span>
+                </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
                     Base URL
@@ -350,17 +424,46 @@ export default function SettingsPage() {
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
+                  <label
+                    htmlFor="openai-model"
+                    className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider"
+                  >
                     Model
                   </label>
-                  <Input
-                    type="text"
-                    placeholder="gpt-4o"
-                    value={openaiModel}
-                    onChange={(e) => setOpenaiModel(e.target.value)}
-                    className="font-mono"
-                    autoComplete="off"
-                  />
+                  {useOllama && ollama ? (
+                    ollamaInstalled ? (
+                      <select
+                        id="openai-model"
+                        value={modelIsCustom ? "" : openaiModel}
+                        onChange={(e) => setOpenaiModel(e.target.value)}
+                        className="bg-background border-input h-9 rounded-md border px-3 font-mono text-sm"
+                      >
+                        {ollama.models.map((m) => (
+                          <option key={m.name} value={m.name}>
+                            {m.name} · {formatGb(m.size_bytes)}
+                          </option>
+                        ))}
+                        <option value="">custom…</option>
+                      </select>
+                    ) : (
+                      <p className="text-destructive font-mono text-[10px] tracking-wider">
+                        Ollama not running — install from ollama.com, then run{" "}
+                        <code>ollama pull qwen2.5:7b</code>.
+                      </p>
+                    )
+                  ) : null}
+                  {!useOllama || !ollamaInstalled || modelIsCustom ? (
+                    <Input
+                      id={useOllama && ollamaInstalled ? undefined : "openai-model"}
+                      type="text"
+                      placeholder="gpt-4o"
+                      value={openaiModel}
+                      onChange={(e) => setOpenaiModel(e.target.value)}
+                      className="font-mono"
+                      autoComplete="off"
+                      aria-label="Custom model name"
+                    />
+                  ) : null}
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
@@ -407,6 +510,59 @@ export default function SettingsPage() {
               <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
                 Key stored encrypted on server. Never returned. Base URL and
                 model are echoed back when configured.
+              </p>
+            </>
+          )}
+        </div>
+      </section>
+
+      {/* Tavily web search */}
+      <section className="mb-8">
+        <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
+          Web search (Tavily)
+        </h2>
+        <div className="bg-card flex flex-col gap-4 rounded-lg p-5">
+          {creds === null ? (
+            <Skeleton className="h-4 w-64" />
+          ) : (
+            <>
+              <Input
+                type="password"
+                value={tavilyKeyInput}
+                placeholder={
+                  creds.tavily_configured ? "•••• (enter new key to update)" : "tvly-…"
+                }
+                onChange={(e) => setTavilyKeyInput(e.target.value)}
+                className="font-mono"
+                autoComplete="off"
+                aria-label="Tavily API key"
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => void onSaveTavily()}
+                  disabled={!tavilyKeyInput.trim() || tavilySaving}
+                  className="font-mono text-xs uppercase tracking-wider"
+                >
+                  Save
+                </Button>
+                {creds.tavily_configured ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void onClearTavily()}
+                    disabled={tavilySaving}
+                    className="font-mono text-xs uppercase tracking-wider"
+                  >
+                    Clear
+                  </Button>
+                ) : null}
+              </div>
+              <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+                Used by OpenAI-compatible providers (including Ollama) to browse the web. Free
+                tier: 1,000 searches/month at tavily.com. Without a key, runs use model knowledge
+                only and say so.
+                {mode === "hosted" ? " The site's shared key is used as a fallback." : ""}
               </p>
             </>
           )}
