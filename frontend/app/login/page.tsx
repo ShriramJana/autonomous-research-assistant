@@ -79,7 +79,7 @@ export default function LoginPage() {
   useEffect(() => {
     if (mode === "local") router.replace("/");
   }, [mode, router]);
-  if (mode === "local") return null;
+  if (mode === null || mode === "local") return null;
   return (
     <main className="mx-auto max-w-md p-8 pt-20">
       <h1 className="font-mono text-2xl tracking-tight">Sign in to ARA</h1>

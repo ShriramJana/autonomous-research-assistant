@@ -6,11 +6,22 @@ import { fetchConfig, type Mode } from "@/lib/config";
 
 let modePromise: Promise<Mode> | null = null;
 
-/** Resolves once per page load; falls back to "hosted" if the backend is unreachable. */
+const CONFIG_TIMEOUT_MS = 1500;
+
+/**
+ * Resolves once per page load.
+ * - `make local` sets NEXT_PUBLIC_ARA_MODE=local, so local mode resolves with
+ *   no network call (and never waits on, or touches, Supabase).
+ * - Otherwise /api/config is raced against a short timeout: the hosted backend
+ *   is on Cloud Run with scale-to-zero (~18s cold start) and first paint must
+ *   not block on it. Timeout or error falls back to "hosted".
+ */
 export function fetchMode(): Promise<Mode> {
-  modePromise ??= fetchConfig()
-    .then((c) => c.mode)
-    .catch(() => "hosted" as const);
+  if (process.env.NEXT_PUBLIC_ARA_MODE === "local") return Promise.resolve("local");
+  modePromise ??= Promise.race([
+    fetchConfig().then((c) => c.mode),
+    new Promise<Mode>((resolve) => setTimeout(() => resolve("hosted"), CONFIG_TIMEOUT_MS)),
+  ]).catch(() => "hosted" as const);
   return modePromise;
 }
 
