@@ -100,6 +100,7 @@ class DepthPresetConfig(BaseModel):
 class ConfigResponse(BaseModel):
     models: ModelsConfig
     depth_presets: dict[str, DepthPresetConfig]
+    mode: Literal["hosted", "local"]
 
 
 class MeResponse(BaseModel):
@@ -228,6 +229,7 @@ async def get_config() -> ConfigResponse:
             synthesizer=settings.claude_synthesizer_model,
         ),
         depth_presets={d: DepthPresetConfig(**p) for d, p in depth_presets().items()},
+        mode=settings.ara_mode,
     )
 
 

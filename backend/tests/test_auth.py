@@ -21,7 +21,9 @@ from fastapi import HTTPException, Request
 
 from ara.auth import jwt as auth_jwt
 from ara.auth.dependencies import (
+    LOCAL_USER,
     _extract_cookie_token,
+    get_current_user,
     get_optional_user,
     require_admin,
 )
@@ -358,3 +360,21 @@ def test_jwks_client_is_cached_per_url() -> None:
     assert a1 is a2
     b = auth_jwt._get_jwks_client("https://other.supabase.co")
     assert b is not a1
+
+
+# --- local mode --------------------------------------------------------------
+
+
+def _bare_request() -> Request:
+    return Request({"type": "http", "headers": [], "method": "GET", "path": "/"})
+
+
+def test_local_mode_current_user_is_local_user() -> None:
+    s = Settings(ara_mode="local")
+    assert get_current_user(_bare_request(), None, s) == LOCAL_USER
+    assert get_optional_user(_bare_request(), None, s) == LOCAL_USER
+
+
+def test_local_mode_admin_passes() -> None:
+    s = Settings(ara_mode="local", admin_user_id=None)
+    assert require_admin(LOCAL_USER, s) == LOCAL_USER

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from pydantic import Field
+import os
+from typing import Literal
+
+from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -28,6 +31,23 @@ class Settings(BaseSettings):
     ara_host: str = "0.0.0.0"
     ara_port: int = 8000
     ara_cors_origins: str = "http://localhost:3000"
+
+    # Deployment mode. "local" = no auth, SQLite in ara_data_dir, loopback only.
+    ara_mode: Literal["hosted", "local"] = "hosted"
+    ara_data_dir: str = "~/.ara"
+    ollama_base_url: str = "http://localhost:11434"
+
+    @property
+    def is_local(self) -> bool:
+        return self.ara_mode == "local"
+
+    @model_validator(mode="after")
+    def _apply_local_mode(self) -> Settings:
+        self.ara_data_dir = os.path.expanduser(self.ara_data_dir)
+        if self.ara_mode == "local":
+            # An unauthenticated app must never listen on a LAN address.
+            self.ara_host = "127.0.0.1"
+        return self
 
     # Researcher guardrails
     ara_researcher_max_iterations: int = 5

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from ara.config import Settings
 
 
@@ -38,3 +40,28 @@ def test_settings_2b_defaults() -> None:
     s = Settings(_env_file=None)  # type: ignore[call-arg]
     assert s.ara_encryption_key == ""
     assert s.tavily_global_monthly_cap == 1000
+
+
+def test_mode_defaults_hosted(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("ARA_MODE", raising=False)
+    s = Settings()
+    assert s.ara_mode == "hosted"
+    assert s.is_local is False
+
+
+def test_local_mode_forces_loopback_host(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ARA_MODE", "local")
+    monkeypatch.setenv("ARA_HOST", "0.0.0.0")
+    s = Settings()
+    assert s.is_local is True
+    assert s.ara_host == "127.0.0.1"
+
+
+def test_data_dir_expands_home(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("ARA_DATA_DIR", "~/somewhere")
+    assert "~" not in Settings().ara_data_dir
+
+
+def test_ollama_base_url_default(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
+    assert Settings().ollama_base_url == "http://localhost:11434"

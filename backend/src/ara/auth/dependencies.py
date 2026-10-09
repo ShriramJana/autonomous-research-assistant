@@ -1,4 +1,4 @@
-"""FastAPI dependencies that resolve the current Supabase user.
+"""FastAPI dependencies resolving the current user (Supabase JWT, or built-in in local mode).
 
 Token sources (checked in order):
 1. ``Authorization: Bearer <jwt>`` header
@@ -24,11 +24,14 @@ import binascii
 import json
 import re
 from typing import Any
+from uuid import UUID
 
 from fastapi import Depends, Header, HTTPException, Request, status
 
 from ara.auth.jwt import User, verify_jwt
 from ara.config import Settings, get_settings
+
+LOCAL_USER = User(id=UUID("00000000-0000-4000-8000-000000000001"), email="local@ara")
 
 _SB_COOKIE_RE = re.compile(r"^sb-[A-Za-z0-9_-]+-auth-token(?:\.(\d+))?$")
 _BASE64_PREFIX = "base64-"
@@ -88,6 +91,8 @@ def get_current_user(
     authorization: str | None = Header(default=None),
     settings: Settings = Depends(get_settings),
 ) -> User:
+    if settings.is_local:
+        return LOCAL_USER
     token = _extract_token(authorization, request.cookies)
     if token is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
@@ -99,6 +104,8 @@ def get_optional_user(
     authorization: str | None = Header(default=None),
     settings: Settings = Depends(get_settings),
 ) -> User | None:
+    if settings.is_local:
+        return LOCAL_USER
     token = _extract_token(authorization, request.cookies)
     if token is None:
         return None
@@ -114,6 +121,8 @@ def require_admin(
     user: User = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
 ) -> User:
+    if settings.is_local:
+        return user
     if settings.admin_user_id is None or str(user.id) != settings.admin_user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Admin only")
     return user

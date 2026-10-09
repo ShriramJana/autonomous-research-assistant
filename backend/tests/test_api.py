@@ -255,3 +255,9 @@ async def test_stream_delivers_plan_ready_and_report_complete() -> None:
     assert "plan_ready" in event_types
     assert "researcher_complete" in event_types
     assert "report_complete" in event_types
+
+
+async def test_get_config_reports_mode() -> None:
+    async with await _async_client() as client:
+        resp = await client.get("/api/config")
+    assert resp.json()["mode"] == "hosted"
