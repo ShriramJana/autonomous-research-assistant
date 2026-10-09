@@ -351,6 +351,53 @@ async def test_create_research_skips_tavily_cap_when_user_has_tavily_key() -> No
     cap.assert_not_awaited()
 
 
+async def test_create_research_checks_tavily_cap_without_user_key() -> None:
+    """Mirror of the bypass test: with no user Tavily key the server cap is checked,
+    and a reached cap turns web search off (the run degrades to offline)."""
+    enc_key = generate_key()
+    fake_rec = CredentialRecord(
+        active_provider="openai",
+        anthropic_key_ciphertext=None,
+        openai_key_ciphertext=encrypt_secret("sk-openai-stored", key=enc_key),
+        openai_base_url="https://api.openai.com/v1",
+        openai_model="gpt-4o",
+        tavily_key_ciphertext=None,
+    )
+    cap = AsyncMock(return_value=TavilyCapStatus(used=1000, cap=1000))
+    captured: dict[str, Any] = {}
+    done = asyncio.Event()
+
+    async def fake_run_report(**kwargs: Any) -> None:
+        captured["overrides"] = kwargs["overrides"]
+        done.set()
+
+    app = create_app()
+    app.dependency_overrides[get_current_user] = lambda: _TEST_USER
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        ara_encryption_key=enc_key, tavily_api_key="tvly-server"
+    )
+    app.state.repo = object()
+
+    transport = httpx.ASGITransport(app=app)
+    with (
+        patch("ara.api.routes.get_credentials", new=AsyncMock(return_value=fake_rec)),
+        patch("ara.api.routes.check_tavily_cap", new=cap),
+        patch("ara.api.routes.run_report", fake_run_report),
+    ):
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/api/research",
+                json={"question": "q", "depth": "standard", "browse_web": True},
+            )
+        await asyncio.wait_for(done.wait(), timeout=2.0)
+
+    assert resp.status_code == 200
+    cap.assert_awaited_once()
+    ov = captured["overrides"]
+    assert ov.tavily_api_key is None
+    assert ov.options.web_search_enabled is False
+
+
 async def test_create_research_with_anthropic_active_builds_correct_overrides() -> None:
     """POST /api/research uses stored Anthropic creds (no X-Anthropic-Key header)."""
     enc_key = generate_key()

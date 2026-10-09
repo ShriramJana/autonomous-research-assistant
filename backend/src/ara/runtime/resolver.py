@@ -17,7 +17,8 @@ from ara.runtime.overrides import RuntimeOverrides
 def _user_tavily(record: CredentialRecord, settings: Settings) -> str | None:
     if record.tavily_key_ciphertext is None:
         return None
-    return decrypt_secret(record.tavily_key_ciphertext, key=settings.ara_encryption_key)
+    key = decrypt_secret(record.tavily_key_ciphertext, key=settings.ara_encryption_key)
+    return key if key.strip() else None
 
 
 def resolve_overrides(
@@ -41,7 +42,9 @@ def resolve_overrides(
             researcher_model=settings.claude_researcher_model,
             synthesizer_model=settings.claude_synthesizer_model,
             options=options_for_depth(depth, web_search_enabled=browse_web),
-            tavily_api_key=_user_tavily(record, settings),
+            # Anthropic searches server-side; never decrypt (or fail on) the unused
+            # Tavily ciphertext.
+            tavily_api_key=None,
         )
 
     if record.active_provider == "openai":

@@ -64,7 +64,7 @@ Workflow:
 2. Synthesize 3-8 key facts that directly answer the sub-query.
 3. Do NOT list any sources — leave "sources" empty and give each key fact an \
    empty "source_urls" list. You cannot verify URLs without web access.
-4. Call submit_finding with your summary, key_facts, and sources.
+4. Call submit_finding with your summary and key_facts (leave sources empty).
 
 Critical constraints:
 - Acknowledge uncertainty in the summary when your knowledge may be stale.

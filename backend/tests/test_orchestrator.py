@@ -8,6 +8,7 @@ handling, degraded findings, report closure) without touching Anthropic.
 from __future__ import annotations
 
 import asyncio
+from dataclasses import replace
 from typing import Any
 from unittest.mock import patch
 from uuid import uuid4
@@ -404,6 +405,52 @@ async def test_pipeline_records_tavily_search_count() -> None:
     state = store.get_state(report_id)
     assert state is not None
     assert state.tavily_searches == 6  # 2 per researcher x 3 sub-queries
+
+
+async def _run_counting_tavily(overrides: RuntimeOverrides) -> int:
+    """Run with researchers that each report 2 Tavily searches; return the stored count."""
+    store = InMemoryReportStore()
+    report_id = uuid4()
+    plan = _plan_with_n(3)
+    settings = _settings()
+
+    async def fake_plan(**kwargs: Any) -> ResearchPlan:
+        return plan
+
+    async def fake_research(
+        *, sub_query: SubQuery, emit: Any, on_tavily_search: Any = None, **kwargs: Any
+    ) -> SubQueryFinding:
+        if on_tavily_search is not None:
+            await on_tavily_search()
+            await on_tavily_search()
+        return SubQueryFinding(sub_query_id=sub_query.id, summary="s", key_facts=[], sources=[])
+
+    async def fake_synth(*, emit: Any, **kwargs: Any) -> FinalReport:
+        return _fake_final_report(kwargs["report_id"], kwargs["original_question"])
+
+    with (
+        patch("ara.graph.dag.plan_research", fake_plan),
+        patch("ara.graph.dag.research_sub_query", fake_research),
+        patch("ara.graph.dag.synthesize_report", fake_synth),
+    ):
+        await run_report(
+            report_id=report_id, question="top", store=store, settings=settings,
+            overrides=overrides, owner_id=uuid4(),
+        )
+    state = store.get_state(report_id)
+    assert state is not None
+    return state.tavily_searches
+
+
+async def test_server_tavily_key_searches_count_against_global_cap() -> None:
+    ov = replace(_overrides(_settings()), tavily_api_key=None)
+    assert await _run_counting_tavily(ov) == 6
+
+
+async def test_user_tavily_key_searches_are_not_counted() -> None:
+    """Spec: the global cap applies only when the server's Tavily key is used."""
+    ov = replace(_overrides(_settings()), tavily_api_key="tvly-user")
+    assert await _run_counting_tavily(ov) == 0
 
 
 @pytest.mark.asyncio

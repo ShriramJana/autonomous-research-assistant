@@ -57,6 +57,8 @@ async def repo(request: pytest.FixtureRequest, tmp_path: Path) -> AsyncIterator[
             async with pool.acquire() as conn:
                 await conn.execute("delete from reports where owner_id = $1", OWNER)
                 await conn.execute("delete from user_credentials where user_id = $1", OWNER)
+                # OWNER is a test-only user in the real auth table: remove it too.
+                await conn.execute("delete from auth.users where id = $1", OWNER)
             await pool.close()
     else:  # pragma: no cover
         raise AssertionError(request.param)
@@ -210,7 +212,9 @@ async def test_quota_sums_only_free_runs(repo: ReportsRepo) -> None:
     assert await repo.count_free_runs(OWNER, since=since) == 1  # owner-scoped: exact
     # Global sums: a shared Postgres DB may hold other users' rows, so assert lower bounds.
     assert await repo.sum_free_spend(since=since) >= 1.5 - 1e-9
-    assert await repo.sum_tavily(since=since) >= 7  # tavily counts byok runs too
+    # The repo sums every stored count, BYOK rows included; the orchestrator stores
+    # only server-key Tavily searches, so user-key searches never reach the cap.
+    assert await repo.sum_tavily(since=since) >= 7
 
 
 async def test_month_filters_exclude_older_rows(repo: ReportsRepo) -> None:

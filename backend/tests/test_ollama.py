@@ -72,3 +72,11 @@ async def test_odd_rows_are_skipped_or_defaulted_never_raise() -> None:
         ("b:2", 0),
         ("c:3", 5),
     ]
+
+
+async def test_malformed_base_url_is_unavailable() -> None:
+    # "http://bad host" only fails to connect (ConnectError); an unclosed IPv6
+    # bracket makes httpx raise InvalidURL, which is not an HTTPError.
+    for bad in ("http://[::1:11434", "http://bad host:11434"):
+        status = await list_models(bad)
+        assert status.available is False and status.models == []

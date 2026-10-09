@@ -79,9 +79,12 @@ async def run_report(
         researcher=overrides.researcher_model,
         synthesizer=overrides.synthesizer_model,
     )
+    # The global Tavily cap meters only the server's key: searches made with the
+    # user's own Tavily key are not counted (the report row keeps 0).
     graph = build_graph(
         llm=llm, emit=emit, settings=settings, models=models,
-        options=overrides.options, on_tavily_search=on_tavily_search,
+        options=overrides.options,
+        on_tavily_search=None if overrides.tavily_api_key else on_tavily_search,
         tavily_api_key=overrides.tavily_api_key,
     )
 

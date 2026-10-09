@@ -139,3 +139,25 @@ def test_anthropic_ignores_tavily_for_web_search() -> None:
     rec = _rec(active_provider="anthropic", anthropic_key_ciphertext=encrypt_secret("a", key=KEY))
     ov = resolve_overrides(rec, settings=s, depth="quick", browse_web=True, tavily_capped=False)
     assert ov is not None and ov.options.web_search_enabled is True
+
+
+def test_anthropic_never_decrypts_tavily_ciphertext() -> None:
+    """A corrupt Tavily ciphertext must not fail an Anthropic run (it is unused)."""
+    rec = _rec(
+        active_provider="anthropic",
+        anthropic_key_ciphertext=encrypt_secret("a", key=KEY),
+        tavily_key_ciphertext="not-a-valid-ciphertext",
+    )
+    ov = resolve_overrides(
+        rec, settings=_settings(), depth="quick", browse_web=True, tavily_capped=False
+    )
+    assert ov is not None and ov.tavily_api_key is None
+
+
+def test_blank_user_tavily_key_counts_as_absent() -> None:
+    s = _settings()
+    s.tavily_api_key = ""
+    rec = _openai_rec(tavily_key_ciphertext=encrypt_secret("   ", key=KEY))
+    ov = resolve_overrides(rec, settings=s, depth="quick", browse_web=True, tavily_capped=False)
+    assert ov is not None and ov.tavily_api_key is None
+    assert ov.options.web_search_enabled is False

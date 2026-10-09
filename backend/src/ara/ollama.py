@@ -41,7 +41,7 @@ async def list_models(base_url: str, *, timeout: float = 2.0) -> OllamaStatus:
             resp = await client.get(url)
             resp.raise_for_status()
             data: Any = resp.json()
-    except (httpx.HTTPError, ValueError):
+    except (httpx.HTTPError, httpx.InvalidURL, ValueError):
         return OllamaStatus(available=False, models=[])
     rows = data.get("models") if isinstance(data, dict) else None
     if not isinstance(rows, list):
