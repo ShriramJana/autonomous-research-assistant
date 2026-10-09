@@ -23,3 +23,19 @@ def test_unwritable_dir_raises_clear_error(tmp_path: Path) -> None:
             load_or_create_key(str(ro))
     finally:
         ro.chmod(0o700)
+
+
+def test_empty_key_file_is_regenerated(tmp_path: Path) -> None:
+    (tmp_path / "encryption.key").write_text("  \n")
+    key = load_or_create_key(str(tmp_path))
+    assert decrypt_secret(encrypt_secret("s", key=key), key=key) == "s"
+    assert (tmp_path / "encryption.key").read_text().strip() == key
+    assert (tmp_path / "encryption.key").stat().st_mode & 0o777 == 0o600
+    assert [p.name for p in tmp_path.iterdir()] == ["encryption.key"]
+
+
+def test_garbage_key_file_raises_and_is_left_alone(tmp_path: Path) -> None:
+    (tmp_path / "encryption.key").write_text("not-a-fernet-key")
+    with pytest.raises(RuntimeError, match=r"encryption\.key"):
+        load_or_create_key(str(tmp_path))
+    assert (tmp_path / "encryption.key").read_text() == "not-a-fernet-key"

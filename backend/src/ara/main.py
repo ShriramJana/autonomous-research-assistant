@@ -29,6 +29,10 @@ logger = logging.getLogger(__name__)
 def create_app() -> FastAPI:
     get_settings.cache_clear()
     settings = get_settings()
+    # Resolve the local key here (not in the lifespan) so it lives on this app's
+    # own freshly cached Settings and handlers see it without mutating shared state.
+    if settings.is_local and not settings.ara_encryption_key:
+        settings.ara_encryption_key = load_or_create_key(settings.ara_data_dir)
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -41,12 +45,10 @@ def create_app() -> FastAPI:
         doorbell: EventDoorbell | None = None
         if settings.is_local:
             data_dir = settings.ara_data_dir
-            if not settings.ara_encryption_key:
-                settings.ara_encryption_key = load_or_create_key(data_dir)
             repo = await SqliteReportsRepo.open(os.path.join(data_dir, "ara.db"))
             app.state.db_pool = None
             app.state.repo = repo
-            app.state.store = SqliteReportStore(repo)
+            app.state.store = SqliteReportStore(repo, buffer_size=settings.ara_event_buffer_size)
             logger.info("local mode: data in %s", data_dir)
         elif settings.supabase_db_url:
             db_url = settings.supabase_db_url
@@ -75,7 +77,7 @@ def create_app() -> FastAPI:
                 await doorbell.stop()
             if app.state.db_pool is not None:
                 await app.state.db_pool.close()
-            if settings.is_local:
+            if settings.is_local and app.state.repo is not None:
                 await app.state.repo.close()
 
     app = FastAPI(title="Autonomous Research Assistant", version="0.2.0", lifespan=lifespan)

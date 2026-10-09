@@ -25,6 +25,7 @@ from unittest.mock import AsyncMock, patch
 from uuid import UUID, uuid4
 
 import httpx
+import pytest
 
 from ara.auth import User, get_current_user, get_optional_user
 from ara.config import Settings, get_settings
@@ -302,3 +303,26 @@ async def test_local_mode_free_provider_run_is_503(tmp_path: Path) -> None:
     async with _local_client(tmp_path) as client:
         resp = await client.post("/api/research", json={"question": "why?"})
     assert resp.status_code == 503
+
+
+async def test_local_key_resolved_at_app_construction(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Key is visible to handlers after create_app() alone — no lifespan run."""
+    from ara.db.sqlite import SqliteReportsRepo
+
+    monkeypatch.setenv("ARA_MODE", "local")
+    monkeypatch.setenv("ARA_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("ARA_ENCRYPTION_KEY", "")
+    app = create_app()
+    repo = await SqliteReportsRepo.open(str(tmp_path / "ara.db"))
+    app.state.repo = repo
+    try:
+        transport = httpx.ASGITransport(app=app)
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.put("/api/credentials/anthropic", json={"key": "sk-ant-test"})
+        assert resp.status_code == 204
+        assert (tmp_path / "encryption.key").exists()
+    finally:
+        await repo.close()
+        get_settings.cache_clear()
