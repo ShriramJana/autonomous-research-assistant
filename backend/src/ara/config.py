@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+from functools import lru_cache
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -77,5 +78,6 @@ class Settings(BaseSettings):
         return [o.strip() for o in self.ara_cors_origins.split(",") if o.strip()]
 
 
+@lru_cache
 def get_settings() -> Settings:
     return Settings()

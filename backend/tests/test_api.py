@@ -17,6 +17,9 @@ test_credentials_api.py).
 from __future__ import annotations
 
 import json
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, patch
 from uuid import UUID, uuid4
@@ -25,6 +28,7 @@ import httpx
 
 from ara.auth import User, get_current_user, get_optional_user
 from ara.config import Settings, get_settings
+from ara.crypto import generate_key
 from ara.main import create_app
 from ara.models.research import (
     FinalReport,
@@ -261,3 +265,40 @@ async def test_get_config_reports_mode() -> None:
     async with await _async_client() as client:
         resp = await client.get("/api/config")
     assert resp.json()["mode"] == "hosted"
+
+
+@asynccontextmanager
+async def _local_client(tmp_path: Path) -> AsyncIterator[httpx.AsyncClient]:
+    """Local mode: no auth overrides at all — LOCAL_USER must come from settings."""
+    from ara.db.sqlite import SqliteReportsRepo
+    from ara.storage.sqlite import SqliteReportStore
+
+    app = create_app()
+    repo = await SqliteReportsRepo.open(str(tmp_path / "ara.db"))
+    app.state.repo = repo
+    app.state.store = SqliteReportStore(repo)
+    app.dependency_overrides[get_settings] = lambda: Settings(
+        ara_mode="local", ara_encryption_key=generate_key(), anthropic_api_key=""
+    )  # anthropic_api_key="" overrides any value read from ../.env
+    transport = httpx.ASGITransport(app=app)
+    try:
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            yield client
+    finally:
+        await repo.close()
+
+
+async def test_local_mode_endpoints_need_no_token(tmp_path: Path) -> None:
+    async with _local_client(tmp_path) as client:
+        me = await client.get("/api/me")
+        assert me.status_code == 200 and me.json()["email"] == "local@ara"
+        assert (await client.get("/api/reports")).json() == []
+        assert (await client.get("/api/credentials")).status_code == 200
+        quota = await client.get("/api/quota")
+        assert quota.status_code == 200 and quota.json()["free_tier_available"] is False
+
+
+async def test_local_mode_free_provider_run_is_503(tmp_path: Path) -> None:
+    async with _local_client(tmp_path) as client:
+        resp = await client.post("/api/research", json={"question": "why?"})
+    assert resp.status_code == 503

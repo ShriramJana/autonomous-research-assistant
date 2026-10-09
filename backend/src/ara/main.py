@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -14,15 +15,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from ara.api.routes import router
 from ara.config import get_settings
 from ara.db.postgres import PostgresReportsRepo
+from ara.db.sqlite import SqliteReportsRepo
+from ara.localkey import load_or_create_key
 from ara.shutdown import drain_tasks
 from ara.storage.memory import InMemoryReportStore
 from ara.storage.notify import EventDoorbell
+from ara.storage.sqlite import SqliteReportStore
 from ara.storage.supabase import SupabaseReportStore
 
 logger = logging.getLogger(__name__)
 
 
 def create_app() -> FastAPI:
+    get_settings.cache_clear()
     settings = get_settings()
 
     @asynccontextmanager
@@ -34,7 +39,16 @@ def create_app() -> FastAPI:
         )
         logging.getLogger("httpx").setLevel(logging.WARNING)
         doorbell: EventDoorbell | None = None
-        if settings.supabase_db_url:
+        if settings.is_local:
+            data_dir = settings.ara_data_dir
+            if not settings.ara_encryption_key:
+                settings.ara_encryption_key = load_or_create_key(data_dir)
+            repo = await SqliteReportsRepo.open(os.path.join(data_dir, "ara.db"))
+            app.state.db_pool = None
+            app.state.repo = repo
+            app.state.store = SqliteReportStore(repo)
+            logger.info("local mode: data in %s", data_dir)
+        elif settings.supabase_db_url:
             db_url = settings.supabase_db_url
             app.state.db_pool = await asyncpg.create_pool(db_url, min_size=1, max_size=10)
             app.state.repo = PostgresReportsRepo(app.state.db_pool)
@@ -61,6 +75,8 @@ def create_app() -> FastAPI:
                 await doorbell.stop()
             if app.state.db_pool is not None:
                 await app.state.db_pool.close()
+            if settings.is_local:
+                await app.state.repo.close()
 
     app = FastAPI(title="Autonomous Research Assistant", version="0.2.0", lifespan=lifespan)
     # Eager state init so TestClient without `with` still works.
