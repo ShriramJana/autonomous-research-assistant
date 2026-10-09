@@ -90,7 +90,9 @@ def _fakes() -> tuple[Any, Any, Any]:
     return fake_plan, fake_research, fake_synth
 
 
-async def _async_client() -> httpx.AsyncClient:
+async def _async_client(
+    client_addr: tuple[str, int] = ("127.0.0.1", 123),
+) -> httpx.AsyncClient:
     app = create_app()
     # Bypass Supabase auth in tests by force-injecting a stable fake user.
     app.dependency_overrides[get_current_user] = lambda: _TEST_USER
@@ -106,7 +108,7 @@ async def _async_client() -> httpx.AsyncClient:
     # sentinel repo so the 503 gate passes; get_credentials is patched in
     # each test so the sentinel repo is never actually used for DB calls.
     app.state.repo = object()
-    transport = httpx.ASGITransport(app=app)
+    transport = httpx.ASGITransport(app=app, client=client_addr)
     return httpx.AsyncClient(transport=transport, base_url="http://test")
 
 
@@ -338,3 +340,64 @@ async def test_ollama_models_endpoint_never_errors(monkeypatch: pytest.MonkeyPat
     async with await _async_client() as client:
         resp = await client.get("/api/ollama/models")
     assert resp.status_code == 200 and resp.json() == {"available": False, "models": []}
+
+
+async def test_local_mode_rejects_non_loopback_clients(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Defence in depth: even if a proxy exposes the backend, LAN peers get 403."""
+    from ara.db.sqlite import SqliteReportsRepo
+
+    monkeypatch.setenv("ARA_MODE", "local")
+    monkeypatch.setenv("ARA_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("ARA_ENCRYPTION_KEY", generate_key())
+    app = create_app()
+    repo = await SqliteReportsRepo.open(str(tmp_path / "ara.db"))
+    app.state.repo = repo
+    try:
+        lan = httpx.ASGITransport(app=app, client=("192.168.1.9", 50000))
+        async with httpx.AsyncClient(transport=lan, base_url="http://test") as client:
+            blocked = await client.get("/api/me")
+        assert blocked.status_code == 403
+        assert blocked.json() == {"detail": "Local mode accepts loopback connections only"}
+
+        loop = httpx.ASGITransport(app=app, client=("127.0.0.1", 50000))
+        async with httpx.AsyncClient(transport=loop, base_url="http://test") as client:
+            ok = await client.get("/api/me")
+        assert ok.status_code == 200 and ok.json()["email"] == "local@ara"
+    finally:
+        await repo.close()
+        get_settings.cache_clear()
+
+
+async def test_hosted_mode_does_not_block_lan_clients() -> None:
+    async with await _async_client(client_addr=("192.168.1.9", 50000)) as client:
+        resp = await client.get("/api/me")
+    assert resp.status_code == 200
+
+
+async def test_local_lifespan_sweeps_orphaned_running_reports(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from ara.db.sqlite import SqliteReportsRepo
+
+    seed = await SqliteReportsRepo.open(str(tmp_path / "ara.db"))
+    rid = uuid4()
+    await seed.create_report(
+        rid, owner_id=uuid4(), question="q", depth="quick", browse_web=False, used_byok=False
+    )
+    await seed.close()
+
+    monkeypatch.setenv("ARA_MODE", "local")
+    monkeypatch.setenv("ARA_DATA_DIR", str(tmp_path))
+    monkeypatch.setenv("ARA_ENCRYPTION_KEY", generate_key())
+    app = create_app()
+    try:
+        async with app.router.lifespan_context(app):
+            row = await app.state.repo.get_report(rid)
+        assert row is not None and row.status == "error"
+        assert row.error_message == (
+            "Interrupted: the server stopped while this report was running"
+        )
+    finally:
+        get_settings.cache_clear()

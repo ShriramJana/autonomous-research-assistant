@@ -58,7 +58,8 @@ class SqliteReportsRepo:
 
     @classmethod
     async def open(cls, path: str) -> SqliteReportsRepo:
-        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        # The database holds credential ciphertexts: keep the data dir owner-only.
+        Path(path).parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         conn = await aiosqlite.connect(path)
         conn.row_factory = aiosqlite.Row
         await conn.execute("pragma journal_mode=wal")
@@ -131,6 +132,18 @@ class SqliteReportsRepo:
                 status, cost_usd, report_payload_json, error_message,
                 tavily_searches, _now(), str(report_id),
             ),
+        )
+
+    async def fail_running_reports(self, error_message: str) -> int:
+        """Startup sweep (SQLite only): close rows left `running` by a previous process.
+
+        In local mode there is exactly one process, so any `running` row at startup
+        was orphaned by a stop/crash and would otherwise stay `running` forever.
+        """
+        return await self._run(
+            "update reports set status = 'error', error_message = ?, completed_at = ? "
+            "where status = 'running'",
+            (error_message, _now()),
         )
 
     async def get_report(self, report_id: UUID) -> ReportRow | None:

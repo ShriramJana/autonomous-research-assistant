@@ -29,7 +29,7 @@ def load_or_create_key(data_dir: str) -> str:
                     ) from exc
                 return existing
             # Empty/whitespace: nothing can depend on it; fall through and regenerate.
-        path.parent.mkdir(parents=True, exist_ok=True)
+        path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
         key = generate_key()
         # Write a temp file in the same dir (mkstemp is 0600), then atomically
         # replace, so a half-written key file never exists.

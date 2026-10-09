@@ -65,3 +65,21 @@ def test_data_dir_expands_home(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_ollama_base_url_default(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.delenv("OLLAMA_BASE_URL", raising=False)
     assert Settings().ollama_base_url == "http://localhost:11434"
+
+
+@pytest.mark.parametrize("marker", ["K_SERVICE", "KUBERNETES_SERVICE_HOST"])
+def test_local_mode_refused_on_hosted_runtime(
+    monkeypatch: pytest.MonkeyPatch, marker: str
+) -> None:
+    from pydantic import ValidationError
+
+    monkeypatch.setenv("ARA_MODE", "local")
+    monkeypatch.setenv(marker, "x")
+    with pytest.raises(ValidationError, match="not allowed on a hosted runtime"):
+        Settings()
+
+
+def test_hosted_mode_fine_on_hosted_runtime(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("ARA_MODE", raising=False)
+    monkeypatch.setenv("K_SERVICE", "ara-backend")
+    assert Settings().is_local is False

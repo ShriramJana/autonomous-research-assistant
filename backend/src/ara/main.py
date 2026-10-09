@@ -5,12 +5,13 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 
 import asyncpg
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from ara.api.routes import router
 from ara.config import get_settings
@@ -24,6 +25,32 @@ from ara.storage.sqlite import SqliteReportStore
 from ara.storage.supabase import SupabaseReportStore
 
 logger = logging.getLogger(__name__)
+
+_LOOPBACK_HOSTS = frozenset({"127.0.0.1", "::1", "localhost"})
+_INTERRUPTED_MESSAGE = "Interrupted: the server stopped while this report was running"
+
+
+async def _loopback_only(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
+    """Local mode has no auth: refuse any peer that is not this machine, even if
+    something (a dev server, a proxy) exposes the port. Only the direct peer
+    address counts; x-forwarded-for is deliberately ignored."""
+    if request.client is not None and request.client.host not in _LOOPBACK_HOSTS:
+        return JSONResponse(
+            {"detail": "Local mode accepts loopback connections only"}, status_code=403
+        )
+    return await call_next(request)
+
+
+async def _open_local_repo(data_dir: str) -> SqliteReportsRepo:
+    repo = await SqliteReportsRepo.open(os.path.join(data_dir, "ara.db"))
+    # One process owns this database, so any row still `running` was orphaned by a
+    # previous stop/crash; close it so it never shows as running forever.
+    swept = await repo.fail_running_reports(_INTERRUPTED_MESSAGE)
+    if swept:
+        logger.info("local mode: marked %d interrupted report(s) as error", swept)
+    return repo
 
 
 def create_app() -> FastAPI:
@@ -45,7 +72,7 @@ def create_app() -> FastAPI:
         doorbell: EventDoorbell | None = None
         if settings.is_local:
             data_dir = settings.ara_data_dir
-            repo = await SqliteReportsRepo.open(os.path.join(data_dir, "ara.db"))
+            repo = await _open_local_repo(data_dir)
             app.state.db_pool = None
             app.state.repo = repo
             app.state.store = SqliteReportStore(repo, buffer_size=settings.ara_event_buffer_size)
@@ -87,6 +114,9 @@ def create_app() -> FastAPI:
     app.state.store = InMemoryReportStore(buffer_size=settings.ara_event_buffer_size)
     tasks: set[asyncio.Task[None]] = set()
     app.state.tasks = tasks
+
+    if settings.is_local:
+        app.middleware("http")(_loopback_only)
 
     app.add_middleware(
         CORSMiddleware,

@@ -99,3 +99,64 @@ async def test_put_after_close_is_ignored(repo: SqliteReportsRepo) -> None:
     await store.close(rid, status="error", error_message="x")
     await store.put_event(rid, PlanReady(plan=_plan()))
     assert await repo.replay_events(rid) == []
+
+
+async def test_live_state_exists_before_row_is_written(
+    repo: SqliteReportsRepo, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A stream request that sees the row must also find the live state."""
+    store = SqliteReportStore(repo)
+    rid = uuid4()
+    seen: list[bool] = []
+    original = repo.create_report
+
+    async def spy(report_id: UUID, **kwargs: object) -> None:
+        seen.append(store._live.get_state(report_id) is not None)
+        await original(report_id, **kwargs)  # type: ignore[arg-type]
+
+    monkeypatch.setattr(repo, "create_report", spy)
+    await store.create(rid, "q", owner_id=OWNER, depth="quick", browse_web=False, used_byok=False)
+    assert seen == [True]
+
+
+INTERRUPTED = "Interrupted: the server stopped while this report was running"
+
+
+async def test_startup_sweep_fails_orphaned_running_reports(tmp_path: Path) -> None:
+    path = str(tmp_path / "ara.db")
+    repo = await SqliteReportsRepo.open(path)
+    store = SqliteReportStore(repo)
+    orphan = await _create(store)
+    await store.put_event(orphan, PlanReady(plan=_plan()))
+    done = await _create(store)
+    await store.close(done, status="completed", cost_usd=0.1)
+    done_before = await repo.get_report(done)
+    await repo.close()  # "crash": the orphan is never closed
+
+    repo2 = await SqliteReportsRepo.open(path)
+    try:
+        assert await repo2.fail_running_reports(INTERRUPTED) == 1
+        row = await repo2.get_report(orphan)
+        assert row is not None
+        assert row.status == "error"
+        assert row.error_message == INTERRUPTED
+        assert row.completed_at is not None
+        assert await repo2.get_report(done) == done_before
+
+        store2 = SqliteReportStore(repo2)
+
+        async def drain() -> list[object]:
+            return [e async for e in store2.subscribe(orphan)]
+
+        events = await asyncio.wait_for(drain(), timeout=2)
+        assert len(events) == 1 and isinstance(events[0], PlanReady)
+        assert await repo2.fail_running_reports(INTERRUPTED) == 0
+    finally:
+        await repo2.close()
+
+
+async def test_open_creates_owner_only_data_dir(tmp_path: Path) -> None:
+    data_dir = tmp_path / "fresh"
+    r = await SqliteReportsRepo.open(str(data_dir / "ara.db"))
+    await r.close()
+    assert data_dir.stat().st_mode & 0o777 == 0o700

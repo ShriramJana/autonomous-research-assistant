@@ -39,3 +39,9 @@ def test_garbage_key_file_raises_and_is_left_alone(tmp_path: Path) -> None:
     with pytest.raises(RuntimeError, match=r"encryption\.key"):
         load_or_create_key(str(tmp_path))
     assert (tmp_path / "encryption.key").read_text() == "not-a-fernet-key"
+
+
+def test_creates_owner_only_data_dir(tmp_path: Path) -> None:
+    data_dir = tmp_path / "fresh"
+    load_or_create_key(str(data_dir))
+    assert data_dir.stat().st_mode & 0o777 == 0o700

@@ -30,12 +30,14 @@ class SqliteReportStore:
         self, report_id: UUID, question: str, *, owner_id: UUID, depth: Depth,
         browse_web: bool, used_byok: bool,
     ) -> None:
-        await self._repo.create_report(
-            report_id, owner_id=owner_id, question=question, depth=depth,
-            browse_web=browse_web, used_byok=used_byok,
-        )
+        # Live state first: a stream request that finds the row must also find the
+        # live state, or it would replay an empty tail and stop.
         await self._live.create(
             report_id, question, owner_id=owner_id, depth=depth,
+            browse_web=browse_web, used_byok=used_byok,
+        )
+        await self._repo.create_report(
+            report_id, owner_id=owner_id, question=question, depth=depth,
             browse_web=browse_web, used_byok=used_byok,
         )
 

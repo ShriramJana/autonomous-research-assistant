@@ -42,10 +42,16 @@ class Settings(BaseSettings):
     def is_local(self) -> bool:
         return self.ara_mode == "local"
 
+    # Note: nothing reads `ara_host` to bind a socket; the real loopback enforcement is
+    # the launcher's `--host 127.0.0.1` plus the loopback-only middleware in main.py.
     @model_validator(mode="after")
     def _apply_local_mode(self) -> Settings:
         self.ara_data_dir = os.path.expanduser(self.ara_data_dir)
         if self.ara_mode == "local":
+            # A stray ARA_MODE=local must never ship an unauthenticated app to
+            # Cloud Run (K_SERVICE) or Kubernetes (KUBERNETES_SERVICE_HOST).
+            if "K_SERVICE" in os.environ or "KUBERNETES_SERVICE_HOST" in os.environ:
+                raise ValueError("ARA_MODE=local is not allowed on a hosted runtime")
             # An unauthenticated app must never listen on a LAN address.
             self.ara_host = "127.0.0.1"
         return self
