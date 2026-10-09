@@ -42,11 +42,11 @@ requires_db = pytest.mark.skipif(
 async def _async_client(
     encryption_key: str | None = None,
 ) -> httpx.AsyncClient:
-    """Build an AsyncClient with auth bypassed and a sentinel db_pool."""
+    """Build an AsyncClient with auth bypassed and a sentinel repo."""
     app = create_app()
     app.dependency_overrides[get_current_user] = lambda: _TEST_USER
     app.dependency_overrides[get_optional_user] = lambda: _TEST_USER
-    app.state.db_pool = object()
+    app.state.repo = object()
 
     if encryption_key is not None:
         settings_with_key = Settings(ara_encryption_key=encryption_key)
@@ -66,7 +66,7 @@ async def test_put_anthropic_key_503_without_encryption_key() -> None:
     app = create_app()
     app.dependency_overrides[get_current_user] = lambda: _TEST_USER
     app.dependency_overrides[get_settings] = lambda: Settings(ara_encryption_key="")
-    app.state.db_pool = object()
+    app.state.repo = object()
 
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
@@ -83,7 +83,7 @@ async def test_put_openai_config_503_without_encryption_key() -> None:
     app = create_app()
     app.dependency_overrides[get_current_user] = lambda: _TEST_USER
     app.dependency_overrides[get_settings] = lambda: Settings(ara_encryption_key="")
-    app.state.db_pool = object()
+    app.state.repo = object()
 
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
@@ -119,6 +119,64 @@ async def test_get_credentials_no_record_returns_free_defaults() -> None:
     assert body["openai"]["configured"] is False
     assert body["openai"]["base_url"] is None
     assert body["openai"]["model"] is None
+    assert body["tavily_configured"] is False
+
+
+async def test_credentials_503_when_repo_missing() -> None:
+    """No repo on app.state (no DB, not local mode) → 503 with the setup hint."""
+    app = create_app()
+    app.dependency_overrides[get_current_user] = lambda: _TEST_USER
+    assert app.state.repo is None  # eager default
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.get("/api/credentials")
+    assert resp.status_code == 503
+    assert resp.json()["detail"] == (
+        "Database not configured (set SUPABASE_DB_URL or ARA_MODE=local)"
+    )
+
+
+async def test_put_tavily_key_503_without_encryption_key() -> None:
+    """PUT /api/credentials/tavily → 503 when ARA_ENCRYPTION_KEY is not set."""
+    app = create_app()
+    app.dependency_overrides[get_current_user] = lambda: _TEST_USER
+    app.dependency_overrides[get_settings] = lambda: Settings(ara_encryption_key="")
+    app.state.repo = object()
+
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+        resp = await client.put("/api/credentials/tavily", json={"key": "tvly-abc"})
+    assert resp.status_code == 503
+    assert "ARA_ENCRYPTION_KEY" in resp.json()["detail"]
+
+
+async def test_put_and_delete_tavily_key_roundtrip_via_repo() -> None:
+    import tempfile
+    from pathlib import Path
+
+    from ara.db.sqlite import SqliteReportsRepo
+
+    tmp = Path(tempfile.mkdtemp())
+    repo = await SqliteReportsRepo.open(str(tmp / "ara.db"))
+    app = create_app()
+    app.dependency_overrides[get_current_user] = lambda: _TEST_USER
+    app.dependency_overrides[get_optional_user] = lambda: _TEST_USER
+    app.state.repo = repo
+    key = generate_key()
+    app.dependency_overrides[get_settings] = lambda: Settings(ara_encryption_key=key)
+    transport = httpx.ASGITransport(app=app)
+    try:
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            r = await client.put("/api/credentials/tavily", json={"key": "tvly-abc"})
+            assert r.status_code == 204
+            r = await client.get("/api/credentials")
+            assert r.json()["tavily_configured"] is True
+            r = await client.delete("/api/credentials/tavily")
+            assert r.status_code == 204
+            r = await client.get("/api/credentials")
+            assert r.json()["tavily_configured"] is False
+    finally:
+        await repo.close()
 
 
 async def test_get_credentials_anthropic_configured() -> None:
@@ -130,6 +188,7 @@ async def test_get_credentials_anthropic_configured() -> None:
         openai_key_ciphertext=None,
         openai_base_url=None,
         openai_model=None,
+        tavily_key_ciphertext=None,
     )
     async with await _async_client() as client:
         with patch(
@@ -157,6 +216,7 @@ async def test_get_credentials_openai_configured() -> None:
         openai_key_ciphertext=encrypt_secret("sk-openai-real", key=enc_key),
         openai_base_url="https://api.openai.com/v1",
         openai_model="gpt-4o",
+        tavily_key_ciphertext=None,
     )
     async with await _async_client() as client:
         with patch(
@@ -214,6 +274,7 @@ async def test_create_research_with_openai_active_builds_correct_overrides() -> 
         openai_key_ciphertext=encrypt_secret("sk-openai-stored", key=enc_key),
         openai_base_url="https://api.openai.com/v1",
         openai_model="gpt-4o",
+        tavily_key_ciphertext=None,
     )
     fake_tavily = TavilyCapStatus(used=0, cap=1000)
 
@@ -228,7 +289,7 @@ async def test_create_research_with_openai_active_builds_correct_overrides() -> 
     app.dependency_overrides[get_current_user] = lambda: _TEST_USER
     app.dependency_overrides[get_optional_user] = lambda: _TEST_USER
     app.dependency_overrides[get_settings] = lambda: Settings(ara_encryption_key=enc_key)
-    app.state.db_pool = object()
+    app.state.repo = object()
 
     transport = httpx.ASGITransport(app=app)
     with (
@@ -251,6 +312,45 @@ async def test_create_research_with_openai_active_builds_correct_overrides() -> 
     assert ov.planner_model == ov.researcher_model == ov.synthesizer_model == "gpt-4o"
 
 
+async def test_create_research_skips_tavily_cap_when_user_has_tavily_key() -> None:
+    """The global Tavily cap only guards the server key: a user key bypasses it."""
+    enc_key = generate_key()
+    fake_rec = CredentialRecord(
+        active_provider="openai",
+        anthropic_key_ciphertext=None,
+        openai_key_ciphertext=encrypt_secret("sk-openai-stored", key=enc_key),
+        openai_base_url="https://api.openai.com/v1",
+        openai_model="gpt-4o",
+        tavily_key_ciphertext=encrypt_secret("tvly-user", key=enc_key),
+    )
+    cap = AsyncMock(return_value=TavilyCapStatus(used=1000, cap=1000))
+    done = asyncio.Event()
+
+    async def fake_run_report(**kwargs: Any) -> None:
+        done.set()
+
+    app = create_app()
+    app.dependency_overrides[get_current_user] = lambda: _TEST_USER
+    app.dependency_overrides[get_settings] = lambda: Settings(ara_encryption_key=enc_key)
+    app.state.repo = object()
+
+    transport = httpx.ASGITransport(app=app)
+    with (
+        patch("ara.api.routes.get_credentials", new=AsyncMock(return_value=fake_rec)),
+        patch("ara.api.routes.check_tavily_cap", new=cap),
+        patch("ara.api.routes.run_report", fake_run_report),
+    ):
+        async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
+            resp = await client.post(
+                "/api/research",
+                json={"question": "q", "depth": "standard", "browse_web": True},
+            )
+        await asyncio.wait_for(done.wait(), timeout=2.0)
+
+    assert resp.status_code == 200
+    cap.assert_not_awaited()
+
+
 async def test_create_research_with_anthropic_active_builds_correct_overrides() -> None:
     """POST /api/research uses stored Anthropic creds (no X-Anthropic-Key header)."""
     enc_key = generate_key()
@@ -260,6 +360,7 @@ async def test_create_research_with_anthropic_active_builds_correct_overrides() 
         openai_key_ciphertext=None,
         openai_base_url=None,
         openai_model=None,
+        tavily_key_ciphertext=None,
     )
 
     captured: dict[str, Any] = {}
@@ -273,7 +374,7 @@ async def test_create_research_with_anthropic_active_builds_correct_overrides() 
     app.dependency_overrides[get_current_user] = lambda: _TEST_USER
     app.dependency_overrides[get_optional_user] = lambda: _TEST_USER
     app.dependency_overrides[get_settings] = lambda: Settings(ara_encryption_key=enc_key)
-    app.state.db_pool = object()
+    app.state.repo = object()
 
     transport = httpx.ASGITransport(app=app)
     with (
@@ -305,12 +406,13 @@ async def test_create_research_corrupt_ciphertext_returns_400() -> None:
         openai_key_ciphertext=None,
         openai_base_url=None,
         openai_model=None,
+        tavily_key_ciphertext=None,
     )
 
     app = create_app()
     app.dependency_overrides[get_current_user] = lambda: _TEST_USER
     app.dependency_overrides[get_settings] = lambda: Settings(ara_encryption_key=enc_key)
-    app.state.db_pool = object()
+    app.state.repo = object()
 
     transport = httpx.ASGITransport(app=app)
     with patch("ara.api.routes.get_credentials", new=AsyncMock(return_value=fake_rec)):
@@ -343,7 +445,7 @@ async def test_create_research_free_tier_path_unchanged() -> None:
         anthropic_api_key="sk-ant-free-tier",
         ara_encryption_key="",
     )
-    app.state.db_pool = object()
+    app.state.repo = object()
 
     transport = httpx.ASGITransport(app=app)
     with (
@@ -374,7 +476,7 @@ async def test_credential_endpoints_require_auth() -> None:
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     app.dependency_overrides[get_current_user] = raise_401
-    app.state.db_pool = object()
+    app.state.repo = object()
 
     transport = httpx.ASGITransport(app=app)
     async with httpx.AsyncClient(transport=transport, base_url="http://test") as client:
@@ -396,3 +498,9 @@ async def test_credential_endpoints_require_auth() -> None:
             "/api/credentials/active", json={"provider": "free"}
         )
         assert resp_active.status_code == 401
+
+        resp_put_tav = await client.put("/api/credentials/tavily", json={"key": "tvly"})
+        assert resp_put_tav.status_code == 401
+
+        resp_del_tav = await client.delete("/api/credentials/tavily")
+        assert resp_del_tav.status_code == 401

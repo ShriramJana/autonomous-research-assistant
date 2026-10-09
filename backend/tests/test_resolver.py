@@ -26,6 +26,7 @@ def _rec(**kw: object) -> CredentialRecord:
         "openai_key_ciphertext": None,
         "openai_base_url": None,
         "openai_model": None,
+        "tavily_key_ciphertext": None,
     }
     base.update(kw)
     return CredentialRecord(**base)  # type: ignore[arg-type]

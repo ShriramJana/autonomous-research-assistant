@@ -15,7 +15,6 @@ from collections.abc import AsyncIterator
 from typing import Any, Literal
 from uuid import UUID, uuid4
 
-import asyncpg
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
@@ -28,12 +27,15 @@ from ara.credentials import (
     check_tavily_cap,
     clear_anthropic,
     clear_openai,
+    clear_tavily,
     get_credentials,
     set_active,
     upsert_anthropic,
     upsert_openai,
+    upsert_tavily,
 )
 from ara.crypto import CredentialDecryptError, encrypt_secret
+from ara.db import ReportRow, ReportsRepo
 from ara.options import Depth, depth_presets, options_for_depth
 from ara.quota import QuotaDenial, check_free_tier
 from ara.runtime.orchestrator import run_report
@@ -66,6 +68,10 @@ class OpenAIConfigRequest(BaseModel):
     key: str = Field(min_length=1)
 
 
+class TavilyKeyRequest(BaseModel):
+    key: str = Field(min_length=1)
+
+
 class ActiveProviderRequest(BaseModel):
     provider: Literal["free", "anthropic", "openai"]
 
@@ -80,6 +86,7 @@ class CredentialsResponse(BaseModel):
     active_provider: Literal["free", "anthropic", "openai"]
     anthropic_configured: bool
     openai: OpenAIConfigStatus
+    tavily_configured: bool
 
 
 class CreateResearchResponse(BaseModel):
@@ -146,14 +153,15 @@ class QuotaResponse(BaseModel):
 # ---------- Helpers ----------
 
 
-def _pool_or_503(request: Request) -> asyncpg.Pool:
-    pool = request.app.state.db_pool
-    if pool is None:
+def _repo_or_503(request: Request) -> ReportsRepo:
+    repo = request.app.state.repo
+    if repo is None:
         raise HTTPException(
             status_code=503,
-            detail="Database not configured (set SUPABASE_DB_URL)",
+            detail="Database not configured (set SUPABASE_DB_URL or ARA_MODE=local)",
         )
-    return pool
+    typed: ReportsRepo = repo
+    return typed
 
 
 def _encryption_key_or_503(settings: Settings) -> str:
@@ -165,54 +173,45 @@ def _encryption_key_or_503(settings: Settings) -> str:
     return settings.ara_encryption_key
 
 
-async def _fetch_report_row(pool: asyncpg.Pool, report_id: UUID) -> asyncpg.Record | None:
-    async with pool.acquire() as conn:
-        return await conn.fetchrow("select * from reports where id = $1", report_id)
-
-
 async def _require_report_access(
-    pool: asyncpg.Pool,
+    repo: ReportsRepo,
     report_id: UUID,
     user: User | None,
     share_token: UUID | None,
-) -> asyncpg.Record:
+) -> ReportRow:
     """Three-path access check. Returns the row or raises 403/404."""
-    row = await _fetch_report_row(pool, report_id)
+    row = await repo.get_report(report_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Report not found")
-    if user is not None and row["owner_id"] == user.id:
+    if user is not None and row.owner_id == user.id:
         return row
-    if row["is_sample"]:
+    if row.is_sample:
         return row
-    if (
-        share_token is not None
-        and row["share_token"] is not None
-        and row["share_token"] == share_token
-    ):
+    if share_token is not None and row.share_token is not None and row.share_token == share_token:
         return row
     raise HTTPException(status_code=403, detail="Not authorized to view this report")
 
 
-def _row_to_summary(row: asyncpg.Record) -> ReportSummary:
+def _row_to_summary(row: ReportRow) -> ReportSummary:
     return ReportSummary(
-        id=row["id"],
-        question=row["question"],
-        status=row["status"],
-        depth=row["depth"],
-        used_byok=row["used_byok"],
-        is_sample=row["is_sample"],
-        cost_usd=float(row["cost_usd"]) if row["cost_usd"] is not None else None,
-        created_at=row["created_at"].isoformat(),
-        completed_at=row["completed_at"].isoformat() if row["completed_at"] else None,
+        id=row.id,
+        question=row.question,
+        status=row.status,
+        depth=row.depth,
+        used_byok=row.used_byok,
+        is_sample=row.is_sample,
+        cost_usd=row.cost_usd,
+        created_at=row.created_at.isoformat(),
+        completed_at=row.completed_at.isoformat() if row.completed_at else None,
     )
 
 
-def _row_to_detail(row: asyncpg.Record) -> ReportDetail:
+def _row_to_detail(row: ReportRow) -> ReportDetail:
     return ReportDetail(
         **_row_to_summary(row).model_dump(),
-        report_payload=row["report_payload"],
-        error_message=row["error_message"],
-        share_token=row["share_token"],
+        report_payload=row.report_payload,
+        error_message=row.error_message,
+        share_token=row.share_token,
     )
 
 
@@ -241,12 +240,8 @@ async def health() -> dict[str, str]:
 
 @router.get("/gallery", response_model=list[ReportSummary])
 async def get_gallery(request: Request) -> list[ReportSummary]:
-    pool = _pool_or_503(request)
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(
-            "select * from reports where is_sample = true order by created_at desc"
-        )
-    return [_row_to_summary(r) for r in rows]
+    repo = _repo_or_503(request)
+    return [_row_to_summary(r) for r in await repo.list_samples()]
 
 
 # ---------- Authed: identity, quota ----------
@@ -263,9 +258,9 @@ async def get_quota(
     user: User = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
 ) -> QuotaResponse:
-    pool = _pool_or_503(request)
-    status_ = await check_free_tier(user.id, pool, settings)
-    tavily = await check_tavily_cap(pool, settings)
+    repo = _repo_or_503(request)
+    status_ = await check_free_tier(user.id, repo, settings)
+    tavily = await check_tavily_cap(repo, settings)
     return QuotaResponse(
         used=status_.used,
         limit=status_.limit,
@@ -290,13 +285,14 @@ async def get_credentials_route(
     request: Request,
     user: User = Depends(get_current_user),
 ) -> CredentialsResponse:
-    pool = _pool_or_503(request)
-    rec = await get_credentials(user.id, pool)
+    repo = _repo_or_503(request)
+    rec = await get_credentials(user.id, repo)
     if rec is None:
         return CredentialsResponse(
             active_provider="free",
             anthropic_configured=False,
             openai=OpenAIConfigStatus(configured=False, base_url=None, model=None),
+            tavily_configured=False,
         )
     return CredentialsResponse(
         active_provider=rec.active_provider,  # type: ignore[arg-type]
@@ -306,6 +302,7 @@ async def get_credentials_route(
             base_url=rec.openai_base_url,
             model=rec.openai_model,
         ),
+        tavily_configured=rec.tavily_key_ciphertext is not None,
     )
 
 
@@ -316,17 +313,17 @@ async def put_anthropic_key(
     user: User = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
 ) -> None:
-    pool = _pool_or_503(request)
+    repo = _repo_or_503(request)
     key = _encryption_key_or_503(settings)
-    await upsert_anthropic(user.id, pool, ciphertext=encrypt_secret(req.key, key=key))
+    await upsert_anthropic(user.id, repo, ciphertext=encrypt_secret(req.key, key=key))
 
 
 @router.delete("/credentials/anthropic", status_code=204)
 async def delete_anthropic_key(
     request: Request, user: User = Depends(get_current_user)
 ) -> None:
-    pool = _pool_or_503(request)
-    await clear_anthropic(user.id, pool)
+    repo = _repo_or_503(request)
+    await clear_anthropic(user.id, repo)
 
 
 @router.put("/credentials/openai", status_code=204)
@@ -336,11 +333,11 @@ async def put_openai_config(
     user: User = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
 ) -> None:
-    pool = _pool_or_503(request)
+    repo = _repo_or_503(request)
     key = _encryption_key_or_503(settings)
     await upsert_openai(
         user.id,
-        pool,
+        repo,
         ciphertext=encrypt_secret(req.key, key=key),
         base_url=req.base_url,
         model=req.model,
@@ -351,8 +348,27 @@ async def put_openai_config(
 async def delete_openai_config(
     request: Request, user: User = Depends(get_current_user)
 ) -> None:
-    pool = _pool_or_503(request)
-    await clear_openai(user.id, pool)
+    repo = _repo_or_503(request)
+    await clear_openai(user.id, repo)
+
+
+@router.put("/credentials/tavily", status_code=204)
+async def put_tavily_key(
+    req: TavilyKeyRequest,
+    request: Request,
+    user: User = Depends(get_current_user),
+    settings: Settings = Depends(get_settings),
+) -> None:
+    repo = _repo_or_503(request)
+    key = _encryption_key_or_503(settings)
+    await upsert_tavily(user.id, repo, ciphertext=encrypt_secret(req.key, key=key))
+
+
+@router.delete("/credentials/tavily", status_code=204)
+async def delete_tavily_key(
+    request: Request, user: User = Depends(get_current_user)
+) -> None:
+    await clear_tavily(user.id, _repo_or_503(request))
 
 
 @router.put("/credentials/active", status_code=204)
@@ -361,9 +377,9 @@ async def put_active_provider(
     request: Request,
     user: User = Depends(get_current_user),
 ) -> None:
-    pool = _pool_or_503(request)
+    repo = _repo_or_503(request)
     try:
-        await set_active(user.id, pool, provider=req.provider)
+        await set_active(user.id, repo, provider=req.provider)
     except CredentialError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -375,13 +391,8 @@ async def put_active_provider(
 async def list_reports(
     request: Request, user: User = Depends(get_current_user)
 ) -> list[ReportSummary]:
-    pool = _pool_or_503(request)
-    async with pool.acquire() as conn:
-        rows = await conn.fetch(
-            "select * from reports where owner_id = $1 order by created_at desc",
-            user.id,
-        )
-    return [_row_to_summary(r) for r in rows]
+    repo = _repo_or_503(request)
+    return [_row_to_summary(r) for r in await repo.list_reports(user.id)]
 
 
 @router.get("/reports/{report_id}", response_model=ReportDetail)
@@ -391,8 +402,8 @@ async def get_report(
     t: UUID | None = Query(default=None),
     user: User | None = Depends(get_optional_user),
 ) -> ReportDetail:
-    pool = _pool_or_503(request)
-    row = await _require_report_access(pool, report_id, user, t)
+    repo = _repo_or_503(request)
+    row = await _require_report_access(repo, report_id, user, t)
     return _row_to_detail(row)
 
 
@@ -400,13 +411,8 @@ async def get_report(
 async def delete_report(
     report_id: UUID, request: Request, user: User = Depends(get_current_user)
 ) -> None:
-    pool = _pool_or_503(request)
-    async with pool.acquire() as conn:
-        result = await conn.execute(
-            "delete from reports where id = $1 and owner_id = $2",
-            report_id, user.id,
-        )
-    if result.endswith("0"):
+    repo = _repo_or_503(request)
+    if not await repo.delete_report(report_id, user.id):
         raise HTTPException(status_code=404, detail="Report not found")
 
 
@@ -414,37 +420,19 @@ async def delete_report(
 async def share_report(
     report_id: UUID, request: Request, user: User = Depends(get_current_user)
 ) -> ShareResponse:
-    pool = _pool_or_503(request)
-    token = uuid4()
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            """
-            update reports
-            set share_token = coalesce(share_token, $1)
-            where id = $2 and owner_id = $3
-            returning share_token
-            """,
-            token, report_id, user.id,
-        )
-    if row is None:
+    repo = _repo_or_503(request)
+    token = await repo.ensure_share_token(report_id, user.id, uuid4())
+    if token is None:
         raise HTTPException(status_code=404, detail="Report not found")
-    return ShareResponse(
-        share_url_path=f"/r/{report_id}?t={row['share_token']}",
-        share_token=row["share_token"],
-    )
+    return ShareResponse(share_url_path=f"/r/{report_id}?t={token}", share_token=token)
 
 
 @router.delete("/reports/{report_id}/share", status_code=204)
 async def revoke_share(
     report_id: UUID, request: Request, user: User = Depends(get_current_user)
 ) -> None:
-    pool = _pool_or_503(request)
-    async with pool.acquire() as conn:
-        result = await conn.execute(
-            "update reports set share_token = null where id = $1 and owner_id = $2",
-            report_id, user.id,
-        )
-    if result.endswith("0"):
+    repo = _repo_or_503(request)
+    if not await repo.revoke_share_token(report_id, user.id):
         raise HTTPException(status_code=404, detail="Report not found")
 
 
@@ -452,12 +440,8 @@ async def revoke_share(
 async def promote_report(
     report_id: UUID, request: Request, _: User = Depends(require_admin)
 ) -> None:
-    pool = _pool_or_503(request)
-    async with pool.acquire() as conn:
-        result = await conn.execute(
-            "update reports set is_sample = true where id = $1", report_id
-        )
-    if result.endswith("0"):
+    repo = _repo_or_503(request)
+    if not await repo.set_sample(report_id, True):
         raise HTTPException(status_code=404, detail="Report not found")
 
 
@@ -465,12 +449,8 @@ async def promote_report(
 async def unpromote_report(
     report_id: UUID, request: Request, _: User = Depends(require_admin)
 ) -> None:
-    pool = _pool_or_503(request)
-    async with pool.acquire() as conn:
-        result = await conn.execute(
-            "update reports set is_sample = false where id = $1", report_id
-        )
-    if result.endswith("0"):
+    repo = _repo_or_503(request)
+    if not await repo.set_sample(report_id, False):
         raise HTTPException(status_code=404, detail="Report not found")
 
 
@@ -484,15 +464,22 @@ async def create_research(
     user: User = Depends(get_current_user),
     settings: Settings = Depends(get_settings),
 ) -> CreateResearchResponse:
-    pool = _pool_or_503(request)
+    repo = _repo_or_503(request)
     store: ReportStore = request.app.state.store
     tasks: set[asyncio.Task[None]] = request.app.state.tasks
 
-    record = await get_credentials(user.id, pool)
+    record = await get_credentials(user.id, repo)
 
+    # The global Tavily cap guards only the server key: a user with their own
+    # Tavily key is never capped.
     tavily_capped = False
-    if record is not None and record.active_provider == "openai" and req.browse_web:
-        tavily_capped = (await check_tavily_cap(pool, settings)).reached
+    if (
+        record is not None
+        and record.active_provider == "openai"
+        and req.browse_web
+        and record.tavily_key_ciphertext is None
+    ):
+        tavily_capped = (await check_tavily_cap(repo, settings)).reached
 
     try:
         overrides = resolve_overrides(
@@ -517,7 +504,7 @@ async def create_research(
                 status_code=503,
                 detail="Free tier disabled (server has no ANTHROPIC_API_KEY)",
             )
-        quota = await check_free_tier(user.id, pool, settings)
+        quota = await check_free_tier(user.id, repo, settings)
         if isinstance(quota, QuotaDenial):
             return JSONResponse(  # type: ignore[return-value]
                 status_code=402,
@@ -568,8 +555,8 @@ async def stream_research(
     t: UUID | None = Query(default=None),
     user: User | None = Depends(get_optional_user),
 ) -> EventSourceResponse:
-    pool = _pool_or_503(request)
-    await _require_report_access(pool, report_id, user, t)
+    repo = _repo_or_503(request)
+    await _require_report_access(repo, report_id, user, t)
     store: ReportStore = request.app.state.store
 
     async def event_source() -> AsyncIterator[dict[str, Any]]:
@@ -586,21 +573,12 @@ async def replay_report(
     t: UUID | None = Query(default=None),
     user: User | None = Depends(get_optional_user),
 ) -> EventSourceResponse:
-    pool = _pool_or_503(request)
-    await _require_report_access(pool, report_id, user, t)
+    repo = _repo_or_503(request)
+    await _require_report_access(repo, report_id, user, t)
 
     async def event_source() -> AsyncIterator[dict[str, Any]]:
-        async with pool.acquire() as conn:
-            rows = await conn.fetch(
-                """
-                select event from report_events
-                where report_id = $1
-                order by id asc
-                """,
-                report_id,
-            )
-        for row in rows:
-            yield {"data": row["event"]}
+        for event_json in await repo.replay_events(report_id):
+            yield {"data": event_json}
             await asyncio.sleep(REPLAY_INTER_EVENT_DELAY_MS / 1000)
 
     return EventSourceResponse(event_source())

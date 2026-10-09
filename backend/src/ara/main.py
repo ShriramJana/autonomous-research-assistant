@@ -13,6 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from ara.api.routes import router
 from ara.config import get_settings
+from ara.db.postgres import PostgresReportsRepo
 from ara.shutdown import drain_tasks
 from ara.storage.memory import InMemoryReportStore
 from ara.storage.notify import EventDoorbell
@@ -36,11 +37,13 @@ def create_app() -> FastAPI:
         if settings.supabase_db_url:
             db_url = settings.supabase_db_url
             app.state.db_pool = await asyncpg.create_pool(db_url, min_size=1, max_size=10)
+            app.state.repo = PostgresReportsRepo(app.state.db_pool)
             doorbell = EventDoorbell(lambda: asyncpg.connect(db_url))
             await doorbell.start()
             app.state.store = SupabaseReportStore(pool=app.state.db_pool, doorbell=doorbell)
         else:
             app.state.db_pool = None
+            app.state.repo = None
             app.state.store = InMemoryReportStore(buffer_size=settings.ara_event_buffer_size)
         try:
             yield
@@ -62,6 +65,7 @@ def create_app() -> FastAPI:
     app = FastAPI(title="Autonomous Research Assistant", version="0.2.0", lifespan=lifespan)
     # Eager state init so TestClient without `with` still works.
     app.state.db_pool = None
+    app.state.repo = None
     app.state.store = InMemoryReportStore(buffer_size=settings.ara_event_buffer_size)
     tasks: set[asyncio.Task[None]] = set()
     app.state.tasks = tasks

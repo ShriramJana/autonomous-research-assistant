@@ -4,10 +4,14 @@ from __future__ import annotations
 
 import os
 from collections.abc import AsyncIterator
+from pathlib import Path
 from typing import Any
 from unittest.mock import AsyncMock, MagicMock
+from uuid import UUID, uuid4
 
 import pytest
+
+from ara.db import ReportsRepo
 
 
 def make_usage(input_tokens: int = 10, output_tokens: int = 5) -> MagicMock:
@@ -111,3 +115,53 @@ async def db_pool() -> AsyncIterator[object]:
         yield pool
     finally:
         await pool.close()
+
+
+# --- ReportsRepo over both backends (SQLite always; Postgres under requires_db)
+
+
+@pytest.fixture(params=["sqlite", pytest.param("postgres", marks=requires_db)])
+async def any_repo(request: pytest.FixtureRequest, tmp_path: Path) -> AsyncIterator[ReportsRepo]:
+    if request.param == "sqlite":
+        from ara.db.sqlite import SqliteReportsRepo
+
+        sqlite_repo = await SqliteReportsRepo.open(str(tmp_path / "ara.db"))
+        try:
+            yield sqlite_repo
+        finally:
+            await sqlite_repo.close()
+        return
+    import asyncpg as _asyncpg
+
+    from ara.db.postgres import PostgresReportsRepo
+
+    pool = await _asyncpg.create_pool(os.environ["SUPABASE_DB_URL"], min_size=1, max_size=2)
+    assert pool is not None
+    try:
+        yield PostgresReportsRepo(pool)
+    finally:
+        await pool.close()
+
+
+async def new_repo_user(repo: ReportsRepo) -> UUID:
+    """A fresh user id; on Postgres also an `auth.users` row (FK target)."""
+    uid = uuid4()
+    pool = getattr(repo, "pool", None)
+    if pool is not None:
+        async with pool.acquire() as conn:
+            await conn.execute(
+                """insert into auth.users (id, instance_id, aud, role, email,
+                   encrypted_password, email_confirmed_at, created_at, updated_at)
+                   values ($1, '00000000-0000-0000-0000-000000000000', 'authenticated',
+                   'authenticated', $2, '', now(), now(), now())""",
+                uid, f"{uid}@test.local",
+            )
+    return uid
+
+
+async def drop_repo_user(repo: ReportsRepo, uid: UUID) -> None:
+    """Remove a user made by `new_repo_user` (cascades reports + credentials)."""
+    pool = getattr(repo, "pool", None)
+    if pool is not None:
+        async with pool.acquire() as conn:
+            await conn.execute("delete from auth.users where id = $1", uid)

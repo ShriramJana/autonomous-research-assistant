@@ -41,7 +41,7 @@ _TEST_USER = User(id=uuid4(), email="test@example.com")
 
 
 async def _bypass_access(
-    _pool: Any, _report_id: Any, _user: Any, _share_token: Any
+    _repo: Any, _report_id: Any, _user: Any, _share_token: Any
 ) -> dict[str, Any]:
     return {"owner_id": _TEST_USER.id, "is_sample": False, "share_token": None}
 
@@ -97,10 +97,10 @@ async def _async_client() -> httpx.AsyncClient:
         anthropic_api_key="sk-ant-free-tier-test",
         ara_encryption_key="",
     )
-    # POST /research calls _pool_or_503 then get_credentials — set a truthy
-    # sentinel pool so the 503 gate passes; get_credentials is patched in
-    # each test so the sentinel pool is never actually used for DB calls.
-    app.state.db_pool = object()
+    # POST /research calls _repo_or_503 then get_credentials — set a truthy
+    # sentinel repo so the 503 gate passes; get_credentials is patched in
+    # each test so the sentinel repo is never actually used for DB calls.
+    app.state.repo = object()
     transport = httpx.ASGITransport(app=app)
     return httpx.AsyncClient(transport=transport, base_url="http://test")
 
@@ -188,7 +188,7 @@ def _parse_sse_lines(text: str) -> list[dict[str, Any]]:
 
 async def test_quota_reports_free_tier_unavailable_when_no_anthropic_key() -> None:
     app = create_app()
-    app.state.db_pool = object()
+    app.state.repo = object()
     user = User(id=uuid4(), email="t@example.com")
     app.dependency_overrides[get_current_user] = lambda: user
     app.dependency_overrides[get_settings] = lambda: Settings(

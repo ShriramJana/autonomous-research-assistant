@@ -1,9 +1,10 @@
 """Free-tier quota — per-user monthly count + global monthly spend cap.
 
-Both numbers are derived from `reports` rows on each check. No counter
-table to drift. If this ever becomes a hotspot, add an in-process 30s
-TTL cache around `_count_user_runs` and `_sum_global_spend` — but ship
-without it.
+Both numbers are derived from `reports` rows on each check (via
+`ReportsRepo`). No counter table to drift. The month window comes from
+`month_start()` so every backend agrees on the boundary. If this ever
+becomes a hotspot, add an in-process 30s TTL cache around the two repo
+calls — but ship without it.
 """
 
 from __future__ import annotations
@@ -12,9 +13,8 @@ from dataclasses import dataclass
 from typing import Literal
 from uuid import UUID
 
-import asyncpg
-
 from ara.config import Settings
+from ara.db import ReportsRepo, month_start
 
 
 @dataclass(frozen=True)
@@ -37,11 +37,10 @@ class QuotaDenial:
 QuotaStatus = QuotaOk | QuotaDenial
 
 
-async def check_free_tier(
-    user_id: UUID, pool: asyncpg.Pool, settings: Settings
-) -> QuotaStatus:
-    used = await _count_user_runs(user_id, pool)
-    spend = await _sum_global_spend(pool)
+async def check_free_tier(user_id: UUID, repo: ReportsRepo, settings: Settings) -> QuotaStatus:
+    since = month_start()
+    used = await repo.count_free_runs(user_id, since=since)
+    spend = await repo.sum_free_spend(since=since)
     limit = settings.free_tier_per_user_monthly
     cap = settings.free_tier_global_cap_usd
 
@@ -58,29 +57,3 @@ async def check_free_tier(
             global_spend_usd=spend, global_cap_usd=cap,
         )
     return QuotaOk(used=used, limit=limit, global_spend_usd=spend, global_cap_usd=cap)
-
-
-async def _count_user_runs(user_id: UUID, pool: asyncpg.Pool) -> int:
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            """
-            select count(*)::int as n from reports
-            where owner_id = $1
-              and used_byok = false
-              and created_at >= date_trunc('month', now())
-            """,
-            user_id,
-        )
-    return row["n"] if row else 0
-
-
-async def _sum_global_spend(pool: asyncpg.Pool) -> float:
-    async with pool.acquire() as conn:
-        row = await conn.fetchrow(
-            """
-            select coalesce(sum(cost_usd), 0)::float as s from reports
-            where used_byok = false
-              and created_at >= date_trunc('month', now())
-            """,
-        )
-    return float(row["s"]) if row else 0.0
