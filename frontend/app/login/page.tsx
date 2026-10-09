@@ -1,8 +1,9 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
+import { useMode } from "@/hooks/use-mode";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +74,12 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
+  const { mode } = useMode();
+  const router = useRouter();
+  useEffect(() => {
+    if (mode === "local") router.replace("/");
+  }, [mode, router]);
+  if (mode === "local") return null;
   return (
     <main className="mx-auto max-w-md p-8 pt-20">
       <h1 className="font-mono text-2xl tracking-tight">Sign in to ARA</h1>

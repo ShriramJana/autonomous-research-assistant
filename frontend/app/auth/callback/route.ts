@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { requestOrigin } from "@/lib/request-origin";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
 /**
@@ -17,6 +18,7 @@ function safeNext(value: string | null): string {
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
+  const origin = requestOrigin(request.headers, url.origin);
   const code = url.searchParams.get("code");
   const next = safeNext(url.searchParams.get("next"));
 
@@ -25,9 +27,9 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
       return NextResponse.redirect(
-        new URL(`/login?error=${encodeURIComponent(error.message)}`, url.origin),
+        new URL(`/login?error=${encodeURIComponent(error.message)}`, origin),
       );
     }
   }
-  return NextResponse.redirect(new URL(next, url.origin));
+  return NextResponse.redirect(new URL(next, origin));
 }

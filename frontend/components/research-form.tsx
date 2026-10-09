@@ -12,6 +12,7 @@ import {
 import { apiGet, createResearch, type ApiError } from "@/lib/api";
 import { freeTierBlockMessage, friendlyRunError } from "@/lib/run-status";
 import { getCredentials } from "@/lib/credentials";
+import { useMode } from "@/hooks/use-mode";
 import { useBrowseWeb } from "@/hooks/use-browse-web";
 import { type Depth, useDepth } from "@/hooks/use-depth";
 
@@ -48,6 +49,7 @@ export function ResearchForm({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [depthOpen, setDepthOpen] = useState(false);
+  const { mode } = useMode();
   const { depth, setDepth } = useDepth();
   const { browseWeb, toggleBrowseWeb } = useBrowseWeb();
   const [activeProvider, setActiveProvider] = useState<"free" | "anthropic" | "openai">("free");
@@ -231,9 +233,11 @@ export function ResearchForm({
           {quota.used} of {quota.limit} free reports used this month
         </p>
       ) : null}
-      <p className="text-muted-foreground/50 mt-3 px-2 font-mono text-[10px] tracking-wider">
-        Free-hosted demo — if it&apos;s been idle, your first run may take ~20s to wake up.
-      </p>
+      {mode !== "local" ? (
+        <p className="text-muted-foreground/50 mt-3 px-2 font-mono text-[10px] tracking-wider">
+          Free-hosted demo — if it&apos;s been idle, your first run may take ~20s to wake up.
+        </p>
+      ) : null}
     </form>
   );
 }

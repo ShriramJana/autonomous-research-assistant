@@ -2,6 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  if (process.env.NEXT_PUBLIC_ARA_MODE === "local") return NextResponse.next({ request });
   const response = NextResponse.next({ request });
 
   const supabase = createServerClient(

@@ -15,7 +15,10 @@ export interface DepthPresetConfig {
   max_iterations: number;
 }
 
+export type Mode = "hosted" | "local";
+
 export interface Config {
+  mode: Mode;
   models: ModelsConfig;
   depth_presets: Record<Depth, DepthPresetConfig>;
 }

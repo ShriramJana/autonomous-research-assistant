@@ -1,6 +1,7 @@
 "use client";
 
 import type { Depth } from "@/hooks/use-depth";
+import { fetchMode } from "@/hooks/use-mode";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 
 // All API calls are same-origin via the Next.js /api/:path* rewrite (see
@@ -13,14 +14,15 @@ export interface ApiError extends Error {
 }
 
 async function authedFetch(input: string, init: RequestInit = {}): Promise<Response> {
-  const supabase = createSupabaseBrowser();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
   const headers = new Headers(init.headers);
-  if (session?.access_token) {
-    headers.set("Authorization", `Bearer ${session.access_token}`);
+  if ((await fetchMode()) === "hosted") {
+    const supabase = createSupabaseBrowser();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+    if (session?.access_token) {
+      headers.set("Authorization", `Bearer ${session.access_token}`);
+    }
   }
   return fetch(input, { ...init, headers, credentials: "include" });
 }

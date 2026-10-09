@@ -9,6 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useMode } from "@/hooks/use-mode";
 import { useUser } from "@/hooks/use-user";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 
@@ -23,6 +24,7 @@ export function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useUser();
+  const { mode } = useMode();
   const isDashboard = pathname === "/";
 
   const onExecuteClick = (e: React.MouseEvent) => {
@@ -76,7 +78,20 @@ export function TopNav() {
             <CircleUser className="h-5 w-5" strokeWidth={1.5} />
           </PopoverTrigger>
           <PopoverContent align="end" className="w-56">
-            {user ? (
+            {mode === "local" ? (
+              <>
+                <p className="text-muted-foreground/60 px-2 py-1 font-mono text-[10px] uppercase tracking-wider">
+                  Local mode
+                </p>
+                <p className="truncate px-2 pb-2 text-sm">{user?.email}</p>
+                <Link
+                  href="/settings"
+                  className="block rounded px-2 py-1.5 text-sm hover:bg-accent"
+                >
+                  Settings
+                </Link>
+              </>
+            ) : user ? (
               <>
                 <p className="text-muted-foreground/60 px-2 py-1 font-mono text-[10px] uppercase tracking-wider">
                   Signed in as
