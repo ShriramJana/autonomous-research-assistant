@@ -195,3 +195,13 @@ report; they re-read rows with `id > last_seen`, falling back to a 2s poll if
 the listener is down. A per-report write lock keeps commit order equal to id
 order when parallel researchers emit at once. See `deploy/README.md` for how
 this plays out on Kubernetes.
+
+## Local mode and the data-access layer
+
+`ARA_MODE=local` runs the same app without Supabase: every request is the built-in
+local user, persistence is a SQLite file in `ARA_DATA_DIR`, and the backend binds to
+loopback. All SQL lives behind `ara.db.ReportsRepo` (`PostgresReportsRepo` for the
+hosted site, `SqliteReportsRepo` locally); routes, credentials and quota code never
+touch a driver. The local event store (`SqliteReportStore`) persists events through
+the repo and fans live events out in-process — one process, so the Postgres
+NOTIFY doorbell is not needed.

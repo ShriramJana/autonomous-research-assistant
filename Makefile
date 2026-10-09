@@ -1,4 +1,4 @@
-.PHONY: install install-frontend dev dev-backend dev-frontend test lint typecheck fmt k8s-up k8s-build k8s-deploy k8s-lint k8s-down
+.PHONY: install install-frontend dev dev-backend dev-frontend test lint typecheck fmt k8s-up k8s-build k8s-deploy k8s-lint k8s-down local
 
 install:
 	cd backend && uv sync --all-extras
@@ -70,3 +70,6 @@ k8s-lint:
 
 k8s-down:
 	kind delete cluster --name $(KIND_CLUSTER)
+
+local:
+	bash scripts/local.sh

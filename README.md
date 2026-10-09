@@ -6,6 +6,15 @@
 
 Built as the flagship portfolio project for LLMTechno.
 
+## Run it locally (no accounts)
+
+```bash
+brew install ollama && ollama pull qwen2.5:7b    # or any tool-capable model
+make local                                       # needs uv + Node 20+
+```
+
+Open <http://localhost:3000>, go to **Settings → Use Ollama (local)**, pick the model, and run a report. Local mode skips sign-in, listens only on `localhost`, and stores reports and keys in `~/.ara` (delete the folder to reset). Add a free [Tavily](https://tavily.com) key in Settings to let the researchers browse the web; without one, reports use model knowledge only and say so. Anthropic or OpenAI keys work too.
+
 <!-- TODO: add a hero screenshot or short demo GIF here, e.g.:
 ![ARA running a live research report](docs/assets/ara-demo.png)
 -->
