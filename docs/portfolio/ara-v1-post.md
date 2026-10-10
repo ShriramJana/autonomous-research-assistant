@@ -2,7 +2,7 @@
 
 I built ARA (Autonomous Research Assistant) as the flagship portfolio project for LLMTechno, my AI consulting practice. It is a research agent that takes a natural-language question, decomposes it into parallel sub-queries, web-searches each one, and synthesizes a cited report — all streamed live to the browser as it runs. The source is on GitHub at [ShriramJana/autonomous-research-assistant](https://github.com/ShriramJana/autonomous-research-assistant).
 
-**[Try it live](https://autonomous-research-assistant-tawny.vercel.app)** — no account required for the demo gallery; bring your own Anthropic or OpenAI key for a live run.
+**[Try it live](https://ara.llmtechno.com)** — no account required for the demo gallery; bring your own Anthropic or OpenAI key for a live run.
 
 ---
 
@@ -153,4 +153,4 @@ The current design already anticipates this. Each scholarly API is just another 
 
 Source: [https://github.com/ShriramJana/autonomous-research-assistant](https://github.com/ShriramJana/autonomous-research-assistant)
 
-Live: [https://autonomous-research-assistant-tawny.vercel.app](https://autonomous-research-assistant-tawny.vercel.app)
+Live: [https://ara.llmtechno.com](https://ara.llmtechno.com)

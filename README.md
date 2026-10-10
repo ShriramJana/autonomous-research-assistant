@@ -2,7 +2,7 @@
 
 **A three-stage AI agent pipeline that turns a research question into a cited, multi-source report — streamed live to the browser.** Planner → parallel Researchers → Synthesizer, with every claim traceable to its source.
 
-**🔗 Live demo: https://autonomous-research-assistant-tawny.vercel.app** — no account needed to watch the demo gallery; bring your own Anthropic or OpenAI key to run a live report.
+**🔗 Live demo: https://ara.llmtechno.com** — no account needed to watch the demo gallery; bring your own Anthropic or OpenAI key to run a live report.
 
 Built as the flagship portfolio project for LLMTechno.
 
