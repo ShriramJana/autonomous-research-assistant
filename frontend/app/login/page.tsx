@@ -24,6 +24,9 @@ function LoginForm() {
       provider: "google",
       options: {
         redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        // Always show Google's account chooser, even with a single signed-in
+        // account; visitors to a demo often have several.
+        queryParams: { prompt: "select_account" },
       },
     });
     if (error) setError(error.message);
