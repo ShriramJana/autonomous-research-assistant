@@ -279,6 +279,12 @@ function LandingFooter() {
             Gallery
           </Link>
           <Link
+            href="/privacy"
+            className="text-muted-foreground hover:text-foreground font-mono text-xs transition-colors"
+          >
+            Privacy
+          </Link>
+          <Link
             href="/login"
             className="text-muted-foreground hover:text-foreground font-mono text-xs transition-colors"
           >
