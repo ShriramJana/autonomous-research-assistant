@@ -8,6 +8,11 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    # The Supabase auth callback sets a session as chunked `sb-*-auth-token.N`
+    # cookies on its redirect; those Set-Cookie headers exceed nginx's default
+    # 4k header buffer and surface as "upstream sent too big header" / 502.
+    nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+    nginx.ingress.kubernetes.io/proxy-buffers-number: "4"
 spec:
   ingressClassName: {{ .Values.ingress.className }}
   rules:
