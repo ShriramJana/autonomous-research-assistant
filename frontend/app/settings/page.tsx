@@ -24,13 +24,8 @@ import {
   setActiveProvider,
 } from "@/lib/credentials";
 import { useMode } from "@/hooks/use-mode";
-import {
-  OLLAMA_OPENAI_BASE_URL,
-  OLLAMA_PLACEHOLDER_KEY,
-  type OllamaStatus,
-  formatGb,
-  getOllamaModels,
-} from "@/lib/ollama";
+import { type OllamaStatus, formatGb, getOllamaModels } from "@/lib/ollama";
+import { PROVIDER_PRESETS, type ProviderPreset, presetFor } from "@/lib/providers";
 
 type LoadState =
   | { kind: "loading" }
@@ -69,9 +64,10 @@ export default function SettingsPage() {
   const [openaiKeyInput, setOpenaiKeyInput] = useState("");
   const [openaiSaving, setOpenaiSaving] = useState(false);
 
-  // Ollama preset
+  // Provider preset (pre-fills base URL / model / key hint); Ollama adds a model picker.
+  const [preset, setPreset] = useState<ProviderPreset | null>(null);
   const [ollama, setOllama] = useState<OllamaStatus | null>(null);
-  const [useOllama, setUseOllama] = useState(false);
+  const useOllama = preset?.id === "ollama";
 
   // Tavily key form
   const [tavilyKeyInput, setTavilyKeyInput] = useState("");
@@ -109,6 +105,8 @@ export default function SettingsPage() {
           if (c.openai.configured) {
             if (c.openai.base_url) setOpenaiBaseUrl((prev) => prev || c.openai.base_url!);
             if (c.openai.model) setOpenaiModel((prev) => prev || c.openai.model!);
+            // Highlight the chip the stored base URL came from (user's pick wins).
+            setPreset((prev) => prev ?? presetFor(c.openai.base_url));
           }
         }
       })
@@ -193,20 +191,23 @@ export default function SettingsPage() {
       setOpenaiBaseUrl("");
       setOpenaiModel("");
       setOpenaiKeyInput("");
+      setPreset(null);
       loadCredentials();
     } finally {
       setOpenaiSaving(false);
     }
   };
 
-  const onUseOllama = async () => {
-    setOpenaiBaseUrl(OLLAMA_OPENAI_BASE_URL);
-    setOpenaiKeyInput(OLLAMA_PLACEHOLDER_KEY);
-    setUseOllama(true);
+  const onPickPreset = async (p: ProviderPreset) => {
+    setPreset(p);
+    setOpenaiBaseUrl(p.baseUrl);
+    setOpenaiModel(p.defaultModel);
+    setOpenaiKeyInput(p.id === "ollama" ? p.keyPlaceholder : "");
+    if (p.id !== "ollama") return;
     try {
       const status = await getOllamaModels();
       setOllama(status);
-      if (status.available && status.models[0] && !openaiModel.trim()) {
+      if (status.available && status.models[0]) {
         setOpenaiModel(status.models[0].name);
       }
     } catch {
@@ -402,23 +403,51 @@ export default function SettingsPage() {
           ) : (
             <>
               <div className="flex flex-col gap-3">
-                {/* Local mode only: on the hosted backend localhost:11434 is the
-                    server's own container, so an Ollama config could never work. */}
-                {mode === "local" ? (
-                  <div className="flex items-center gap-3">
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      onClick={() => void onUseOllama()}
-                      className="font-mono text-xs uppercase tracking-wider"
-                    >
-                      Use Ollama (local)
-                    </Button>
-                    <span className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
-                      Runs on your machine. No API key needed.
-                    </span>
+                {/* Presets pre-fill the fields below; every vendor speaks the OpenAI
+                    chat format. Local-only presets (Ollama) are hidden on the hosted
+                    backend, where localhost is the server's own container. */}
+                <div className="flex flex-col gap-2">
+                  <span className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
+                    Provider
+                  </span>
+                  <div className="flex flex-wrap gap-2">
+                    {PROVIDER_PRESETS.filter((p) => !p.localOnly || mode === "local").map((p) => (
+                      <Button
+                        key={p.id}
+                        size="sm"
+                        variant={preset?.id === p.id ? "secondary" : "outline"}
+                        aria-pressed={preset?.id === p.id}
+                        onClick={() => void onPickPreset(p)}
+                        className="font-mono text-xs tracking-wider"
+                      >
+                        {p.label}
+                      </Button>
+                    ))}
                   </div>
-                ) : null}
+                  {preset ? (
+                    <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+                      {preset.note}
+                      {preset.keyUrl ? (
+                        <>
+                          {" "}
+                          <a
+                            href={preset.keyUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary underline"
+                          >
+                            Get a {preset.label} key ↗
+                          </a>
+                        </>
+                      ) : null}
+                    </p>
+                  ) : (
+                    <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+                      Pick a provider to pre-fill the fields, or enter any OpenAI-compatible
+                      endpoint by hand.
+                    </p>
+                  )}
+                </div>
                 <div className="flex flex-col gap-1">
                   <label className="text-muted-foreground/80 font-mono text-[10px] uppercase tracking-wider">
                     Base URL
@@ -465,7 +494,7 @@ export default function SettingsPage() {
                     <Input
                       id={useOllama && ollamaInstalled ? undefined : "openai-model"}
                       type="text"
-                      placeholder="gpt-4o"
+                      placeholder={preset?.defaultModel ?? "gpt-4.1-mini"}
                       value={openaiModel}
                       onChange={(e) => setOpenaiModel(e.target.value)}
                       className="font-mono"
@@ -481,7 +510,9 @@ export default function SettingsPage() {
                   <Input
                     type="password"
                     placeholder={
-                      creds.openai.configured ? "•••• (enter new key to update)" : "sk-…"
+                      creds.openai.configured
+                        ? "•••• (enter new key to update)"
+                        : preset?.keyPlaceholder ?? "sk-…"
                     }
                     value={openaiKeyInput}
                     onChange={(e) => setOpenaiKeyInput(e.target.value)}

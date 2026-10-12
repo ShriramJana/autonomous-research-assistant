@@ -13,7 +13,7 @@ brew install ollama && ollama pull qwen2.5:7b    # or any tool-capable model
 make local                                       # needs uv + Node 20+
 ```
 
-Open <http://localhost:3000>, go to **Settings → Use Ollama (local)**, pick the model, press **Save** (saving activates Ollama as the provider), then run a report. Local mode skips sign-in, both servers listen only on `localhost`, and stores reports and keys in `~/.ara` (delete the folder to reset). Add a free [Tavily](https://tavily.com) key in Settings to let the researchers browse the web; without one, reports use model knowledge only and say so. Anthropic or OpenAI keys work too.
+Open <http://localhost:3000>, go to **Settings → Provider → Ollama (local)**, pick the model, press **Save** (saving activates Ollama as the provider), then run a report. The same card has one-click presets for OpenAI, Google Gemini, Groq, Mistral, xAI, DeepSeek, OpenRouter and Together AI — any OpenAI-compatible endpoint works. Local mode skips sign-in, both servers listen only on `localhost`, and stores reports and keys in `~/.ara` (delete the folder to reset). Add a free [Tavily](https://tavily.com) key in Settings to let the researchers browse the web; without one, reports use model knowledge only and say so. Anthropic or OpenAI keys work too.
 
 <!-- TODO: add a hero screenshot or short demo GIF here, e.g.:
 ![ARA running a live research report](docs/assets/ara-demo.png)

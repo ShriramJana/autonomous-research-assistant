@@ -1,9 +1,10 @@
-"""Rough cost estimation for Anthropic model calls.
+"""Rough cost estimation for model calls.
 
 Single source of truth for $/MTok rates used both by the scripts CLI and
-the orchestrator's live CostUpdate events. Update when Anthropic pricing
-changes; unknown model ids silently fall back to zero cost rather than
-crashing.
+the orchestrator's live CostUpdate events. Rates are vendor list prices
+(standard tier, uncached, text) checked against each vendor's own pricing
+page on the date in the comment; update when they change. Unknown model
+ids fall back to zero cost and the UI shows "n/a" instead of dollars.
 """
 
 from __future__ import annotations
@@ -24,6 +25,26 @@ PRICING: dict[str, tuple[float, float]] = {
     "gpt-4.1-nano": (0.10, 0.40),
     "openai/gpt-4o": (2.50, 10.0),
     "openai/gpt-4o-mini": (0.15, 0.60),
+    # Provider-preset headline models (verified 2026-10-11 on vendor docs).
+    # Google Gemini — 3.8 Flash is a promotional rate through 2026-12-31
+    # (doubles to 1.50 / 7.50 from 2027-01-01).
+    "gemini-3.8-flash": (0.75, 3.75),
+    "gemini-3.5-flash-lite": (0.30, 2.50),
+    # Groq-hosted open-weight models (same rate on Together / OpenRouter).
+    "openai/gpt-oss-120b": (0.15, 0.60),
+    "openai/gpt-oss-20b": (0.075, 0.30),
+    # Mistral (the `-latest` aliases; Large omitted while its alias is in flux).
+    "mistral-medium-latest": (1.50, 7.50),
+    "mistral-small-latest": (0.15, 0.60),
+    # xAI (standard tier, prompts under 200k tokens).
+    "grok-4.3": (1.25, 2.50),
+    "grok-4.7": (2.00, 6.00),
+    # DeepSeek (peak-hour rate; off-peak is half).
+    "deepseek-flash": (0.30, 1.20),
+    "deepseek-v4-pro": (1.32, 3.96),
+    # Together AI serverless.
+    "zai-org/GLM-5.3-Flash": (0.15, 0.50),
+    "meta-llama/Llama-3.3-70B-Instruct-Turbo": (1.04, 1.04),
 }
 
 
