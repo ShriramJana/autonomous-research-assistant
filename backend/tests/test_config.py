@@ -83,3 +83,11 @@ def test_hosted_mode_fine_on_hosted_runtime(monkeypatch: pytest.MonkeyPatch) -> 
     monkeypatch.delenv("ARA_MODE", raising=False)
     monkeypatch.setenv("K_SERVICE", "ara-backend")
     assert Settings().is_local is False
+
+
+def test_scholarly_settings_have_safe_defaults() -> None:
+    s = Settings(_env_file=None)  # type: ignore[call-arg]
+    assert s.openalex_mailto == ""
+    assert s.semantic_scholar_api_key == ""
+    assert s.ncbi_api_key == ""
+    assert s.ara_scholarly_papers_per_query == 8

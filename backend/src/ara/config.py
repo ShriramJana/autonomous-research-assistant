@@ -24,6 +24,12 @@ class Settings(BaseSettings):
     # Tavily (server-provided client-side search for non-Anthropic providers)
     tavily_api_key: str = Field(default="")
     tavily_global_monthly_cap: int = 1000
+
+    # Scholarly catalogs (all optional; none required for the feature to work)
+    openalex_mailto: str = Field(default="")  # OPENALEX_MAILTO — polite pool contact
+    semantic_scholar_api_key: str = Field(default="")  # enables the Semantic Scholar catalog
+    ncbi_api_key: str = Field(default="")  # PubMed: 10 req/s instead of 3
+    ara_scholarly_papers_per_query: int = 8
     claude_planner_model: str = "claude-sonnet-4-5"
     claude_researcher_model: str = "claude-sonnet-4-5"
     claude_synthesizer_model: str = "claude-opus-4-5"

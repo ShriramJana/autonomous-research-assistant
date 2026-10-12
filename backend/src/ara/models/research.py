@@ -8,9 +8,13 @@ references.
 from __future__ import annotations
 
 from enum import IntEnum
+from typing import Literal
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+
+SourceKind = Literal["web", "scholarly"]
+MAX_SEARCH_TERMS = 4
 
 
 class Priority(IntEnum):
@@ -26,20 +30,33 @@ class SubQuery(BaseModel):
     question: str = Field(min_length=1, max_length=500)
     rationale: str = Field(min_length=1, max_length=2000)
     priority: Priority
+    # Short keyword phrases for scholarly catalogs (planner-supplied; may be empty).
+    search_terms: list[str] = Field(default_factory=list, max_length=MAX_SEARCH_TERMS)
 
 
 class ResearchPlan(BaseModel):
     original_question: str = Field(min_length=1)
     sub_queries: list[SubQuery] = Field(min_length=3, max_length=7)
     web_search_enabled: bool = True
+    scholarly_enabled: bool = False
 
 
 class Source(BaseModel):
-    """A citable web source. `id` is stable across dedup operations."""
+    """A citable source. `id` is stable across dedup operations.
+
+    `kind="scholarly"` sources carry catalog metadata filled by the backend
+    from its own fetched-paper registry — never by the model.
+    """
 
     id: UUID = Field(default_factory=uuid4)
     url: HttpUrl
     title: str = Field(min_length=1, max_length=500)
+    kind: SourceKind = "web"
+    authors: list[str] = Field(default_factory=list)
+    year: int | None = None
+    venue: str | None = None
+    doi: str | None = None
+    citation_count: int | None = None
 
 
 class KeyFact(BaseModel):
@@ -75,6 +92,7 @@ class FinalReport(BaseModel):
     sections: list[ReportSection] = Field(min_length=1)
     citations: list[Source] = Field(default_factory=list)
     web_search_enabled: bool = True
+    scholarly_enabled: bool = False
 
 
 ReportEnvelope = FinalReport

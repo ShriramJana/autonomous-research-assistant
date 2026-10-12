@@ -22,6 +22,7 @@ class ResearchOptions:
     max_sub_queries: int
     max_iterations: int
     web_search_enabled: bool = True
+    scholarly_enabled: bool = False
 
 
 _DEPTH_PRESETS: dict[Depth, ResearchOptions] = {
@@ -31,8 +32,14 @@ _DEPTH_PRESETS: dict[Depth, ResearchOptions] = {
 }
 
 
-def options_for_depth(depth: Depth, *, web_search_enabled: bool = True) -> ResearchOptions:
-    return replace(_DEPTH_PRESETS[depth], web_search_enabled=web_search_enabled)
+def options_for_depth(
+    depth: Depth, *, web_search_enabled: bool = True, scholarly_enabled: bool = False
+) -> ResearchOptions:
+    return replace(
+        _DEPTH_PRESETS[depth],
+        web_search_enabled=web_search_enabled,
+        scholarly_enabled=scholarly_enabled,
+    )
 
 
 def depth_presets() -> dict[Depth, dict[str, int]]:

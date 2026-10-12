@@ -30,6 +30,7 @@ from ara.models.research import (
     SubQuery,
     SubQueryFinding,
 )
+from ara.options import options_for_depth
 
 # ---------- research models ----------
 
@@ -206,3 +207,65 @@ def test_discriminated_union_round_trip() -> None:
 def test_discriminated_union_rejects_unknown_type() -> None:
     with pytest.raises(ValidationError):
         ResearchEventAdapter.validate_python({"type": "nope", "foo": 1})
+
+
+def test_source_defaults_to_web_kind_and_round_trips_scholarly_metadata() -> None:
+    web = Source.model_validate({"url": "https://a.com", "title": "A"})
+    assert web.kind == "web"
+    assert web.authors == [] and web.year is None and web.citation_count is None
+
+    paper = Source.model_validate(
+        {
+            "url": "https://doi.org/10.1/x",
+            "title": "P",
+            "kind": "scholarly",
+            "authors": ["A", "B"],
+            "year": 2024,
+            "venue": "V",
+            "doi": "10.1/x",
+            "citation_count": 12,
+        }
+    )
+    assert paper.kind == "scholarly" and paper.year == 2024 and paper.doi == "10.1/x"
+    assert Source.model_validate_json(paper.model_dump_json()) == paper
+
+
+def test_source_rejects_unknown_kind() -> None:
+    with pytest.raises(ValidationError):
+        Source.model_validate({"url": "https://a.com", "title": "A", "kind": "blog"})
+
+
+def test_sub_query_search_terms_default_empty_and_capped_at_four() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.LOW)
+    assert sq.search_terms == []
+    ok = SubQuery(question="q", rationale="r", priority=Priority.LOW, search_terms=["a", "b"])
+    assert ok.search_terms == ["a", "b"]
+    with pytest.raises(ValidationError):
+        SubQuery(question="q", rationale="r", priority=Priority.LOW, search_terms=["a"] * 5)
+
+
+def test_plan_and_report_scholarly_flags_default_false() -> None:
+    plan = ResearchPlan(
+        original_question="q",
+        sub_queries=[
+            SubQuery(question=f"q{i}", rationale="r", priority=Priority.LOW) for i in range(3)
+        ],
+    )
+    assert plan.scholarly_enabled is False
+    report = FinalReport(
+        report_id=uuid4(),
+        original_question="q",
+        executive_summary="e",
+        sections=[ReportSection(heading="h", content="c")],
+    )
+    assert report.scholarly_enabled is False
+
+
+def test_options_for_depth_carries_scholarly_flag() -> None:
+    assert options_for_depth("quick").scholarly_enabled is False
+    opts = options_for_depth("deep", web_search_enabled=False, scholarly_enabled=True)
+    assert (opts.max_sub_queries, opts.web_search_enabled, opts.scholarly_enabled) == (
+        7,
+        False,
+        True,
+    )
