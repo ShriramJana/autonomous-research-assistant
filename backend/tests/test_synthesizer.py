@@ -285,3 +285,23 @@ def test_citation_row_omits_missing_scholarly_parts() -> None:
         {"url": "https://arxiv.org/abs/1", "title": "Preprint", "kind": "scholarly"}
     )
     assert _citation_row(3, bare) == "3. Preprint. — https://arxiv.org/abs/1"
+
+
+def test_dedupe_prefers_later_scholarly_copy_of_a_web_source() -> None:
+    from ara.agents.synthesizer import _dedupe_sources
+
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    first = _source("https://a.com", "A")
+    web_copy = _source("https://doi.org/10.1/x", "Plain")
+    other = _source("https://b.com", "B")
+    scholarly = Source.model_validate(
+        {"url": "https://doi.org/10.1/x", "title": "Paper", "kind": "scholarly", "year": 2020}
+    )
+    later_web = _source("https://doi.org/10.1/x", "Plain again")
+    findings = [
+        _finding(sq, "one", [first, web_copy, other]),
+        _finding(sq, "two", [scholarly]),
+        _finding(sq, "three", [later_web]),
+    ]
+    deduped = _dedupe_sources(findings)
+    assert [s.id for s in deduped] == [first.id, scholarly.id, other.id]  # position kept

@@ -106,15 +106,22 @@ async def synthesize_report(
 
 
 def _dedupe_sources(findings: list[SubQueryFinding]) -> list[Source]:
-    """Return a first-seen-wins, URL-deduped list of sources across findings."""
-    seen: dict[str, Source] = {}
+    """Return a first-seen-wins, URL-deduped list of sources across findings.
+
+    Exception: a later `scholarly` copy of a URL replaces a kept `web` copy (same
+    position), so catalog metadata is never lost to an earlier plain citation.
+    """
+    position: dict[str, int] = {}
     ordered: list[Source] = []
     for f in findings:
         for s in f.sources:
             url = str(s.url)
-            if url not in seen:
-                seen[url] = s
+            hit = position.get(url)
+            if hit is None:
+                position[url] = len(ordered)
                 ordered.append(s)
+            elif s.kind == "scholarly" and ordered[hit].kind != "scholarly":
+                ordered[hit] = s
     return ordered
 
 
