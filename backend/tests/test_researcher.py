@@ -832,3 +832,160 @@ async def test_raw_and_canonical_variants_dedupe_to_one_source() -> None:
     [src] = finding.sources
     assert src.kind == "scholarly"
     assert finding.key_facts[0].citation_ids == [src.id]
+
+
+# ---------------------------------------------------------------------------
+# Key facts citing candidate papers that the model left out of `sources`
+# ---------------------------------------------------------------------------
+
+
+def _submit_raw(payload: dict[str, Any]) -> CompletionResult:
+    return _result(tool_uses=[_tu(SUBMIT_FINDING_TOOL_NAME, {"summary": "s", **payload})])
+
+
+def _scholarly_llm(web: bool, result: CompletionResult) -> Any:
+    if not web:
+        return _ScriptedLLM([result])
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(return_value=result)
+    return llm
+
+
+@pytest.mark.parametrize("web", [False, True])
+@pytest.mark.parametrize(
+    "sources_field",
+    [{}, {"sources": []}, {"sources": None}],
+    ids=["no-sources-key", "empty-sources", "null-sources"],
+)
+async def test_key_fact_citing_registry_paper_creates_the_source(
+    web: bool, sources_field: dict[str, Any]
+) -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    payload = {"key_facts": [{"statement": "f", "source_urls": [PAPER.url]}], **sources_field}
+    llm = _scholarly_llm(web, _submit_raw(payload))
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="m",
+        emit=emit,
+        web_search_enabled=web,
+        scholarly_fetch=_fetch(BUNDLE),
+    )
+    [src] = finding.sources
+    assert src.kind == "scholarly"
+    assert str(src.url) == PAPER.url
+    assert src.title == PAPER.title
+    assert finding.key_facts[0].citation_ids == [src.id]
+
+
+async def test_key_facts_citing_same_paper_twice_share_one_created_source() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    variant = "https://DOI.org/10.5555/3295222.3295349/"
+    payload = {
+        "key_facts": [
+            {"statement": "a", "source_urls": [PAPER.url, variant]},
+            {"statement": "b", "source_urls": [variant]},
+        ]
+    }
+    llm = _ScriptedLLM([_submit_raw(payload)])
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="m",
+        emit=emit,
+        web_search_enabled=False,
+        scholarly_fetch=_fetch(BUNDLE),
+    )
+    [src] = finding.sources
+    assert [f.citation_ids for f in finding.key_facts] == [[src.id], [src.id]]
+
+
+@pytest.mark.parametrize("web", [False, True])
+async def test_key_fact_citing_unknown_url_without_sources_stays_uncited(web: bool) -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    payload = {"key_facts": [{"statement": "f", "source_urls": ["https://made.up/x"]}]}
+    llm = _scholarly_llm(web, _submit_raw(payload))
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="m",
+        emit=emit,
+        web_search_enabled=web,
+        scholarly_fetch=_fetch(BUNDLE),
+    )
+    assert finding.sources == []
+    assert finding.key_facts[0].citation_ids == []
+
+
+def test_offline_addendum_asks_to_list_cited_candidates_in_sources() -> None:
+    assert "List every candidate paper you cite in `sources` as well (url + title)." in (
+        SCHOLARLY_OFFLINE_ADDENDUM
+    )
+
+
+async def test_key_fact_citing_arxiv_pdf_variant_matches_doi_canonical_paper() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    cited = "http://arxiv.org/pdf/1706.03762v7"
+    payload = {
+        "key_facts": [{"statement": "f", "source_urls": [cited]}],
+        "sources": [{"url": cited, "title": "t"}],
+    }
+    llm = _ScriptedLLM([_submit_raw(payload)])
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="m",
+        emit=emit,
+        web_search_enabled=False,
+        scholarly_fetch=_fetch(BUNDLE),
+    )
+    [src] = finding.sources
+    assert src.kind == "scholarly"
+    assert str(src.url) == PAPER.url  # canonical DOI URL, not the cited PDF link
+    assert finding.key_facts[0].citation_ids == [src.id]
+
+
+def _bundle_with(**kw: Any) -> ScholarlyBundle:
+    from dataclasses import replace
+
+    return ScholarlyBundle(terms=("t",), papers=(replace(PAPER, **kw),), counts={"openalex": 1})
+
+
+async def test_registry_title_longer_than_limit_is_clipped() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    long_title = "Long \n  title " + "x" * 600  # catalogs do not trim titles
+    llm = _ScriptedLLM([_submit([{"url": PAPER.url, "title": "t"}], [PAPER.url])])
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="m",
+        emit=emit,
+        web_search_enabled=False,
+        scholarly_fetch=_fetch(_bundle_with(title=long_title)),
+    )
+    [src] = finding.sources
+    assert len(src.title) == 500
+    assert src.title.startswith("Long title xxx")  # whitespace collapsed before the cut
+
+
+async def test_stored_author_list_is_capped() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    authors = tuple(f"Author {i}" for i in range(40))
+    llm = _ScriptedLLM([_submit([{"url": PAPER.url, "title": "t"}], [PAPER.url])])
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="m",
+        emit=emit,
+        web_search_enabled=False,
+        scholarly_fetch=_fetch(_bundle_with(authors=authors)),
+    )
+    [src] = finding.sources
+    assert src.authors == list(authors[:25])

@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field, HttpUrl
 
 SourceKind = Literal["web", "scholarly"]
 MAX_SEARCH_TERMS = 4
+MAX_SOURCE_TITLE_CHARS = 500
 
 
 class Priority(IntEnum):
@@ -50,7 +51,7 @@ class Source(BaseModel):
 
     id: UUID = Field(default_factory=uuid4)
     url: HttpUrl
-    title: str = Field(min_length=1, max_length=500)
+    title: str = Field(min_length=1, max_length=MAX_SOURCE_TITLE_CHARS)
     kind: SourceKind = "web"
     authors: list[str] = Field(default_factory=list)
     year: int | None = None

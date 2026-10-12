@@ -32,7 +32,13 @@ from ara.agents import EventEmitter, ResearcherError, extract_tool_use
 from ara.llm.client import AnthropicClient, LLMClient, ToolSpec
 from ara.llm.search import format_search_results, tavily_search
 from ara.models.events import ResearcherProgress, ResearcherStarted
-from ara.models.research import KeyFact, Source, SubQuery, SubQueryFinding
+from ara.models.research import (
+    MAX_SOURCE_TITLE_CHARS,
+    KeyFact,
+    Source,
+    SubQuery,
+    SubQueryFinding,
+)
 from ara.scholarly.models import Paper, ScholarlyBundle, authors_short, normalize_url
 
 OnTavilySearch = Callable[[], Awaitable[None]]
@@ -41,6 +47,7 @@ ScholarlyFetch = Callable[[], Awaitable[ScholarlyBundle]]
 SUBMIT_FINDING_TOOL_NAME = "submit_finding"
 SCHOLARLY_TOOL_NAME = "scholarly_search"
 _PROMPT_ABSTRACT_CHARS = 600
+_MAX_AUTHORS_STORED = 25
 
 RESEARCHER_SYSTEM_PROMPT = """\
 You are the Researcher stage of an autonomous research assistant.
@@ -92,7 +99,8 @@ non-academic angles.
 SCHOLARLY_OFFLINE_ADDENDUM = """\
 EXCEPTION: the user message lists CANDIDATE SCHOLARLY SOURCES fetched from academic \
 catalogs. They are real and verified. You MAY cite those exact URLs — and only those — \
-in `sources` and `source_urls`. Any other URL will be discarded.
+in `sources` and `source_urls`. Any other URL will be discarded. List every candidate \
+paper you cite in `sources` as well (url + title).
 """
 
 WEB_SEARCH_CLIENT_TOOL_NAME = "web_search"
@@ -224,8 +232,9 @@ def _system_prompt(base: str, bundle: ScholarlyBundle | None, *, offline: bool) 
     return base + "\n" + (SCHOLARLY_OFFLINE_ADDENDUM if offline else SCHOLARLY_ADDENDUM)
 
 
-def _registry(bundle: ScholarlyBundle | None) -> dict[str, Paper] | None:
-    return bundle.by_url() if bundle is not None and bundle.papers else None
+def _registry(bundle: ScholarlyBundle | None) -> ScholarlyBundle | None:
+    """The bundle when it has papers to match citations against, else None."""
+    return bundle if bundle is not None and bundle.papers else None
 
 
 async def research_sub_query(
@@ -426,14 +435,13 @@ async def _research_with_tavily(
     )
 
 
-def _lookup(registry: dict[str, Paper] | None, url: str) -> Paper | None:
-    if registry is None:
-        return None
-    return registry.get(normalize_url(url).lower())
+def _lookup(registry: ScholarlyBundle | None, url: str) -> Paper | None:
+    """Exact normalised URL, then DOI, then arXiv id (see `ScholarlyBundle.lookup`)."""
+    return registry.lookup(url) if registry is not None else None
 
 
 def _build_finding(
-    sub_query_id: UUID, data: dict[str, Any], registry: dict[str, Paper] | None = None
+    sub_query_id: UUID, data: dict[str, Any], registry: ScholarlyBundle | None = None
 ) -> SubQueryFinding:
     """Translate the raw submit_finding input into a `SubQueryFinding`.
 
@@ -442,10 +450,15 @@ def _build_finding(
     a pre-fetched paper is enriched from the registry (kind="scholarly",
     canonical URL, catalog title and metadata) — the model never supplies
     metadata. Unknown URLs stay `kind="web"`. Dedup is by normalised URL.
+
+    A key fact may cite a candidate paper the model left out of `sources`
+    (small models do this offline); a registry hit is verified data, so the
+    Source is created from the paper. Unknown URLs cited only in key facts
+    resolve to nothing.
     """
     summary = data["summary"]
-    raw_sources = data.get("sources", [])
-    raw_facts = data.get("key_facts", [])
+    raw_sources = data.get("sources") or []
+    raw_facts = data.get("key_facts") or []
 
     sources: list[Source] = []
     url_to_id: dict[str, UUID] = {}
@@ -467,14 +480,10 @@ def _build_finding(
 
     key_facts: list[KeyFact] = []
     for raw in raw_facts:
-        urls = raw.get("source_urls", [])
+        urls = raw.get("source_urls") or []
         citation_ids: list[UUID] = []
         for u in urls:
-            cid = url_to_id.get(normalize_url(str(u)))
-            if cid is None:
-                cited_paper = _lookup(registry, str(u))
-                if cited_paper is not None:
-                    cid = url_to_id.get(normalize_url(cited_paper.url))
+            cid = _resolve_citation(str(u), registry, sources, url_to_id)
             if cid is not None and cid not in citation_ids:
                 citation_ids.append(cid)
         key_facts.append(KeyFact(statement=raw["statement"], citation_ids=citation_ids))
@@ -484,15 +493,44 @@ def _build_finding(
     )
 
 
+def _resolve_citation(
+    cited: str,
+    registry: ScholarlyBundle | None,
+    sources: list[Source],
+    url_to_id: dict[str, UUID],
+) -> UUID | None:
+    """Map one key-fact URL to a Source id, creating the Source on a registry hit."""
+    key = normalize_url(cited)
+    cid = url_to_id.get(key)
+    if cid is not None:
+        return cid
+    paper = _lookup(registry, cited)
+    if paper is None:
+        return None
+    canonical = normalize_url(paper.url)
+    cid = url_to_id.get(canonical)
+    if cid is None:
+        src = _source_from(paper, cited, paper.title)
+        sources.append(src)
+        cid = src.id
+        url_to_id[canonical] = cid
+    url_to_id[key] = cid
+    return cid
+
+
+def _clip_title(title: str) -> str:
+    return " ".join(title.split())[:MAX_SOURCE_TITLE_CHARS]
+
+
 def _source_from(paper: Paper | None, cited_url: str, cited_title: str) -> Source:
     if paper is None:
         return Source.model_validate({"url": cited_url, "title": cited_title})
     return Source.model_validate(
         {
             "url": paper.url,
-            "title": paper.title,
+            "title": _clip_title(paper.title) or _clip_title(paper.url),
             "kind": "scholarly",
-            "authors": list(paper.authors),
+            "authors": list(paper.authors[:_MAX_AUTHORS_STORED]),
             "year": paper.year,
             "venue": paper.venue,
             "doi": paper.doi,
@@ -502,7 +540,7 @@ def _source_from(paper: Paper | None, cited_url: str, cited_title: str) -> Sourc
 
 
 def _restrict_to_registry(
-    finding: SubQueryFinding, registry: dict[str, Paper] | None
+    finding: SubQueryFinding, registry: ScholarlyBundle | None
 ) -> SubQueryFinding:
     """Offline runs keep only sources backed by fetched papers (small models invent URLs)."""
     keep = (
