@@ -28,6 +28,7 @@ class ReportRow:
     status: ReportStatus
     depth: Depth
     browse_web: bool
+    scholarly: bool
     used_byok: bool
     is_sample: bool
     share_token: UUID | None
@@ -65,6 +66,7 @@ class ReportsRepo(Protocol):
         depth: Depth,
         browse_web: bool,
         used_byok: bool,
+        scholarly: bool = False,
     ) -> None: ...
 
     async def append_event(self, report_id: UUID, event_json: str) -> int: ...

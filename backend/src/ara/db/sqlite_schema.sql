@@ -1,4 +1,4 @@
--- SQLite schema for local mode. Mirrors migrations 001-003 with SQLite types:
+-- SQLite schema for local mode. Mirrors migrations 001-004 with SQLite types:
 -- uuid -> TEXT, timestamptz -> TEXT (ISO-8601 UTC), jsonb -> TEXT, boolean -> INTEGER.
 create table if not exists reports (
   id              text primary key,
@@ -7,6 +7,7 @@ create table if not exists reports (
   status          text not null check (status in ('running','completed','error')),
   depth           text not null check (depth in ('quick','standard','deep')),
   browse_web      integer not null default 1,
+  scholarly       integer not null default 0,
   used_byok       integer not null default 0,
   is_sample       integer not null default 0,
   share_token     text unique,

@@ -42,6 +42,7 @@ async def run_report(
         owner_id=owner_id,
         depth=_depth_for(overrides.options),
         browse_web=overrides.options.web_search_enabled,
+        scholarly=overrides.options.scholarly_enabled,
         used_byok=_is_byok(overrides.api_key, settings),
     )
     cumulative_usd = 0.0

@@ -121,6 +121,7 @@ class ReportSummary(BaseModel):
     question: str
     status: Literal["running", "completed", "error"]
     depth: Depth
+    scholarly: bool
     used_byok: bool
     is_sample: bool
     cost_usd: float | None
@@ -209,6 +210,7 @@ def _row_to_summary(row: ReportRow) -> ReportSummary:
         question=row.question,
         status=row.status,
         depth=row.depth,
+        scholarly=row.scholarly,
         used_byok=row.used_byok,
         is_sample=row.is_sample,
         cost_usd=row.cost_usd,

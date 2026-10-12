@@ -520,3 +520,21 @@ async def test_cancelled_run_is_closed_as_error() -> None:
     assert [(e.stage, e.message) for e in errors] == [
         ("runtime", "Run interrupted by server shutdown")
     ]
+
+
+@pytest.mark.asyncio
+async def test_orchestrator_persists_scholarly_flag() -> None:
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    settings.anthropic_api_key = "k"
+    overrides = RuntimeOverrides(
+        api_key="user-key", planner_model="x", researcher_model="x", synthesizer_model="x",
+        options=options_for_depth("quick", web_search_enabled=False, scholarly_enabled=True),
+    )
+    store = InMemoryReportStore()
+    rid = uuid4()
+    await run_report(
+        report_id=rid, question="q", store=store, settings=settings, overrides=overrides,
+        owner_id=uuid4(), llm=_RecordingLLM(),  # type: ignore[arg-type]
+    )
+    state = store.get_state(rid)
+    assert state is not None and state.scholarly is True

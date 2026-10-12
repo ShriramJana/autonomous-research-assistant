@@ -35,6 +35,7 @@ def _row(r: asyncpg.Record) -> ReportRow:
         status=r["status"],
         depth=r["depth"],
         browse_web=r["browse_web"],
+        scholarly=bool(r["scholarly"]),
         used_byok=r["used_byok"],
         is_sample=r["is_sample"],
         share_token=r["share_token"],
@@ -61,14 +62,14 @@ class PostgresReportsRepo:
     # ---- reports ----
     async def create_report(
         self, report_id: UUID, *, owner_id: UUID, question: str, depth: Depth,
-        browse_web: bool, used_byok: bool,
+        browse_web: bool, used_byok: bool, scholarly: bool = False,
     ) -> None:
         async with self.pool.acquire() as conn:
             await conn.execute(
                 "insert into reports "
-                "(id, owner_id, question, status, depth, browse_web, used_byok) "
-                "values ($1, $2, $3, 'running', $4, $5, $6) on conflict (id) do nothing",
-                report_id, owner_id, question, depth, browse_web, used_byok,
+                "(id, owner_id, question, status, depth, browse_web, scholarly, used_byok) "
+                "values ($1, $2, $3, 'running', $4, $5, $6, $7) on conflict (id) do nothing",
+                report_id, owner_id, question, depth, browse_web, scholarly, used_byok,
             )
 
     async def append_event(self, report_id: UUID, event_json: str) -> int:

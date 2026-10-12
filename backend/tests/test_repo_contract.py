@@ -9,9 +9,11 @@ import json
 import os
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
+from importlib import resources
 from pathlib import Path
 from uuid import UUID, uuid4
 
+import aiosqlite
 import pytest
 
 from ara.db.repo import ReportsRepo, month_start
@@ -48,7 +50,8 @@ async def repo(request: pytest.FixtureRequest, tmp_path: Path) -> AsyncIterator[
                     'authenticated', $2, '', now(), now(), now())
                 on conflict (id) do nothing
                 """,
-                OWNER, "local@ara",
+                OWNER,
+                "local@ara",
             )
         impl = PostgresReportsRepo(pool)
         try:
@@ -75,7 +78,8 @@ async def other_owner(repo: ReportsRepo) -> AsyncIterator[UUID]:
                    encrypted_password, email_confirmed_at, created_at, updated_at)
                    values ($1, '00000000-0000-0000-0000-000000000000', 'authenticated',
                    'authenticated', $2, '', now(), now(), now())""",
-                uid, f"{uid}@test.local",
+                uid,
+                f"{uid}@test.local",
             )
     yield uid
     if pool is not None:
@@ -96,7 +100,11 @@ async def test_create_then_get_roundtrips_fields(repo: ReportsRepo) -> None:
     row = await repo.get_report(rid)
     assert row is not None
     assert (row.id, row.owner_id, row.question, row.status, row.depth) == (
-        rid, OWNER, "q?", "running", "quick"
+        rid,
+        OWNER,
+        "q?",
+        "running",
+        "quick",
     )
     assert row.browse_web is False and row.used_byok is False and row.is_sample is False
     assert row.share_token is None and row.completed_at is None
@@ -121,8 +129,12 @@ async def test_events_append_replay_and_since(repo: ReportsRepo) -> None:
 async def test_close_sets_terminal_fields(repo: ReportsRepo) -> None:
     rid = await _seed(repo)
     await repo.close_report(
-        rid, status="completed", cost_usd=0.25,
-        report_payload_json=json.dumps({"k": 1}), error_message=None, tavily_searches=2,
+        rid,
+        status="completed",
+        cost_usd=0.25,
+        report_payload_json=json.dumps({"k": 1}),
+        error_message=None,
+        tavily_searches=2,
     )
     row = await repo.get_report(rid)
     assert row is not None
@@ -151,9 +163,7 @@ async def test_samples_promote_list_unpromote(repo: ReportsRepo) -> None:
     assert await repo.set_sample(uuid4(), True) is False
 
 
-async def test_share_token_is_coalesced_and_revocable(
-    repo: ReportsRepo, other_owner: UUID
-) -> None:
+async def test_share_token_is_coalesced_and_revocable(repo: ReportsRepo, other_owner: UUID) -> None:
     rid = await _seed(repo)
     t1, t2 = uuid4(), uuid4()
     assert await repo.ensure_share_token(rid, OWNER, t1) == t1
@@ -186,10 +196,14 @@ async def test_credentials_upsert_clear_active(repo: ReportsRepo, other_owner: U
     row = await repo.get_credentials(uid)
     assert row is not None
     assert (row.anthropic_key_ciphertext, row.openai_key_ciphertext, row.tavily_key_ciphertext) == (
-        "c1", "c2", "c3"
+        "c1",
+        "c2",
+        "c3",
     )
     assert (row.openai_base_url, row.openai_model, row.active_provider) == (
-        "http://x/v1", "m", "openai"
+        "http://x/v1",
+        "m",
+        "openai",
     )
     await repo.clear_provider(uid, "openai")  # active provider falls back to free
     row = await repo.get_credentials(uid)
@@ -204,10 +218,22 @@ async def test_credentials_upsert_clear_active(repo: ReportsRepo, other_owner: U
 async def test_quota_sums_only_free_runs(repo: ReportsRepo) -> None:
     free = await _seed(repo)
     byok = await _seed(repo, byok=True)
-    await repo.close_report(free, status="completed", cost_usd=1.5, report_payload_json=None,
-                            error_message=None, tavily_searches=3)
-    await repo.close_report(byok, status="completed", cost_usd=9.0, report_payload_json=None,
-                            error_message=None, tavily_searches=4)
+    await repo.close_report(
+        free,
+        status="completed",
+        cost_usd=1.5,
+        report_payload_json=None,
+        error_message=None,
+        tavily_searches=3,
+    )
+    await repo.close_report(
+        byok,
+        status="completed",
+        cost_usd=9.0,
+        report_payload_json=None,
+        error_message=None,
+        tavily_searches=4,
+    )
     since = datetime.now(UTC) - timedelta(minutes=5)
     assert await repo.count_free_runs(OWNER, since=since) == 1  # owner-scoped: exact
     # Global sums: a shared Postgres DB may hold other users' rows, so assert lower bounds.
@@ -219,8 +245,14 @@ async def test_quota_sums_only_free_runs(repo: ReportsRepo) -> None:
 
 async def test_month_filters_exclude_older_rows(repo: ReportsRepo) -> None:
     rid = await _seed(repo)
-    await repo.close_report(rid, status="completed", cost_usd=1.0, report_payload_json=None,
-                            error_message=None, tavily_searches=1)
+    await repo.close_report(
+        rid,
+        status="completed",
+        cost_usd=1.0,
+        report_payload_json=None,
+        error_message=None,
+        tavily_searches=1,
+    )
     future = datetime.now(UTC) + timedelta(days=1)
     assert await repo.count_free_runs(OWNER, since=future) == 0
     assert await repo.sum_free_spend(since=future) == 0.0
@@ -230,3 +262,47 @@ async def test_month_filters_exclude_older_rows(repo: ReportsRepo) -> None:
 def test_month_start_is_first_of_month_utc() -> None:
     ms = month_start(datetime(2026, 10, 8, 13, 5, tzinfo=UTC))
     assert ms == datetime(2026, 10, 1, tzinfo=UTC)
+
+
+async def test_scholarly_flag_roundtrips_and_defaults_false(repo: ReportsRepo) -> None:
+    plain = await _seed(repo)
+    rid = uuid4()
+    await repo.create_report(
+        rid,
+        owner_id=OWNER,
+        question="q",
+        depth="deep",
+        browse_web=True,
+        used_byok=True,
+        scholarly=True,
+    )
+    plain_row, flagged_row = await repo.get_report(plain), await repo.get_report(rid)
+    assert plain_row is not None and plain_row.scholarly is False
+    assert flagged_row is not None and flagged_row.scholarly is True
+
+
+async def test_sqlite_open_adds_scholarly_column_to_pre_004_db(tmp_path: Path) -> None:
+    """A local ara.db created before this change must be upgraded in place."""
+    path = tmp_path / "old.db"
+    schema = resources.files("ara.db").joinpath("sqlite_schema.sql").read_text()
+    old = schema.replace("  scholarly       integer not null default 0,\n", "")
+    assert old != schema, "schema line must match exactly for this test to mean anything"
+    async with aiosqlite.connect(path) as conn:
+        await conn.executescript(old)
+        await conn.commit()
+    repo = await SqliteReportsRepo.open(str(path))
+    try:
+        rid = uuid4()
+        await repo.create_report(
+            rid,
+            owner_id=OWNER,
+            question="q",
+            depth="quick",
+            browse_web=False,
+            used_byok=False,
+            scholarly=True,
+        )
+        row = await repo.get_report(rid)
+        assert row is not None and row.scholarly is True
+    finally:
+        await repo.close()

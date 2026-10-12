@@ -110,13 +110,14 @@ class SupabaseReportStore:
         depth: Depth,
         browse_web: bool,
         used_byok: bool,
+        scholarly: bool = False,
     ) -> None:
         async with self._pool.acquire() as conn:
             await conn.execute(
                 """
                 insert into reports
-                  (id, owner_id, question, status, depth, browse_web, used_byok)
-                values ($1, $2, $3, 'running', $4, $5, $6)
+                  (id, owner_id, question, status, depth, browse_web, scholarly, used_byok)
+                values ($1, $2, $3, 'running', $4, $5, $6, $7)
                 on conflict (id) do nothing
                 """,
                 report_id,
@@ -124,6 +125,7 @@ class SupabaseReportStore:
                 question,
                 depth,
                 browse_web,
+                scholarly,
                 used_byok,
             )
 

@@ -21,6 +21,20 @@ _PROVIDER_COLUMNS: dict[Provider, list[str]] = {
 }
 
 
+# Columns added after the first local release; applied in place on open.
+_COLUMN_UPGRADES: tuple[tuple[str, str, str], ...] = (
+    ("reports", "scholarly", "alter table reports add column scholarly integer not null default 0"),
+)
+
+
+async def _apply_column_upgrades(conn: aiosqlite.Connection) -> None:
+    for table, column, ddl in _COLUMN_UPGRADES:
+        cur = await conn.execute(f"pragma table_info({table})")
+        existing = {row[1] for row in await cur.fetchall()}
+        if column not in existing:
+            await conn.execute(ddl)
+
+
 def _now() -> str:
     return datetime.now(UTC).isoformat()
 
@@ -39,6 +53,7 @@ def _row(r: aiosqlite.Row) -> ReportRow:
         status=r["status"],
         depth=r["depth"],
         browse_web=bool(r["browse_web"]),
+        scholarly=bool(r["scholarly"]),
         used_byok=bool(r["used_byok"]),
         is_sample=bool(r["is_sample"]),
         share_token=UUID(r["share_token"]) if r["share_token"] else None,
@@ -66,6 +81,7 @@ class SqliteReportsRepo:
         await conn.execute("pragma foreign_keys=on")
         schema = resources.files("ara.db").joinpath("sqlite_schema.sql").read_text()
         await conn.executescript(schema)
+        await _apply_column_upgrades(conn)
         await conn.commit()
         return cls(conn)
 
@@ -100,14 +116,14 @@ class SqliteReportsRepo:
     # ---- reports ----
     async def create_report(
         self, report_id: UUID, *, owner_id: UUID, question: str, depth: Depth,
-        browse_web: bool, used_byok: bool,
+        browse_web: bool, used_byok: bool, scholarly: bool = False,
     ) -> None:
         await self._run(
             "insert or ignore into reports (id, owner_id, question, status, depth, browse_web, "
-            "used_byok, created_at) values (?, ?, ?, 'running', ?, ?, ?, ?)",
+            "scholarly, used_byok, created_at) values (?, ?, ?, 'running', ?, ?, ?, ?, ?)",
             (
                 str(report_id), str(owner_id), question, depth,
-                int(browse_web), int(used_byok), _now(),
+                int(browse_web), int(scholarly), int(used_byok), _now(),
             ),
         )
 

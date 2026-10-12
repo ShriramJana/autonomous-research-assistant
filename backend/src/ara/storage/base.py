@@ -28,6 +28,7 @@ class ReportStore(Protocol):
         depth: Depth,
         browse_web: bool,
         used_byok: bool,
+        scholarly: bool = False,
     ) -> None:
         """Register a new report with its owner + chosen run parameters."""
         ...

@@ -28,17 +28,17 @@ class SqliteReportStore:
 
     async def create(
         self, report_id: UUID, question: str, *, owner_id: UUID, depth: Depth,
-        browse_web: bool, used_byok: bool,
+        browse_web: bool, used_byok: bool, scholarly: bool = False,
     ) -> None:
         # Live state first: a stream request that finds the row must also find the
         # live state, or it would replay an empty tail and stop.
         await self._live.create(
             report_id, question, owner_id=owner_id, depth=depth,
-            browse_web=browse_web, used_byok=used_byok,
+            browse_web=browse_web, used_byok=used_byok, scholarly=scholarly,
         )
         await self._repo.create_report(
             report_id, owner_id=owner_id, question=question, depth=depth,
-            browse_web=browse_web, used_byok=used_byok,
+            browse_web=browse_web, used_byok=used_byok, scholarly=scholarly,
         )
 
     async def get_question(self, report_id: UUID) -> str | None:

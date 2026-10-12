@@ -29,6 +29,7 @@ class _ReportState:
     owner_id: UUID
     depth: Depth
     browse_web: bool
+    scholarly: bool
     used_byok: bool
     buffer: deque[ResearchEvent]
     live_queues: list[asyncio.Queue[ResearchEvent | None]] = field(default_factory=list)
@@ -56,6 +57,7 @@ class InMemoryReportStore:
         depth: Depth,
         browse_web: bool,
         used_byok: bool,
+        scholarly: bool = False,
     ) -> None:
         if report_id in self._reports:
             return
@@ -64,6 +66,7 @@ class InMemoryReportStore:
             owner_id=owner_id,
             depth=depth,
             browse_web=browse_web,
+            scholarly=scholarly,
             used_byok=used_byok,
             buffer=deque(maxlen=self._buffer_size),
         )

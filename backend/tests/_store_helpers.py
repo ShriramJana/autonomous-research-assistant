@@ -20,6 +20,7 @@ async def create_test_report(
     depth: Depth = "standard",
     browse_web: bool = True,
     used_byok: bool = True,
+    scholarly: bool = False,
 ) -> UUID:
     """Create a report with test-default metadata. Returns the owner_id used."""
     owner = owner_id or uuid4()
@@ -30,5 +31,6 @@ async def create_test_report(
         depth=depth,
         browse_web=browse_web,
         used_byok=used_byok,
+        scholarly=scholarly,
     )
     return owner
