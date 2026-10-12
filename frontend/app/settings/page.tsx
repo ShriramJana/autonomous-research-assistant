@@ -632,6 +632,10 @@ export default function SettingsPage() {
                 server has an API key.
               </p>
             </>
+          ) : state.kind === "error" ? (
+            <p className="text-muted-foreground font-mono text-xs">
+              Catalog list unavailable — backend may be offline. ({state.message})
+            </p>
           ) : (
             <Skeleton className="h-4 w-64" />
           )}

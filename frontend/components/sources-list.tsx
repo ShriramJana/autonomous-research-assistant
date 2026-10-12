@@ -16,38 +16,44 @@ export function SourcesList({ citations }: { citations: Source[] }) {
         </p>
       ) : (
         <ol className="flex flex-col gap-3">
-          {citations.map((src, i) => (
-            <li key={src.id} className="flex gap-3 text-sm">
-              <span className="text-muted-foreground w-7 shrink-0 font-mono text-[11px] leading-5">
-                [{String(i + 1).padStart(2, "0")}]
-              </span>
-              <div className="flex min-w-0 flex-col">
-                <a
-                  href={src.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-foreground hover:text-primary line-clamp-2 text-sm font-medium leading-snug transition-colors"
-                >
-                  {src.title}
-                </a>
-                {src.kind === "scholarly" ? (
-                  <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                    <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-wider">
-                      paper
-                    </Badge>
-                    {sourceMeta(src) ? (
-                      <span className="text-muted-foreground font-mono text-[10px] tracking-tight">
-                        {sourceMeta(src)}
-                      </span>
-                    ) : null}
-                  </div>
-                ) : null}
-                <span className="text-muted-foreground/60 mt-0.5 break-all font-mono text-[10px]">
-                  {src.url}
+          {citations.map((src, i) => {
+            const meta = sourceMeta(src);
+            return (
+              <li key={src.id} className="flex gap-3 text-sm">
+                <span className="text-muted-foreground w-7 shrink-0 font-mono text-[11px] leading-5">
+                  [{String(i + 1).padStart(2, "0")}]
                 </span>
-              </div>
-            </li>
-          ))}
+                <div className="flex min-w-0 flex-col">
+                  <a
+                    href={src.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground hover:text-primary line-clamp-2 text-sm font-medium leading-snug transition-colors"
+                  >
+                    {src.title}
+                  </a>
+                  {src.kind === "scholarly" ? (
+                    <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                      <Badge
+                        variant="outline"
+                        className="font-mono text-[9px] uppercase tracking-wider"
+                      >
+                        paper
+                      </Badge>
+                      {meta ? (
+                        <span className="text-muted-foreground font-mono text-[10px] tracking-tight">
+                          {meta}
+                        </span>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  <span className="text-muted-foreground/60 mt-0.5 break-all font-mono text-[10px]">
+                    {src.url}
+                  </span>
+                </div>
+              </li>
+            );
+          })}
         </ol>
       )}
     </section>

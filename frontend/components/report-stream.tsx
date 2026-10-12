@@ -39,6 +39,8 @@ export function ReportStream({
   const markdown = report ? composeReportMarkdown(report) : streamedMarkdown;
   const showCompletedHeader = report !== null && title;
 
+  const banner = report ? knowledgeBanner(report.web_search_enabled, report.scholarly_enabled) : null;
+
   return (
     <div className="bg-card flex h-full flex-col overflow-hidden rounded-lg print:block print:h-auto print:overflow-visible print:border-0 print:bg-transparent print:shadow-none">
       <div className="flex-1 overflow-y-auto px-8 py-8 print:overflow-visible print:p-0">
@@ -51,9 +53,9 @@ export function ReportStream({
           </div>
         ) : null}
 
-        {report && knowledgeBanner(report.web_search_enabled, report.scholarly_enabled) ? (
+        {banner ? (
           <p className="border-primary/30 bg-primary/5 mb-6 rounded-md border px-4 py-2 font-mono text-[11px] tracking-wider">
-            {knowledgeBanner(report.web_search_enabled, report.scholarly_enabled) === "scholarly-only"
+            {banner === "scholarly-only"
               ? "Scholarly sources only — papers were fetched from academic catalogs; no web pages were browsed."
               : "Model knowledge only — no sources were browsed for this report."}
           </p>
