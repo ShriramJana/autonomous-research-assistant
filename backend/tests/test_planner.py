@@ -127,3 +127,74 @@ async def test_planner_raises_when_sub_queries_not_a_list() -> None:
 
     with pytest.raises(PlannerError, match="not a list"):
         await plan_research(question="q?", llm=llm, model="m")
+
+
+def test_planner_schema_requires_search_terms() -> None:
+    from ara.agents.planner import _planner_tool
+
+    schema = _planner_tool(3)["input_schema"]
+    item = schema["properties"]["sub_queries"]["items"]
+    assert "search_terms" in item["required"]
+    terms = item["properties"]["search_terms"]
+    assert terms["type"] == "array" and terms["items"] == {"type": "string"}
+    assert (terms["minItems"], terms["maxItems"]) == (2, 4)
+
+
+async def test_planner_keeps_search_terms() -> None:
+    response = _mock_tool_use_response(
+        PLANNER_TOOL_NAME,
+        {
+            "sub_queries": [
+                {
+                    "question": "q1",
+                    "rationale": "r",
+                    "priority": 2,
+                    "search_terms": ["rag", "retrieval"],
+                },
+                {
+                    "question": "q2",
+                    "rationale": "r",
+                    "priority": 2,
+                    "search_terms": ["fine-tuning"],
+                },
+                {"question": "q3", "rationale": "r", "priority": 2, "search_terms": ["eval"]},
+            ]
+        },
+    )
+    llm = MagicMock()
+    llm.complete_with_tools = AsyncMock(return_value=response)
+    plan = await plan_research(question="q?", llm=llm, model="m")
+    assert plan.sub_queries[0].search_terms == ["rag", "retrieval"]
+
+
+async def test_planner_normalizes_search_terms() -> None:
+    """Six terms, blanks, non-strings and over-long phrases must never fail the plan."""
+    response = _mock_tool_use_response(
+        PLANNER_TOOL_NAME,
+        {
+            "sub_queries": [
+                {
+                    "question": "q1",
+                    "rationale": "r",
+                    "priority": 2,
+                    "search_terms": [" a ", "", 7, None, "b", "c", "d", "e", "x" * 80],
+                },
+                {"question": "q2", "rationale": "r", "priority": 2, "search_terms": "not a list"},
+                {"question": "q3", "rationale": "r", "priority": 2},
+            ]
+        },
+    )
+    llm = MagicMock()
+    llm.complete_with_tools = AsyncMock(return_value=response)
+    plan = await plan_research(question="q?", llm=llm, model="m")
+    assert plan.sub_queries[0].search_terms == ["a", "b", "c", "d"]
+    assert plan.sub_queries[1].search_terms == []
+    assert plan.sub_queries[2].search_terms == []
+
+
+async def test_planner_rejects_non_object_sub_query() -> None:
+    response = _mock_tool_use_response(PLANNER_TOOL_NAME, {"sub_queries": ["q1", "q2", "q3"]})
+    llm = MagicMock()
+    llm.complete_with_tools = AsyncMock(return_value=response)
+    with pytest.raises(PlannerError, match="not an object"):
+        await plan_research(question="q?", llm=llm, model="m")

@@ -12,9 +12,10 @@ from pydantic import ValidationError
 
 from ara.agents import PlannerError, extract_tool_use
 from ara.llm.client import LLMClient, ToolSpec
-from ara.models.research import ResearchPlan, SubQuery
+from ara.models.research import MAX_SEARCH_TERMS, ResearchPlan, SubQuery
 
 PLANNER_TOOL_NAME = "submit_research_plan"
+_MAX_TERM_CHARS = 60
 
 
 def _planner_system_prompt(target_count: int) -> str:
@@ -34,6 +35,9 @@ Design principles for a good decomposition:
 - Assign priority: 3 (high) for foundational queries the final report \
   depends on, 2 (medium) for substantive supporting questions, 1 (low) for \
   nice-to-have context.
+- For each sub-query also give 2-4 `search_terms`: short keyword phrases \
+  (1-6 words each, no question words) that you would type into a scholarly \
+  search box such as PubMed or arXiv to find papers answering it.
 
 You MUST call the `submit_research_plan` tool with your decomposition. \
 Do not respond with plain text.
@@ -73,8 +77,18 @@ def _planner_tool(target_count: int) -> ToolSpec:
                                 "enum": [1, 2, 3],
                                 "description": "1=low, 2=medium, 3=high.",
                             },
+                            "search_terms": {
+                                "type": "array",
+                                "minItems": 2,
+                                "maxItems": 4,
+                                "items": {"type": "string"},
+                                "description": (
+                                    "2-4 short keyword phrases (1-6 words each) for "
+                                    "scholarly catalog search."
+                                ),
+                            },
                         },
-                        "required": ["question", "rationale", "priority"],
+                        "required": ["question", "rationale", "priority", "search_terms"],
                     },
                 }
             },
@@ -85,6 +99,20 @@ def _planner_tool(target_count: int) -> ToolSpec:
 
 # Default tool spec preserved for tests / external callers that import it.
 PLANNER_TOOL: ToolSpec = _planner_tool(5)
+
+
+def _normalize_terms(raw: Any) -> list[str]:
+    """Drop non-strings and blanks, trim length, cap the count. Never raises."""
+    if not isinstance(raw, list):
+        return []
+    terms = [t.strip()[:_MAX_TERM_CHARS] for t in raw if isinstance(t, str) and t.strip()]
+    return terms[:MAX_SEARCH_TERMS]
+
+
+def _with_terms(raw_sub_query: Any) -> dict[str, Any]:
+    if not isinstance(raw_sub_query, dict):
+        raise PlannerError(f"sub-query is not an object: {type(raw_sub_query).__name__}")
+    return {**raw_sub_query, "search_terms": _normalize_terms(raw_sub_query.get("search_terms"))}
 
 
 async def plan_research(
@@ -124,7 +152,7 @@ async def plan_research(
         raise PlannerError(f"`sub_queries` is not a list: {type(raw_sub_queries).__name__}")
 
     try:
-        sub_queries = [SubQuery(**sq) for sq in raw_sub_queries]
+        sub_queries = [SubQuery(**_with_terms(sq)) for sq in raw_sub_queries]
         return ResearchPlan(original_question=question, sub_queries=sub_queries)
     except ValidationError as exc:
         raise PlannerError(f"Planner output failed validation: {exc}") from exc
