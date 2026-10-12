@@ -105,7 +105,7 @@ def _normalize_terms(raw: Any) -> list[str]:
     """Drop non-strings and blanks, trim length, cap the count. Never raises."""
     if not isinstance(raw, list):
         return []
-    terms = [t.strip()[:_MAX_TERM_CHARS] for t in raw if isinstance(t, str) and t.strip()]
+    terms = [t.strip()[:_MAX_TERM_CHARS].strip() for t in raw if isinstance(t, str) and t.strip()]
     return terms[:MAX_SEARCH_TERMS]
 
 

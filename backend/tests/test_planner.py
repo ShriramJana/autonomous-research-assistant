@@ -198,3 +198,28 @@ async def test_planner_rejects_non_object_sub_query() -> None:
     llm.complete_with_tools = AsyncMock(return_value=response)
     with pytest.raises(PlannerError, match="not an object"):
         await plan_research(question="q?", llm=llm, model="m")
+
+
+async def test_planner_trims_long_search_terms() -> None:
+    response = _mock_tool_use_response(
+        PLANNER_TOOL_NAME,
+        {
+            "sub_queries": [
+                {
+                    "question": "q1",
+                    "rationale": "r",
+                    "priority": 2,
+                    "search_terms": ["x" * 80, "ok", "a" * 59 + " b"],
+                },
+                {"question": "q2", "rationale": "r", "priority": 2},
+                {"question": "q3", "rationale": "r", "priority": 2},
+            ]
+        },
+    )
+    llm = MagicMock()
+    llm.complete_with_tools = AsyncMock(return_value=response)
+    plan = await plan_research(question="q?", llm=llm, model="m")
+    terms = plan.sub_queries[0].search_terms
+    assert len(terms[0]) == 60
+    assert terms[1] == "ok"
+    assert terms[2] == "a" * 59
