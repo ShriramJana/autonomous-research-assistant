@@ -43,7 +43,7 @@ Open <http://localhost:3000>, go to **Settings → Provider → Ollama (local)**
 | Orchestration | LangGraph (3-node `StateGraph`) |
 | LLM | Anthropic + OpenAI SDKs directly, behind an `LLMClient` Protocol |
 | Web search | Anthropic server-side `web_search_20250305`; Tavily for non-Anthropic providers |
-| Scholarly search | OpenAlex, Semantic Scholar, arXiv, PubMed via their public APIs (rate-limited, no keys required) |
+| Scholarly search | OpenAlex, arXiv, PubMed via their public APIs (rate-limited, no keys required); Semantic Scholar with an API key |
 | Packaging | `uv` + `pyproject.toml` |
 | Frontend | Next.js 16 (App Router), TypeScript strict, Tailwind v4, shadcn/ui |
 | Auth + persistence | Supabase (Postgres + Auth) |
