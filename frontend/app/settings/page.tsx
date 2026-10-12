@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,6 +12,7 @@ import { apiGet } from "@/lib/api";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import { useUser } from "@/hooks/use-user";
 import { type Config, fetchConfig } from "@/lib/config";
+import { catalogLabel } from "@/lib/sources";
 import {
   type ActiveProvider,
   type CredentialsState,
@@ -605,6 +607,33 @@ export default function SettingsPage() {
                 {mode === "hosted" ? " The site's shared key is used as a fallback." : ""}
               </p>
             </>
+          )}
+        </div>
+      </section>
+
+      {/* Connected sources */}
+      <section className="mb-8">
+        <h2 className="text-muted-foreground/60 mb-3 font-mono text-[10px] uppercase tracking-widest">
+          Connected sources
+        </h2>
+        <div className="bg-card flex flex-col gap-3 rounded-lg p-5">
+          {state.kind === "ready" ? (
+            <>
+              <div className="flex flex-wrap gap-2">
+                {state.config.scholarly_catalogs.map((id) => (
+                  <Badge key={id} variant="outline" className="font-mono text-[10px] uppercase tracking-wider">
+                    {catalogLabel(id)}
+                  </Badge>
+                ))}
+              </div>
+              <p className="text-muted-foreground/70 font-mono text-[10px] tracking-wider">
+                Scholarly catalogs queried when a run has Sources → Scholarly on. No keys required —
+                they work with Ollama and with web search off. Semantic Scholar appears only when the
+                server has an API key.
+              </p>
+            </>
+          ) : (
+            <Skeleton className="h-4 w-64" />
           )}
         </div>
       </section>

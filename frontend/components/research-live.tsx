@@ -66,9 +66,6 @@ export function ResearchLive({
     return out;
   }, [state.report, state.agents]);
 
-  const webSearchEnabled =
-    state.plan?.web_search_enabled ?? state.report?.web_search_enabled;
-
   const isComplete = state.status === "complete" && state.report !== null;
 
   const flashFor = (kind: Exclude<Flash, null>) => {

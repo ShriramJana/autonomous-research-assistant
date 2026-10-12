@@ -7,6 +7,7 @@ import remarkGfm from "remark-gfm";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Citation } from "@/components/citation";
 import { composeReportMarkdown } from "@/lib/report";
+import { knowledgeBanner } from "@/lib/sources";
 import type { FinalReport, Source } from "@/lib/types";
 
 const CITE_RE = /\[(\d+)\]/g;
@@ -50,9 +51,11 @@ export function ReportStream({
           </div>
         ) : null}
 
-        {report && report.web_search_enabled === false ? (
+        {report && knowledgeBanner(report.web_search_enabled, report.scholarly_enabled) ? (
           <p className="border-primary/30 bg-primary/5 mb-6 rounded-md border px-4 py-2 font-mono text-[11px] tracking-wider">
-            Model knowledge only — no sources were browsed for this report.
+            {knowledgeBanner(report.web_search_enabled, report.scholarly_enabled) === "scholarly-only"
+              ? "Scholarly sources only — papers were fetched from academic catalogs; no web pages were browsed."
+              : "Model knowledge only — no sources were browsed for this report."}
           </p>
         ) : null}
 

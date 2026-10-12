@@ -1,6 +1,8 @@
 "use client";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Badge } from "@/components/ui/badge";
+import { sourceMeta } from "@/lib/sources";
 import type { Source } from "@/lib/types";
 
 export function Citation({ number, source }: { number: number; source: Source | undefined }) {
@@ -16,6 +18,14 @@ export function Citation({ number, source }: { number: number; source: Source | 
         {source ? (
           <div className="flex flex-col gap-2">
             <p className="font-medium leading-tight">{source.title}</p>
+            {source.kind === "scholarly" ? (
+              <p className="text-muted-foreground font-mono text-[10px] tracking-tight">
+                <Badge variant="outline" className="mr-2 font-mono text-[9px] uppercase tracking-wider">
+                  paper
+                </Badge>
+                {sourceMeta(source)}
+              </p>
+            ) : null}
             <a
               href={source.url}
               target="_blank"

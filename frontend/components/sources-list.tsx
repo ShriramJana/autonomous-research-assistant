@@ -1,5 +1,7 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import { sourceMeta } from "@/lib/sources";
 import type { Source } from "@/lib/types";
 
 export function SourcesList({ citations }: { citations: Source[] }) {
@@ -28,6 +30,18 @@ export function SourcesList({ citations }: { citations: Source[] }) {
                 >
                   {src.title}
                 </a>
+                {src.kind === "scholarly" ? (
+                  <div className="mt-0.5 flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="font-mono text-[9px] uppercase tracking-wider">
+                      paper
+                    </Badge>
+                    {sourceMeta(src) ? (
+                      <span className="text-muted-foreground font-mono text-[10px] tracking-tight">
+                        {sourceMeta(src)}
+                      </span>
+                    ) : null}
+                  </div>
+                ) : null}
                 <span className="text-muted-foreground/60 mt-0.5 break-all font-mono text-[10px]">
                   {src.url}
                 </span>

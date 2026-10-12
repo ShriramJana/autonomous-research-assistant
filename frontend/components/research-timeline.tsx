@@ -1,9 +1,10 @@
 "use client";
 
-import { GlobeLock } from "lucide-react";
+import { GlobeLock, Library } from "lucide-react";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgentStatus } from "@/components/agent-status";
+import { knowledgeBanner } from "@/lib/sources";
 import { deriveStages } from "@/lib/timeline";
 import type { StageStatus, TimelineStage } from "@/lib/timeline";
 import type { AgentState, ResearchStreamState } from "@/hooks/use-research-stream";
@@ -19,9 +20,10 @@ export function ResearchTimeline({ state }: { state: ResearchStreamState }) {
   const stages = deriveStages(state);
   const originalQuestion =
     state.plan?.original_question ?? state.report?.original_question ?? null;
-  const webSearchEnabled =
-    state.plan?.web_search_enabled ?? state.report?.web_search_enabled;
-  const offline = webSearchEnabled === false;
+  const banner = knowledgeBanner(
+    state.plan?.web_search_enabled ?? state.report?.web_search_enabled,
+    state.plan?.scholarly_enabled ?? state.report?.scholarly_enabled,
+  );
   const isPlanning = state.status === "planning";
 
   return (
@@ -35,14 +37,22 @@ export function ResearchTimeline({ state }: { state: ResearchStreamState }) {
             {originalQuestion}
           </p>
         ) : null}
-        {offline ? (
+        {banner ? (
           <div
             className="border-border/60 bg-secondary/50 text-muted-foreground mt-1 inline-flex items-center gap-1.5 self-start rounded px-2 py-1"
-            title="Researchers answered from training knowledge — sources may be sparse or canonical-only."
+            title={
+              banner === "scholarly-only"
+                ? "Researchers cited pre-fetched papers from academic catalogs; no web pages were browsed."
+                : "Researchers answered from training knowledge — sources may be sparse or canonical-only."
+            }
           >
-            <GlobeLock className="h-3 w-3" strokeWidth={1.75} />
+            {banner === "scholarly-only" ? (
+              <Library className="h-3 w-3" strokeWidth={1.75} />
+            ) : (
+              <GlobeLock className="h-3 w-3" strokeWidth={1.75} />
+            )}
             <span className="font-mono text-[10px] uppercase tracking-wider">
-              Web search disabled
+              {banner === "scholarly-only" ? "Scholarly sources only" : "Web search disabled"}
             </span>
           </div>
         ) : null}

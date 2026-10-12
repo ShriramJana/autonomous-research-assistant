@@ -2,6 +2,7 @@
 // Kept in lib/ (rather than inline in ReportStream) so header actions like
 // Copy-to-clipboard can render the same thing the reader sees.
 
+import { sourceMeta } from "@/lib/sources";
 import type { FinalReport } from "@/lib/types";
 
 export function composeReportMarkdown(report: FinalReport): string {
@@ -13,7 +14,8 @@ export function composeReportMarkdown(report: FinalReport): string {
   if (report.citations.length > 0) {
     parts.push(`# Sources\n`);
     report.citations.forEach((src, i) => {
-      parts.push(`[${i + 1}] ${src.title} — ${src.url}`);
+      const meta = sourceMeta(src);
+      parts.push(`[${i + 1}] ${src.title} — ${src.url}` + (meta ? `\n    ${meta}` : ""));
     });
   }
   return parts.join("\n");
