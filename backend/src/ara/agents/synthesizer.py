@@ -27,6 +27,7 @@ from ara.agents import EventEmitter, SynthesizerError
 from ara.llm.client import LLMClient
 from ara.models.events import SynthesisToken
 from ara.models.research import FinalReport, ReportSection, Source, SubQueryFinding
+from ara.scholarly.models import authors_short
 
 SYNTHESIZER_SYSTEM_PROMPT = """\
 You are the Synthesizer stage of an autonomous research assistant.
@@ -46,6 +47,8 @@ FORMAT (strict — the parser depends on it):
   relevant section ("Evidence on X was incomplete; see Limitations.").
 - Do NOT add a final `# References` or `# Citations` section — citations are \
   rendered separately by the UI.
+- Citations formatted as "Authors (Year). Title. Venue" are peer-reviewed papers or \
+  preprints; you may refer to them as such ("a 2017 NeurIPS paper [3]").
 
 Write for a technical but non-specialist reader. Be concise, accurate, and \
 grounded strictly in the provided findings.
@@ -115,6 +118,20 @@ def _dedupe_sources(findings: list[SubQueryFinding]) -> list[Source]:
     return ordered
 
 
+def _citation_row(n: int, source: Source) -> str:
+    if source.kind != "scholarly":
+        return f"{n}. {source.title} — {source.url}"
+    head = " ".join(
+        part for part in (authors_short(source.authors), f"({source.year})" if source.year else "")
+        if part
+    )
+    body = " ".join(
+        part for part in (f"{head}." if head else "", f"{source.title}.", source.venue or "")
+        if part
+    )
+    return f"{n}. {body} — {source.url}"
+
+
 def _build_user_prompt(
     *,
     original_question: str,
@@ -125,7 +142,7 @@ def _build_user_prompt(
 
     if master_citations:
         citations_block = "\n".join(
-            f"{i + 1}. {s.title} — {s.url}" for i, s in enumerate(master_citations)
+            _citation_row(i + 1, s) for i, s in enumerate(master_citations)
         )
     else:
         citations_block = "(no citations available — all sub-queries failed)"

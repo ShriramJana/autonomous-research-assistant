@@ -243,3 +243,45 @@ async def test_synthesizer_falls_back_when_exec_heading_missing() -> None:
     )
     assert report.executive_summary == "Overview text."
     assert [s.heading for s in report.sections] == ["Overview", "Details"]
+
+
+async def test_synthesizer_formats_scholarly_citation_rows() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    paper = Source.model_validate(
+        {
+            "url": "https://doi.org/10.5555/3295222.3295349",
+            "title": "Attention Is All You Need",
+            "kind": "scholarly",
+            "authors": ["Ashish Vaswani", "Noam Shazeer", "Niki Parmar", "Jakob Uszkoreit"],
+            "year": 2017,
+            "venue": "NeurIPS",
+            "doi": "10.5555/3295222.3295349",
+            "citation_count": 90000,
+        }
+    )
+    web = _source("https://a.com", "A")
+    llm = FakeLLM(["# Executive Summary\n\nX [1] [2].\n\n# S\n\nY [1].\n"])
+    emit, _ = _make_emit()
+    await synthesize_report(
+        report_id=uuid4(),
+        original_question="top",
+        findings=[_finding(sq, "f", [paper, web])],
+        llm=cast(LLMClient, llm),
+        model="m",
+        emit=emit,
+    )
+    prompt = llm.calls[0]["messages"][0]["content"]
+    assert (
+        "1. Ashish Vaswani, Noam Shazeer, Niki Parmar et al. (2017). "
+        "Attention Is All You Need. NeurIPS — https://doi.org/10.5555/3295222.3295349"
+    ) in prompt
+    assert "2. A — https://a.com/" in prompt
+
+
+def test_citation_row_omits_missing_scholarly_parts() -> None:
+    from ara.agents.synthesizer import _citation_row
+
+    bare = Source.model_validate(
+        {"url": "https://arxiv.org/abs/1", "title": "Preprint", "kind": "scholarly"}
+    )
+    assert _citation_row(3, bare) == "3. Preprint. — https://arxiv.org/abs/1"
