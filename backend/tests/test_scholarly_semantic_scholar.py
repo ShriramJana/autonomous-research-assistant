@@ -106,3 +106,21 @@ async def test_semantic_scholar_degrades_to_empty(response: httpx.Response) -> N
                 await semantic_scholar.search(["q"], limit=3, http=http, settings=_settings("k"))
                 == []
             )
+
+
+async def test_semantic_scholar_tolerates_non_list_authors() -> None:
+    url = "https://www.semanticscholar.org/paper/"
+    body = {
+        "data": [
+            {"title": "Odd", "url": url + "a", "authors": True},
+            {"title": "Fine", "url": url + "b"},
+        ]
+    }
+    with respx.mock:
+        respx.get(URL).mock(return_value=httpx.Response(200, json=body))
+        async with httpx.AsyncClient() as http:
+            papers = await semantic_scholar.search(
+                ["q"], limit=3, http=http, settings=_settings("k")
+            )
+    assert [p.title for p in papers] == ["Odd", "Fine"]
+    assert papers[0].authors == ()

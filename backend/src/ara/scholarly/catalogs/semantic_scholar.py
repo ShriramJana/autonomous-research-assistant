@@ -62,9 +62,10 @@ def _parse_paper(row: dict[str, Any]) -> Paper | None:
     ext = ext if isinstance(ext, dict) else {}
     doi = normalize_doi(ext.get("DOI") if isinstance(ext.get("DOI"), str) else None)
     arxiv_id = strip_arxiv_version(ext.get("ArXiv") if isinstance(ext.get("ArXiv"), str) else None)
+    raw_authors = row.get("authors")
     authors = tuple(
         a["name"].strip()
-        for a in row.get("authors") or []
+        for a in (raw_authors if isinstance(raw_authors, list) else [])
         if isinstance(a, dict) and isinstance(a.get("name"), str) and a["name"].strip()
     )
     year = row.get("year")

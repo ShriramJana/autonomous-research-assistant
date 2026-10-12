@@ -61,7 +61,10 @@ def _reconstruct_abstract(index: Any) -> str | None:
 
 def _authors(work: dict[str, Any]) -> tuple[str, ...]:
     names: list[str] = []
-    for authorship in work.get("authorships") or []:
+    authorships = work.get("authorships")
+    if not isinstance(authorships, list):
+        return ()
+    for authorship in authorships:
         author = authorship.get("author") if isinstance(authorship, dict) else None
         name = author.get("display_name") if isinstance(author, dict) else None
         if isinstance(name, str) and name.strip():

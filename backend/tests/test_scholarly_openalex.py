@@ -109,3 +109,18 @@ async def test_openalex_timeout_degrades_to_empty() -> None:
         respx.get(URL).mock(side_effect=httpx.ReadTimeout("slow"))
         async with httpx.AsyncClient() as http:
             assert await openalex.search(["q"], limit=3, http=http, settings=_settings()) == []
+
+
+async def test_openalex_tolerates_non_list_authorships() -> None:
+    body = {
+        "results": [
+            {"id": "https://openalex.org/W1", "display_name": "Odd", "authorships": 5},
+            {"id": "https://openalex.org/W2", "display_name": "Fine"},
+        ]
+    }
+    with respx.mock:
+        respx.get(URL).mock(return_value=httpx.Response(200, json=body))
+        async with httpx.AsyncClient() as http:
+            papers = await openalex.search(["q"], limit=3, http=http, settings=_settings())
+    assert [p.title for p in papers] == ["Odd", "Fine"]
+    assert papers[0].authors == ()
