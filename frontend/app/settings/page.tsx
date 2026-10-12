@@ -620,7 +620,7 @@ export default function SettingsPage() {
           {state.kind === "ready" ? (
             <>
               <div className="flex flex-wrap gap-2">
-                {state.config.scholarly_catalogs.map((id) => (
+                {(state.config.scholarly_catalogs ?? []).map((id) => (
                   <Badge key={id} variant="outline" className="font-mono text-[10px] uppercase tracking-wider">
                     {catalogLabel(id)}
                   </Badge>

@@ -19,7 +19,8 @@ export type Mode = "hosted" | "local";
 
 export interface Config {
   mode: Mode;
-  scholarly_catalogs: string[];
+  // Optional: a backend older than the frontend (Vercel deploys first) omits it.
+  scholarly_catalogs?: string[];
   models: ModelsConfig;
   depth_presets: Record<Depth, DepthPresetConfig>;
 }
