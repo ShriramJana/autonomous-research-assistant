@@ -14,12 +14,21 @@ export interface ResearchPlan {
   original_question: string;
   sub_queries: SubQuery[];
   web_search_enabled?: boolean;
+  scholarly_enabled?: boolean;
 }
+
+export type SourceKind = "web" | "scholarly";
 
 export interface Source {
   id: string; // UUID — stable across dedup
   url: string;
   title: string;
+  kind?: SourceKind; // absent on pre-2026-10 payloads → treat as "web"
+  authors?: string[];
+  year?: number | null;
+  venue?: string | null;
+  doi?: string | null;
+  citation_count?: number | null;
 }
 
 export interface KeyFact {
@@ -47,4 +56,5 @@ export interface FinalReport {
   sections: ReportSection[];
   citations: Source[];
   web_search_enabled?: boolean;
+  scholarly_enabled?: boolean;
 }

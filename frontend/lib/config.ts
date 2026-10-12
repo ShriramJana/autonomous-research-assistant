@@ -19,6 +19,7 @@ export type Mode = "hosted" | "local";
 
 export interface Config {
   mode: Mode;
+  scholarly_catalogs: string[];
   models: ModelsConfig;
   depth_presets: Record<Depth, DepthPresetConfig>;
 }

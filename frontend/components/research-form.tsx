@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Globe, Layers, Zap } from "lucide-react";
+import { Check, Layers, Library, Zap } from "lucide-react";
 
 import {
   Popover,
@@ -12,8 +12,11 @@ import {
 import { apiGet, createResearch, type ApiError } from "@/lib/api";
 import { freeTierBlockMessage, friendlyRunError } from "@/lib/run-status";
 import { getCredentials } from "@/lib/credentials";
+import { fetchConfig } from "@/lib/config";
+import { DEFAULT_CATALOGS, catalogLabel, sourcesLabel } from "@/lib/sources";
 import { useMode } from "@/hooks/use-mode";
 import { useBrowseWeb } from "@/hooks/use-browse-web";
+import { useScholarly } from "@/hooks/use-scholarly";
 import { type Depth, useDepth } from "@/hooks/use-depth";
 
 interface Quota {
@@ -52,11 +55,25 @@ export function ResearchForm({
   const { mode } = useMode();
   const { depth, setDepth } = useDepth();
   const { browseWeb, toggleBrowseWeb } = useBrowseWeb();
+  const { scholarly, toggleScholarly } = useScholarly();
+  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [catalogs, setCatalogs] = useState<string[]>(DEFAULT_CATALOGS);
   const [activeProvider, setActiveProvider] = useState<"free" | "anthropic" | "openai">("free");
   const [quota, setQuota] = useState<Quota | null>(null);
 
   useEffect(() => {
     getCredentials().then((c) => setActiveProvider(c.active_provider)).catch(() => setActiveProvider("free"));
+  }, []);
+  useEffect(() => {
+    let cancelled = false;
+    fetchConfig()
+      .then((c) => {
+        if (!cancelled && c.scholarly_catalogs?.length) setCatalogs(c.scholarly_catalogs);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
   }, []);
   useEffect(() => {
     apiGet<Quota>("/api/quota")
@@ -88,6 +105,7 @@ export function ResearchForm({
       const { report_id } = await createResearch(trimmed, {
         depth,
         browseWeb,
+        scholarly,
       });
       router.push(`/r/${report_id}`);
     } catch (err) {
@@ -185,29 +203,40 @@ export function ResearchForm({
                 })}
               </PopoverContent>
             </Popover>
-            <button
-              type="button"
-              onClick={toggleBrowseWeb}
-              disabled={freeTier}
-              aria-pressed={browseWeb}
-              title={
-                freeTier
-                  ? "Free tier locked to quick depth — add API key in Settings to unlock"
-                  : browseWeb
-                    ? "Web search enabled — click to disable"
-                    : "Web search disabled — click to enable"
-              }
-              className={
-                browseWeb
-                  ? "text-primary hover:text-primary/80 flex items-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                  : "text-muted-foreground/50 hover:text-foreground flex items-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-              }
-            >
-              <Globe className="h-3.5 w-3.5" strokeWidth={1.75} />
-              <span className="font-mono text-[10px] uppercase tracking-wider">
-                Browse Web · {browseWeb ? "On" : "Off"}
-              </span>
-            </button>
+            <Popover open={sourcesOpen} onOpenChange={setSourcesOpen}>
+              <PopoverTrigger
+                disabled={freeTier}
+                title={
+                  freeTier
+                    ? "Free tier locked to quick depth — add API key in Settings to unlock"
+                    : undefined
+                }
+                className="text-muted-foreground hover:text-foreground flex items-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={`Sources: ${freeTier ? "None" : sourcesLabel(browseWeb, scholarly)}`}
+              >
+                <Library className="h-3.5 w-3.5" strokeWidth={1.75} />
+                <span className="font-mono text-[10px] uppercase tracking-wider">
+                  Sources · {freeTier ? "None" : sourcesLabel(browseWeb, scholarly)}
+                </span>
+              </PopoverTrigger>
+              <PopoverContent align="start" className="w-72 p-1.5">
+                <p className="text-muted-foreground/60 px-2 py-1 font-mono text-[10px] uppercase tracking-wider">
+                  Research sources
+                </p>
+                <SourceRow
+                  label="Web"
+                  detail="Live web search"
+                  active={browseWeb}
+                  onToggle={toggleBrowseWeb}
+                />
+                <SourceRow
+                  label="Scholarly"
+                  detail={catalogs.map(catalogLabel).join(", ")}
+                  active={scholarly}
+                  onToggle={toggleScholarly}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           <button
             type="submit"
@@ -238,6 +267,42 @@ export function ResearchForm({
           Free-hosted demo — if it&apos;s been idle, your first run may take ~20s to wake up.
         </p>
       ) : null}
+      {mode === "local" ? (
+        <p className="text-muted-foreground/50 mt-3 px-2 font-mono text-[10px] tracking-wider">
+          Scholarly sources need no key — turn them on under Sources for cited papers even without web search.
+        </p>
+      ) : null}
     </form>
+  );
+}
+
+function SourceRow({
+  label,
+  detail,
+  active,
+  onToggle,
+}: {
+  label: string;
+  detail: string;
+  active: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={active}
+      className={
+        active
+          ? "bg-accent text-foreground flex w-full items-center justify-between rounded px-2 py-1.5 text-left"
+          : "text-muted-foreground hover:bg-accent/50 hover:text-foreground flex w-full items-center justify-between rounded px-2 py-1.5 text-left transition-colors"
+      }
+    >
+      <div className="flex flex-col">
+        <span className="text-sm font-medium">{label}</span>
+        <span className="text-muted-foreground/70 font-mono text-[10px] tracking-tight">{detail}</span>
+      </div>
+      {active ? <Check className="text-primary h-3.5 w-3.5" strokeWidth={2.5} /> : null}
+    </button>
   );
 }

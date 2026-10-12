@@ -85,6 +85,7 @@ export interface CreateResearchResponse {
 export interface CreateResearchOptions {
   depth?: Depth;
   browseWeb?: boolean;
+  scholarly?: boolean;
 }
 
 export async function createResearch(
@@ -94,5 +95,6 @@ export async function createResearch(
   const body: Record<string, unknown> = { question };
   if (options.depth) body.depth = options.depth;
   if (typeof options.browseWeb === "boolean") body.browse_web = options.browseWeb;
+  if (typeof options.scholarly === "boolean") body.scholarly = options.scholarly;
   return apiPost<CreateResearchResponse>("/api/research", body);
 }
