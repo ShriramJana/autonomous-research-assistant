@@ -471,6 +471,10 @@ def _build_finding(
         citation_ids: list[UUID] = []
         for u in urls:
             cid = url_to_id.get(normalize_url(str(u)))
+            if cid is None:
+                cited_paper = _lookup(registry, str(u))
+                if cited_paper is not None:
+                    cid = url_to_id.get(normalize_url(cited_paper.url))
             if cid is not None and cid not in citation_ids:
                 citation_ids.append(cid)
         key_facts.append(KeyFact(statement=raw["statement"], citation_ids=citation_ids))
@@ -501,7 +505,9 @@ def _restrict_to_registry(
     finding: SubQueryFinding, registry: dict[str, Paper] | None
 ) -> SubQueryFinding:
     """Offline runs keep only sources backed by fetched papers (small models invent URLs)."""
-    keep = {s.id for s in finding.sources if _lookup(registry, str(s.url)) is not None}
+    keep = (
+        {s.id for s in finding.sources if s.kind == "scholarly"} if registry is not None else set()
+    )
     return finding.model_copy(
         update={
             "sources": [s for s in finding.sources if s.id in keep],

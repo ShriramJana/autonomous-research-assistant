@@ -16,6 +16,7 @@ from ara.agents import ResearcherError
 from ara.agents.researcher import (
     RESEARCHER_OFFLINE_SYSTEM_PROMPT,
     RESEARCHER_SYSTEM_PROMPT,
+    RESEARCHER_TAVILY_SYSTEM_PROMPT,
     SCHOLARLY_ADDENDUM,
     SCHOLARLY_OFFLINE_ADDENDUM,
     SUBMIT_FINDING_TOOL_NAME,
@@ -747,5 +748,87 @@ async def test_tavily_loop_receives_scholarly_block(monkeypatch: Any) -> None:
     )
     first_user = llm.calls[0]["messages"][0]["content"]
     assert "CANDIDATE SCHOLARLY SOURCES" in first_user
-    assert "SCHOLARLY SOURCES" in llm.calls[0]["system"]
+    assert llm.calls[0]["system"] == RESEARCHER_TAVILY_SYSTEM_PROMPT + "\n" + SCHOLARLY_ADDENDUM
     assert finding.sources[0].kind == "scholarly"
+
+
+SICI_URL = "https://doi.org/10.1002/(sici)1097-4636(199706)35:4<487::aid-jbm8>3.0.co;2-i"
+SICI_PAPER = Paper(
+    catalog="openalex",
+    title="SICI paper",
+    url=SICI_URL,
+    authors=("A B",),
+    year=1997,
+    venue=None,
+    doi=None,
+    arxiv_id=None,
+    abstract=None,
+    citation_count=None,
+)
+
+
+async def test_offline_keeps_paper_whose_url_has_angle_brackets() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    llm = _ScriptedLLM([_submit([{"url": SICI_URL, "title": "t"}], [SICI_URL])])
+    emit, _ = _make_emit()
+    bundle = ScholarlyBundle(terms=("s",), papers=(SICI_PAPER,), counts={"openalex": 1})
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="m",
+        emit=emit,
+        web_search_enabled=False,
+        scholarly_fetch=_fetch(bundle),
+    )
+    [src] = finding.sources
+    assert src.kind == "scholarly"
+    assert finding.key_facts[0].citation_ids == [src.id]
+
+
+async def test_key_fact_citing_case_variant_resolves_to_canonical_source() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    variant = "https://DOI.org/10.5555/3295222.3295349/"
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(
+        return_value=_submit([{"url": PAPER.url, "title": "t"}], [variant])
+    )
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, scholarly_fetch=_fetch(BUNDLE)
+    )
+    [src] = finding.sources
+    assert finding.key_facts[0].citation_ids == [src.id]
+
+
+async def test_raw_and_canonical_variants_dedupe_to_one_source() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    variant = "https://DOI.org/10.5555/3295222.3295349/"
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(
+        return_value=_result(
+            tool_uses=[
+                _tu(
+                    SUBMIT_FINDING_TOOL_NAME,
+                    {
+                        "summary": "s",
+                        "key_facts": [
+                            {"statement": "f", "source_urls": [variant, PAPER.url]},
+                        ],
+                        "sources": [
+                            {"url": variant, "title": "a"},
+                            {"url": PAPER.url, "title": "b"},
+                        ],
+                    },
+                )
+            ]
+        )
+    )
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, scholarly_fetch=_fetch(BUNDLE)
+    )
+    [src] = finding.sources
+    assert src.kind == "scholarly"
+    assert finding.key_facts[0].citation_ids == [src.id]
