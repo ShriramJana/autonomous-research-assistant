@@ -15,12 +15,16 @@ import pytest
 from ara.agents import ResearcherError
 from ara.agents.researcher import (
     RESEARCHER_OFFLINE_SYSTEM_PROMPT,
+    RESEARCHER_SYSTEM_PROMPT,
+    SCHOLARLY_ADDENDUM,
+    SCHOLARLY_OFFLINE_ADDENDUM,
     SUBMIT_FINDING_TOOL_NAME,
     research_sub_query,
 )
 from ara.llm.client import WEB_SEARCH_TOOL_TYPE, CompletionResult, ToolUse
 from ara.models.events import ResearcherProgress, ResearcherStarted, ResearchEvent
 from ara.models.research import Priority, SubQuery, SubQueryFinding
+from ara.scholarly.models import Paper, ScholarlyBundle
 
 
 def _tu(name: str, payload: dict[str, Any]) -> ToolUse:
@@ -259,9 +263,7 @@ async def test_researcher_omits_web_search_when_disabled() -> None:
                 SUBMIT_FINDING_TOOL_NAME,
                 {
                     "summary": "offline answer.",
-                    "key_facts": [
-                        {"statement": "claim.", "source_urls": ["https://arxiv.org"]}
-                    ],
+                    "key_facts": [{"statement": "claim.", "source_urls": ["https://arxiv.org"]}],
                     "sources": [{"url": "https://arxiv.org", "title": "arxiv"}],
                 },
             )
@@ -272,9 +274,7 @@ async def test_researcher_omits_web_search_when_disabled() -> None:
     llm.complete_with_tools = AsyncMock(return_value=result)
     emit, _ = _make_emit()
 
-    await research_sub_query(
-        sub_query=sq, llm=llm, model="m", emit=emit, web_search_enabled=False
-    )
+    await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit, web_search_enabled=False)
 
     kwargs = llm.complete_with_tools.await_args.kwargs
     tool_types = {t.get("type") for t in kwargs["tools"] if isinstance(t, dict)}
@@ -352,9 +352,7 @@ async def test_researcher_tavily_loop_searches_then_submits(monkeypatch: Any) ->
                         SUBMIT_FINDING_TOOL_NAME,
                         {
                             "summary": "RAG augments LLMs.",
-                            "key_facts": [
-                                {"statement": "x", "source_urls": ["https://a.com"]}
-                            ],
+                            "key_facts": [{"statement": "x", "source_urls": ["https://a.com"]}],
                             "sources": [{"url": "https://a.com", "title": "A"}],
                         },
                     )
@@ -385,9 +383,7 @@ async def test_researcher_tavily_loop_raises_when_never_submits(monkeypatch: Any
     monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
 
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    llm = _ScriptedLLM(
-        [_result(tool_uses=[_tu("web_search", {"query": "q"})]) for _ in range(10)]
-    )
+    llm = _ScriptedLLM([_result(tool_uses=[_tu("web_search", {"query": "q"})]) for _ in range(10)])
     emit, _ = _make_emit()
     with pytest.raises(ResearcherError):
         await research_sub_query(
@@ -404,9 +400,7 @@ async def test_researcher_tavily_loop_raises_on_budget_exceeded(monkeypatch: Any
     monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
 
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    llm = _ScriptedLLM(
-        [_result(tool_uses=[_tu("web_search", {"query": "q"})], in_tokens=200_000)]
-    )
+    llm = _ScriptedLLM([_result(tool_uses=[_tu("web_search", {"query": "q"})], in_tokens=200_000)])
     emit, _ = _make_emit()
     with pytest.raises(ResearcherError, match="budget exceeded"):
         await research_sub_query(
@@ -428,9 +422,7 @@ async def test_researcher_tavily_loop_raises_when_stuck(monkeypatch: Any) -> Non
     monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
 
     sq = SubQuery(question="q", rationale="r", priority=Priority.MEDIUM)
-    llm = _ScriptedLLM(
-        [_result(tool_uses=[], stop_reason="end_turn")]
-    )
+    llm = _ScriptedLLM([_result(tool_uses=[], stop_reason="end_turn")])
     emit, _ = _make_emit()
     with pytest.raises(ResearcherError, match="called neither"):
         await research_sub_query(
@@ -473,8 +465,12 @@ async def test_tavily_loop_invokes_on_tavily_search(monkeypatch: Any) -> None:
     )
     emit, _ = _make_emit()
     await research_sub_query(
-        sub_query=sq, llm=llm, model="gpt-4o", emit=emit,
-        tavily_api_key="k", on_tavily_search=on_search,
+        sub_query=sq,
+        llm=llm,
+        model="gpt-4o",
+        emit=emit,
+        tavily_api_key="k",
+        on_tavily_search=on_search,
     )
     assert counter["n"] == 2  # one per web_search call
 
@@ -520,3 +516,236 @@ async def test_offline_path_drops_sources() -> None:
     assert finding.sources == []
     assert finding.key_facts
     assert all(f.citation_ids == [] for f in finding.key_facts)
+
+
+# ---------------------------------------------------------------------------
+# Scholarly pre-fetch injection
+# ---------------------------------------------------------------------------
+
+PAPER = Paper(
+    catalog="openalex",
+    title="Attention Is All You Need",
+    url="https://doi.org/10.5555/3295222.3295349",
+    authors=("Ashish Vaswani", "Noam Shazeer", "Niki Parmar", "Jakob Uszkoreit"),
+    year=2017,
+    venue="NeurIPS",
+    doi="10.5555/3295222.3295349",
+    arxiv_id="1706.03762",
+    abstract="The dominant sequence transduction models are based on RNNs.",
+    citation_count=90000,
+)
+BUNDLE = ScholarlyBundle(
+    terms=("transformer", "attention"), papers=(PAPER,), counts={"openalex": 1}
+)
+EMPTY_BUNDLE = ScholarlyBundle(terms=("x",), papers=(), counts={"openalex": 0})
+
+
+def _fetch(bundle: ScholarlyBundle) -> Any:
+    async def fetch() -> ScholarlyBundle:
+        return bundle
+
+    return fetch
+
+
+def _submit(sources: list[dict[str, str]], urls: list[str]) -> CompletionResult:
+    return _result(
+        tool_uses=[
+            _tu(
+                SUBMIT_FINDING_TOOL_NAME,
+                {
+                    "summary": "s",
+                    "key_facts": [{"statement": "f", "source_urls": urls}],
+                    "sources": sources,
+                },
+            )
+        ]
+    )
+
+
+async def test_scholarly_fetch_emits_progress_after_started_and_injects_block() -> None:
+    sq = SubQuery(question="How do transformers work?", rationale="r", priority=Priority.HIGH)
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(
+        return_value=_submit([{"url": PAPER.url, "title": "whatever"}], [PAPER.url])
+    )
+    emit, events = _make_emit()
+
+    await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, scholarly_fetch=_fetch(BUNDLE)
+    )
+
+    assert isinstance(events[0], ResearcherStarted)
+    assert isinstance(events[1], ResearcherProgress)
+    assert events[1].tool_call == "scholarly_search(['transformer', 'attention']) → 1 papers"
+    kwargs = llm.complete_with_tools.await_args.kwargs
+    content = kwargs["messages"][0]["content"]
+    assert content.startswith("How do transformers work?")
+    assert "CANDIDATE SCHOLARLY SOURCES" in content
+    assert "[S1] Attention Is All You Need" in content
+    assert (
+        "Ashish Vaswani, Noam Shazeer, Niki Parmar et al. (2017) · NeurIPS · 90000 citations"
+        in content
+    )
+    assert f"URL: {PAPER.url}" in content
+    assert "dominant sequence transduction" in content
+    assert kwargs["system"] == RESEARCHER_SYSTEM_PROMPT + "\n" + SCHOLARLY_ADDENDUM
+
+
+async def test_cited_scholarly_url_is_enriched_from_registry_not_model() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(
+        return_value=_submit(
+            [
+                {"url": PAPER.url, "title": "Model-made-up title"},
+                {"url": "https://blog.example.com/p", "title": "Blog"},
+            ],
+            [PAPER.url, "https://blog.example.com/p"],
+        )
+    )
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, scholarly_fetch=_fetch(BUNDLE)
+    )
+
+    paper_src, web_src = finding.sources
+    assert paper_src.kind == "scholarly"
+    assert paper_src.title == "Attention Is All You Need"  # registry wins
+    assert paper_src.authors == list(PAPER.authors)
+    assert (paper_src.year, paper_src.venue, paper_src.doi, paper_src.citation_count) == (
+        2017,
+        "NeurIPS",
+        "10.5555/3295222.3295349",
+        90000,
+    )
+    assert web_src.kind == "web" and web_src.authors == []
+    assert finding.key_facts[0].citation_ids == [paper_src.id, web_src.id]
+
+
+async def test_cited_scholarly_url_matches_after_normalization() -> None:
+    """Trailing slash / different case still resolve to the candidate paper."""
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    cited = "https://DOI.org/10.5555/3295222.3295349/"
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(
+        return_value=_submit([{"url": cited, "title": "t"}], [cited])
+    )
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, scholarly_fetch=_fetch(BUNDLE)
+    )
+    [src] = finding.sources
+    assert src.kind == "scholarly"
+    assert str(src.url) == PAPER.url  # canonicalised to the registry URL
+    assert finding.key_facts[0].citation_ids == [src.id]
+
+
+async def test_empty_bundle_emits_zero_papers_and_plain_message() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(
+        return_value=_submit([{"url": "https://a.com", "title": "A"}], ["https://a.com"])
+    )
+    emit, events = _make_emit()
+    await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, scholarly_fetch=_fetch(EMPTY_BUNDLE)
+    )
+    progress = [e for e in events if isinstance(e, ResearcherProgress)]
+    assert progress[0].tool_call == "scholarly_search(['x']) → 0 papers"
+    kwargs = llm.complete_with_tools.await_args.kwargs
+    assert kwargs["messages"][0]["content"] == "q"
+    assert kwargs["system"] == RESEARCHER_SYSTEM_PROMPT
+
+
+async def test_no_fetch_keeps_legacy_behaviour() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(
+        return_value=_submit([{"url": "https://a.com", "title": "A"}], ["https://a.com"])
+    )
+    emit, events = _make_emit()
+    await research_sub_query(sub_query=sq, llm=llm, model="m", emit=emit)
+    assert not any(isinstance(e, ResearcherProgress) and "scholarly" in e.tool_call for e in events)
+    assert llm.complete_with_tools.await_args.kwargs["messages"][0]["content"] == "q"
+
+
+async def test_failing_fetch_degrades_to_no_papers() -> None:
+    async def broken() -> ScholarlyBundle:
+        raise RuntimeError("catalog down")
+
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    llm = MagicMock()
+    llm.supports_server_side_search = True
+    llm.complete_with_tools = AsyncMock(
+        return_value=_submit([{"url": "https://a.com", "title": "A"}], ["https://a.com"])
+    )
+    emit, events = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq, llm=llm, model="m", emit=emit, scholarly_fetch=broken
+    )
+    assert finding.summary == "s"
+    progress = [e for e in events if isinstance(e, ResearcherProgress)]
+    assert progress[0].tool_call == "scholarly_search([]) → 0 papers"
+
+
+async def test_offline_keeps_only_bundle_backed_sources_and_prunes_citations() -> None:
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    llm = _ScriptedLLM(
+        [
+            _submit(
+                [{"url": PAPER.url, "title": "t"}, {"url": "https://made.up/x", "title": "Fake"}],
+                [PAPER.url, "https://made.up/x"],
+            )
+        ]
+    )
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="m",
+        emit=emit,
+        web_search_enabled=False,
+        scholarly_fetch=_fetch(BUNDLE),
+    )
+    [src] = finding.sources
+    assert src.kind == "scholarly" and str(src.url) == PAPER.url
+    assert finding.key_facts[0].citation_ids == [src.id]
+    assert (
+        llm.calls[0]["system"]
+        == RESEARCHER_OFFLINE_SYSTEM_PROMPT + "\n" + SCHOLARLY_OFFLINE_ADDENDUM
+    )
+
+
+async def test_tavily_loop_receives_scholarly_block(monkeypatch: Any) -> None:
+    from ara.agents import researcher as researcher_mod
+
+    async def fake_tavily(query: str, *, api_key: str | None, max_results: int = 5) -> list[Any]:
+        return []
+
+    monkeypatch.setattr(researcher_mod, "tavily_search", fake_tavily)
+
+    sq = SubQuery(question="q", rationale="r", priority=Priority.HIGH)
+    llm = _ScriptedLLM(
+        [
+            _result(tool_uses=[_tu("web_search", {"query": "x"})]),
+            _submit([{"url": PAPER.url, "title": "t"}], [PAPER.url]),
+        ]
+    )
+    emit, _ = _make_emit()
+    finding = await research_sub_query(
+        sub_query=sq,
+        llm=llm,
+        model="gpt-4o",
+        emit=emit,
+        tavily_api_key="k",
+        scholarly_fetch=_fetch(BUNDLE),
+    )
+    first_user = llm.calls[0]["messages"][0]["content"]
+    assert "CANDIDATE SCHOLARLY SOURCES" in first_user
+    assert "SCHOLARLY SOURCES" in llm.calls[0]["system"]
+    assert finding.sources[0].kind == "scholarly"
