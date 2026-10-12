@@ -66,11 +66,15 @@ async def _run_all(
         )
         for c in enabled
     }
-    done, pending = await asyncio.wait(tasks.values(), timeout=_BUNDLE_TIMEOUT_S)
-    for task in pending:
-        task.cancel()
-    if pending:
-        await asyncio.gather(*pending, return_exceptions=True)
+    try:
+        done, _ = await asyncio.wait(tasks.values(), timeout=_BUNDLE_TIMEOUT_S)
+    finally:
+        # Runs on the bundle timeout AND when the caller is cancelled: never orphan a task.
+        pending = [t for t in tasks.values() if not t.done()]
+        for task in pending:
+            task.cancel()
+        if pending:
+            await asyncio.gather(*pending, return_exceptions=True)
     out: dict[CatalogId, list[Paper]] = {}
     for catalog, task in tasks.items():
         ok = task in done and not task.cancelled() and task.exception() is None

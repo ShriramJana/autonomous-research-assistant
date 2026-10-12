@@ -31,9 +31,17 @@ def _paper(catalog: str = "openalex", **kw: object) -> Paper:
     return Paper(**base)  # type: ignore[arg-type]
 
 
+_SCHOLARLY_KEYS = ("openalex_mailto", "semantic_scholar_api_key", "ncbi_api_key")
+
+
 def _settings(**kw: str) -> Settings:
+    """Settings with every scholarly key blank unless overridden.
+
+    An exported `SEMANTIC_SCHOLAR_API_KEY` would otherwise enable a catalog the
+    test did not fake and turn it into a real network call.
+    """
     s = Settings(_env_file=None)  # type: ignore[call-arg]
-    for k, v in kw.items():
+    for k, v in {**dict.fromkeys(_SCHOLARLY_KEYS, ""), **kw}.items():
         setattr(s, k, v)
     return s
 
@@ -223,3 +231,38 @@ async def test_fetch_papers_uses_injected_http_client(monkeypatch: pytest.Monkey
     async with httpx.AsyncClient() as client:
         await fetch_papers(["q"], settings=_settings(), http=client)
     assert seen and all(h is client for h in seen)
+
+
+def test_settings_helper_ignores_ambient_scholarly_keys(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("SEMANTIC_SCHOLAR_API_KEY", "ambient")
+    monkeypatch.setenv("NCBI_API_KEY", "ambient")
+    s = _settings()
+    assert (s.semantic_scholar_api_key, s.ncbi_api_key, s.openalex_mailto) == ("", "", "")
+    assert "semantic_scholar" not in enabled_catalogs(s)
+
+
+async def test_cancelling_fetch_papers_cancels_catalog_tasks(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    started = asyncio.Event()
+    cancelled = asyncio.Event()
+
+    async def hang(*a: Any, **k: Any) -> list[Paper]:
+        started.set()
+        try:
+            await asyncio.sleep(60)
+        except asyncio.CancelledError:
+            cancelled.set()
+            raise
+        return []
+
+    monkeypatch.setitem(catalogs_mod.CATALOGS, "arxiv", hang)
+    monkeypatch.setitem(catalogs_mod.CATALOGS, "openalex", _fake([]))
+    monkeypatch.setitem(catalogs_mod.CATALOGS, "pubmed", _fake([]))
+    task = asyncio.create_task(fetch_papers(["q"], settings=_settings()))
+    await asyncio.wait_for(started.wait(), timeout=2.0)
+    await asyncio.sleep(0.01)
+    task.cancel()
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    assert cancelled.is_set()  # the catalog task was cancelled and awaited, not orphaned
