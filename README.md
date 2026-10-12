@@ -13,7 +13,7 @@ brew install ollama && ollama pull qwen2.5:7b    # or any tool-capable model
 make local                                       # needs uv + Node 20+
 ```
 
-Open <http://localhost:3000>, go to **Settings → Provider → Ollama (local)**, pick the model, press **Save** (saving activates Ollama as the provider), then run a report. The same card has one-click presets for OpenAI, Google Gemini, Groq, Mistral, xAI, DeepSeek, OpenRouter and Together AI — any OpenAI-compatible endpoint works. Local mode skips sign-in, both servers listen only on `localhost`, and stores reports and keys in `~/.ara` (delete the folder to reset). Add a free [Tavily](https://tavily.com) key in Settings to let the researchers browse the web; without one, reports use model knowledge only and say so. Anthropic or OpenAI keys work too.
+Open <http://localhost:3000>, go to **Settings → Provider → Ollama (local)**, pick the model, press **Save** (saving activates Ollama as the provider), then run a report. The same card has one-click presets for OpenAI, Google Gemini, Groq, Mistral, xAI, DeepSeek, OpenRouter and Together AI — any OpenAI-compatible endpoint works. Local mode skips sign-in, both servers listen only on `localhost`, and stores reports and keys in `~/.ara` (delete the folder to reset). Add a free [Tavily](https://tavily.com) key in Settings to let the researchers browse the web; without one, reports use model knowledge only and say so. Anthropic or OpenAI keys work too. Scholarly sources work offline too: with web search off and *Scholarly* on, an Ollama run still cites real papers.
 
 <!-- TODO: add a hero screenshot or short demo GIF here, e.g.:
 ![ARA running a live research report](docs/assets/ara-demo.png)
@@ -32,6 +32,7 @@ Open <http://localhost:3000>, go to **Settings → Provider → Ollama (local)**
 - **Bring your own key (BYOK)** — run on your own Anthropic or OpenAI key. Keys are encrypted per-user with Fernet, stored write-only, and never returned to the client.
 - **Free demo gallery** — pre-recorded real runs replay client-side in the browser, with no backend call and no API key required.
 - **Resilient by design** — if a single researcher fails, the run degrades gracefully (that agent is marked, the report still completes and notes the gap) instead of failing hard.
+- **Connected scholarly sources** — turn on *Sources → Scholarly* and researchers receive top papers from OpenAlex, arXiv, PubMed (and Semantic Scholar with a key); citations show authors, year, venue and citation counts.
 - **Cost-aware** — live token/cost meter and adjustable research depth (quick / standard / deep).
 
 ## Stack
@@ -42,6 +43,7 @@ Open <http://localhost:3000>, go to **Settings → Provider → Ollama (local)**
 | Orchestration | LangGraph (3-node `StateGraph`) |
 | LLM | Anthropic + OpenAI SDKs directly, behind an `LLMClient` Protocol |
 | Web search | Anthropic server-side `web_search_20250305`; Tavily for non-Anthropic providers |
+| Scholarly search | OpenAlex, Semantic Scholar, arXiv, PubMed via their public APIs (rate-limited, no keys required) |
 | Packaging | `uv` + `pyproject.toml` |
 | Frontend | Next.js 16 (App Router), TypeScript strict, Tailwind v4, shadcn/ui |
 | Auth + persistence | Supabase (Postgres + Auth) |

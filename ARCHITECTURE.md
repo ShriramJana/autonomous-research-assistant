@@ -196,6 +196,25 @@ the listener is down. A per-report write lock keeps commit order equal to id
 order when parallel researchers emit at once. See `deploy/README.md` for how
 this plays out on Kubernetes.
 
+## Connected sources (scholarly)
+
+`ara/scholarly/` fetches papers deterministically before each researcher's LLM call —
+no new agent, no new tool loop. `graph/dag.research_node` builds a `scholarly_fetch`
+callable from the planner's `search_terms`; `research_sub_query` awaits it right after
+`researcher_started`, emits one `researcher_progress` (`scholarly_search([...]) → n papers`),
+and appends the top papers to the user message as "candidate scholarly sources". The model
+cites them by URL exactly as it cites web results. `_build_finding` enriches any cited URL
+that matches the fetched registry (`kind="scholarly"`, authors, year, venue, DOI, citation
+count) so metadata is never model-generated; in offline runs only registry-backed sources
+survive.
+
+Catalogs (`catalogs/*.py`) share one signature, degrade every failure to `[]`, sit behind a
+process-wide `RateLimiter` each, and run under a 15 s per-catalog / 20 s per-bundle guard
+(`service.fetch_papers`, partial results kept). Dedup is by DOI → arXiv id → normalised title;
+canonical URLs (`doi.org`, then `arxiv.org/abs`, then landing page) make cross-catalog
+duplicates collapse into one `Source`. Semantic Scholar runs only with an API key; OpenAlex
+is the backbone and also indexes arXiv preprints.
+
 ## Local mode and the data-access layer
 
 `ARA_MODE=local` runs the same app without Supabase: every request is the built-in
