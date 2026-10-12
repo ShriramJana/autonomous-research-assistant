@@ -161,3 +161,23 @@ def test_blank_user_tavily_key_counts_as_absent() -> None:
     ov = resolve_overrides(rec, settings=s, depth="quick", browse_web=True, tavily_capped=False)
     assert ov is not None and ov.tavily_api_key is None
     assert ov.options.web_search_enabled is False
+
+
+def test_scholarly_flag_reaches_options_for_both_providers() -> None:
+    s = _settings()
+    anth = _rec(active_provider="anthropic", anthropic_key_ciphertext=encrypt_secret("k", key=KEY))
+    ov = resolve_overrides(anth, settings=s, depth="quick", browse_web=False, tavily_capped=False,
+                           scholarly=True)
+    assert ov is not None and ov.options.scholarly_enabled is True
+    assert ov.options.web_search_enabled is False
+
+    openai = _rec(
+        active_provider="openai", openai_key_ciphertext=encrypt_secret("k", key=KEY),
+        openai_base_url="http://x/v1", openai_model="m",
+    )
+    ov2 = resolve_overrides(openai, settings=s, depth="quick", browse_web=True, tavily_capped=True,
+                            scholarly=True)
+    assert ov2 is not None and ov2.options.scholarly_enabled is True
+
+    ov3 = resolve_overrides(anth, settings=s, depth="quick", browse_web=True, tavily_capped=False)
+    assert ov3 is not None and ov3.options.scholarly_enabled is False

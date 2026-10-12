@@ -17,7 +17,7 @@ from langgraph.graph import END, START, StateGraph
 
 from ara.agents import EventEmitter, PlannerError, ResearcherError, SynthesizerError
 from ara.agents.planner import plan_research
-from ara.agents.researcher import OnTavilySearch, research_sub_query
+from ara.agents.researcher import OnTavilySearch, ScholarlyFetch, research_sub_query
 from ara.agents.synthesizer import synthesize_report
 from ara.config import Settings
 from ara.graph.state import GraphState
@@ -30,6 +30,8 @@ from ara.models.events import (
 )
 from ara.models.research import SubQuery, SubQueryFinding
 from ara.options import ResearchOptions, options_for_depth
+from ara.scholarly.models import ScholarlyBundle
+from ara.scholarly.service import fetch_papers
 
 
 @dataclass(frozen=True)
@@ -66,7 +68,12 @@ def build_graph(
         except PlannerError as exc:
             await emit(ErrorEvent(stage="plan", message=str(exc)))
             raise
-        plan = plan.model_copy(update={"web_search_enabled": opts.web_search_enabled})
+        plan = plan.model_copy(
+            update={
+                "web_search_enabled": opts.web_search_enabled,
+                "scholarly_enabled": opts.scholarly_enabled,
+            }
+        )
         await emit(PlanReady(plan=plan))
         return {"plan": plan}
 
@@ -75,6 +82,18 @@ def build_graph(
 
         async def run_one(sq: SubQuery) -> SubQueryFinding:
             finding: SubQueryFinding
+            scholarly_fetch: ScholarlyFetch | None = None
+            if opts.scholarly_enabled:
+                terms = list(sq.search_terms) or [sq.question]
+
+                async def _fetch(terms: list[str] = terms) -> ScholarlyBundle:
+                    return await fetch_papers(
+                        terms,
+                        settings=settings,
+                        limit=settings.ara_scholarly_papers_per_query,
+                    )
+
+                scholarly_fetch = _fetch
             try:
                 finding = await research_sub_query(
                     sub_query=sq,
@@ -86,6 +105,7 @@ def build_graph(
                     web_search_enabled=opts.web_search_enabled,
                     tavily_api_key=tavily_api_key or settings.tavily_api_key,
                     on_tavily_search=on_tavily_search,
+                    scholarly_fetch=scholarly_fetch,
                 )
             except ResearcherError as exc:
                 await emit(
@@ -116,7 +136,12 @@ def build_graph(
         except SynthesizerError as exc:
             await emit(ErrorEvent(stage="synthesis", message=str(exc)))
             raise
-        report = report.model_copy(update={"web_search_enabled": opts.web_search_enabled})
+        report = report.model_copy(
+            update={
+                "web_search_enabled": opts.web_search_enabled,
+                "scholarly_enabled": opts.scholarly_enabled,
+            }
+        )
         await emit(ReportComplete(report=report))
         return {"report": report}
 

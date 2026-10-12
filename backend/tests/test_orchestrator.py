@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 from dataclasses import replace
 from typing import Any
-from unittest.mock import patch
+from unittest.mock import AsyncMock, patch
 from uuid import uuid4
 
 import pytest
@@ -39,6 +39,7 @@ from ara.models.research import (
 from ara.options import options_for_depth
 from ara.runtime.orchestrator import run_report
 from ara.runtime.overrides import RuntimeOverrides
+from ara.scholarly.models import ScholarlyBundle
 from ara.storage.memory import InMemoryReportStore
 
 
@@ -532,9 +533,93 @@ async def test_orchestrator_persists_scholarly_flag() -> None:
     )
     store = InMemoryReportStore()
     rid = uuid4()
-    await run_report(
-        report_id=rid, question="q", store=store, settings=settings, overrides=overrides,
-        owner_id=uuid4(), llm=_RecordingLLM(),  # type: ignore[arg-type]
-    )
+    empty = ScholarlyBundle(terms=(), papers=(), counts={})
+    with patch("ara.graph.dag.fetch_papers", AsyncMock(return_value=empty)):
+        await run_report(
+            report_id=rid, question="q", store=store, settings=settings, overrides=overrides,
+            owner_id=uuid4(), llm=_RecordingLLM(),  # type: ignore[arg-type]
+        )
     state = store.get_state(rid)
     assert state is not None and state.scholarly is True
+
+
+@pytest.mark.asyncio
+async def test_scholarly_flag_propagates_to_plan_report_and_fetch() -> None:
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    settings.anthropic_api_key = "k"
+    settings.ara_scholarly_papers_per_query = 5
+    plan = ResearchPlan(
+        original_question="top",
+        sub_queries=[
+            SubQuery(
+                question="q0", rationale="r", priority=Priority.MEDIUM, search_terms=["t0", "u0"]
+            ),
+            SubQuery(question="q1", rationale="r", priority=Priority.MEDIUM),  # no terms → question
+            SubQuery(question="q2", rationale="r", priority=Priority.MEDIUM, search_terms=["t2"]),
+        ],
+    )
+    fetched: list[ScholarlyBundle] = []
+
+    async def fake_plan(**k: Any) -> ResearchPlan:
+        return plan
+
+    async def fake_research(*, sub_query: SubQuery, emit: Any, **k: Any) -> SubQueryFinding:
+        fetch = k["scholarly_fetch"]
+        assert fetch is not None
+        fetched.append(await fetch())
+        return SubQueryFinding(sub_query_id=sub_query.id, summary="s")
+
+    async def fake_synth(**k: Any) -> FinalReport:
+        return _fake_final_report(k["report_id"], k["original_question"])
+
+    fetch_mock = AsyncMock(return_value=ScholarlyBundle(terms=("x",), papers=(), counts={}))
+    store = InMemoryReportStore()
+    rid = uuid4()
+    overrides = RuntimeOverrides(
+        api_key="k", planner_model="x", researcher_model="x", synthesizer_model="x",
+        options=options_for_depth("quick", scholarly_enabled=True),
+    )
+    with (
+        patch("ara.graph.dag.plan_research", fake_plan),
+        patch("ara.graph.dag.research_sub_query", fake_research),
+        patch("ara.graph.dag.synthesize_report", fake_synth),
+        patch("ara.graph.dag.fetch_papers", fetch_mock),
+    ):
+        await run_report(report_id=rid, question="top", store=store, settings=settings,
+                         overrides=overrides, owner_id=uuid4())
+
+    events = [e async for e in store.subscribe(rid)]
+    plan_ready = next(e for e in events if isinstance(e, PlanReady))
+    assert plan_ready.plan.scholarly_enabled is True
+    report = next(e for e in events if isinstance(e, ReportComplete)).report
+    assert report.scholarly_enabled is True
+    assert len(fetched) == 3
+    terms_seen = sorted(c.args[0] for c in fetch_mock.await_args_list)
+    assert terms_seen == [["q1"], ["t0", "u0"], ["t2"]]
+    assert all(c.kwargs == {"settings": settings, "limit": 5} for c in fetch_mock.await_args_list)
+
+
+@pytest.mark.asyncio
+async def test_scholarly_off_passes_no_fetch() -> None:
+    settings = Settings(_env_file=None)  # type: ignore[call-arg]
+    settings.anthropic_api_key = "k"
+    seen: list[Any] = []
+
+    async def fake_plan(**k: Any) -> ResearchPlan:
+        return _plan_with_n(3)
+
+    async def fake_research(*, sub_query: SubQuery, emit: Any, **k: Any) -> SubQueryFinding:
+        seen.append(k["scholarly_fetch"])
+        return SubQueryFinding(sub_query_id=sub_query.id, summary="s")
+
+    async def fake_synth(**k: Any) -> FinalReport:
+        return _fake_final_report(k["report_id"], k["original_question"])
+
+    with (
+        patch("ara.graph.dag.plan_research", fake_plan),
+        patch("ara.graph.dag.research_sub_query", fake_research),
+        patch("ara.graph.dag.synthesize_report", fake_synth),
+    ):
+        await run_report(report_id=uuid4(), question="top", store=InMemoryReportStore(),
+                         settings=settings, overrides=_overrides(settings), owner_id=uuid4())
+    assert seen == [None, None, None]

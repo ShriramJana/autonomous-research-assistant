@@ -28,6 +28,7 @@ def resolve_overrides(
     depth: Depth,
     browse_web: bool,
     tavily_capped: bool,
+    scholarly: bool = False,
 ) -> RuntimeOverrides | None:
     if record is None or record.active_provider == "free":
         return None
@@ -41,7 +42,9 @@ def resolve_overrides(
             planner_model=settings.claude_planner_model,
             researcher_model=settings.claude_researcher_model,
             synthesizer_model=settings.claude_synthesizer_model,
-            options=options_for_depth(depth, web_search_enabled=browse_web),
+            options=options_for_depth(
+                depth, web_search_enabled=browse_web, scholarly_enabled=scholarly
+            ),
             # Anthropic searches server-side; never decrypt (or fail on) the unused
             # Tavily ciphertext.
             tavily_api_key=None,
@@ -65,7 +68,9 @@ def resolve_overrides(
             planner_model=record.openai_model,
             researcher_model=record.openai_model,
             synthesizer_model=record.openai_model,
-            options=options_for_depth(depth, web_search_enabled=web),
+            options=options_for_depth(
+                depth, web_search_enabled=web, scholarly_enabled=scholarly
+            ),
             provider="openai",
             base_url=record.openai_base_url,
             tavily_api_key=user_tavily,

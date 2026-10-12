@@ -29,6 +29,7 @@ import pytest
 
 from ara.auth import User, get_current_user, get_optional_user
 from ara.config import Settings, get_settings
+from ara.credentials import CredentialError
 from ara.crypto import generate_key
 from ara.main import create_app
 from ara.models.research import (
@@ -401,3 +402,46 @@ async def test_local_lifespan_sweeps_orphaned_running_reports(
         )
     finally:
         get_settings.cache_clear()
+
+
+async def test_get_config_lists_enabled_scholarly_catalogs() -> None:
+    async with await _async_client() as client:
+        body = (await client.get("/api/config")).json()
+    catalogs = body["scholarly_catalogs"]
+    assert set(catalogs) <= {"openalex", "semantic_scholar", "arxiv", "pubmed"}
+    assert {"openalex", "arxiv", "pubmed"} <= set(catalogs)
+    order = ["openalex", "semantic_scholar", "arxiv", "pubmed"]
+    assert catalogs == sorted(catalogs, key=order.index)
+
+
+async def test_post_research_forwards_scholarly_flag_to_resolver() -> None:
+    seen: dict[str, Any] = {}
+
+    def fake_resolve(record: Any, **kw: Any) -> Any:
+        seen.update(kw)
+        raise CredentialError("stop here")
+
+    with (
+        patch("ara.api.routes.get_credentials", AsyncMock(return_value=None)),
+        patch("ara.api.routes.resolve_overrides", fake_resolve),
+    ):
+        async with await _async_client() as client:
+            resp = await client.post("/api/research", json={"question": "q", "scholarly": True})
+    assert resp.status_code == 400
+    assert seen["scholarly"] is True
+
+
+async def test_post_research_scholarly_defaults_false() -> None:
+    seen: dict[str, Any] = {}
+
+    def fake_resolve(record: Any, **kw: Any) -> Any:
+        seen.update(kw)
+        raise CredentialError("stop here")
+
+    with (
+        patch("ara.api.routes.get_credentials", AsyncMock(return_value=None)),
+        patch("ara.api.routes.resolve_overrides", fake_resolve),
+    ):
+        async with await _async_client() as client:
+            await client.post("/api/research", json={"question": "q"})
+    assert seen["scholarly"] is False

@@ -42,6 +42,7 @@ from ara.quota import QuotaDenial, check_free_tier
 from ara.runtime.orchestrator import run_report
 from ara.runtime.overrides import RuntimeOverrides
 from ara.runtime.resolver import resolve_overrides
+from ara.scholarly.catalogs import enabled_catalogs
 from ara.storage.base import ReportStore
 
 router = APIRouter(prefix="/api")
@@ -57,6 +58,7 @@ class CreateResearchRequest(BaseModel):
     question: str = Field(min_length=1, max_length=2000)
     depth: Depth = "standard"
     browse_web: bool = True
+    scholarly: bool = False
 
 
 class AnthropicKeyRequest(BaseModel):
@@ -109,6 +111,7 @@ class ConfigResponse(BaseModel):
     models: ModelsConfig
     depth_presets: dict[str, DepthPresetConfig]
     mode: Literal["hosted", "local"]
+    scholarly_catalogs: list[str]
 
 
 class MeResponse(BaseModel):
@@ -242,6 +245,7 @@ async def get_config() -> ConfigResponse:
         ),
         depth_presets={d: DepthPresetConfig(**p) for d, p in depth_presets().items()},
         mode=settings.ara_mode,
+        scholarly_catalogs=list(enabled_catalogs(settings)),
     )
 
 
@@ -512,6 +516,7 @@ async def create_research(
             depth=req.depth,
             browse_web=req.browse_web,
             tavily_capped=tavily_capped,
+            scholarly=req.scholarly,
         )
     except CredentialDecryptError:
         raise HTTPException(

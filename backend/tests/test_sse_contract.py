@@ -184,3 +184,19 @@ async def test_cost_update_events_fire_with_monotonic_cumulative() -> None:
     cumulative = [e.cumulative_usd for e in events if isinstance(e, CostUpdate)]
     for prev, curr in pairwise(cumulative):
         assert curr >= prev
+
+
+async def test_enriched_scholarly_source_round_trips_through_adapter() -> None:
+    src = Source.model_validate(
+        {
+            "url": "https://doi.org/10.1/x", "title": "P", "kind": "scholarly",
+            "authors": ["A", "B"], "year": 2024, "venue": "V", "doi": "10.1/x", "citation_count": 7,
+        }
+    )
+    event = ResearcherComplete(
+        sub_query_id=uuid4(),
+        finding=SubQueryFinding(sub_query_id=uuid4(), summary="s", sources=[src]),
+    )
+    parsed = ResearchEventAdapter.validate_json(ResearchEventAdapter.dump_json(event))
+    assert isinstance(parsed, ResearcherComplete)
+    assert parsed.finding.sources[0] == src
